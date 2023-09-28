@@ -27,6 +27,7 @@ export default Vue.extend({
   components: {
     MapViewer,
   },
+
   data() {
     return {
       christchurch: {
@@ -38,22 +39,54 @@ export default Vue.extend({
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
     }
   },
-  mounted() {
+  async mounted() {
     // Limit scrolling on this page
     document.body.style.overflow = "hidden"
 
-    this.loadVehicleKmTravelled("http://localhost:8080/sa1s-no-water.geojson").then((sa1s) => {
-      this.dataSources = {geoJsonDataSources: [sa1s]};
-      console.log("added sa1s")
-    });
+    this.dataSources = {geoJsonDataSources: [await this.loadSa1s()]};
+    this.scenarios = [
+      await this.loadCo2Emissions(),
+      await this.loadVehicleKmTravelled()
+    ];
+
   },
   beforeDestroy() {
     // Reset scrolling for other pages
     document.body.style.overflow = ""
   },
   methods: {
-    async loadVehicleKmTravelled(url: string): Promise<Cesium.GeoJsonDataSource> {
-      const sa1s = await Cesium.GeoJsonDataSource.load(url);
+    async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
+      return Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s-no-water.geojson", {
+        fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 0.2),
+        stroke: Cesium.Color.ROYALBLUE.darken(0.5, new Cesium.Color()),
+        strokeWidth: 10
+
+      });
+    },
+
+    async loadCo2Emissions(): Promise<Scenario> {
+      const sa1s = await Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s-no-water.geojson");
+      sa1s.show = false
+      const colorScale = chroma.scale(['Teal', 'DarkRed'])
+      const sa1Entities = sa1s.entities.values;
+      for (const [i, entity] of sa1Entities.reverse().entries()) {
+        const dataNum = (i % 50)
+        const color = colorScale(dataNum / 50)
+        const polyGraphics = new Cesium.PolygonGraphics({
+          extrudedHeight: 10 * dataNum,
+          material: new Cesium.Color(...color.gl()),
+          outlineColor: new Cesium.Color(...color.darken().gl()),
+        });
+        polyGraphics.merge(entity.polygon)
+        entity.polygon = polyGraphics;
+      }
+
+      return {name: "CO2 Emissions", geoJsonDataSources: [sa1s]};
+    },
+
+    async loadVehicleKmTravelled(): Promise<Scenario> {
+      const sa1s = await Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s-no-water.geojson");
+      sa1s.show = false;
       const colorScale = chroma.scale(['RoyalBlue', 'IndianRed'])
       const sa1Entities = sa1s.entities.values;
       for (const [i, entity] of sa1Entities.entries()) {
@@ -62,13 +95,12 @@ export default Vue.extend({
         const polyGraphics = new Cesium.PolygonGraphics({
           extrudedHeight: 10 * dataNum,
           material: new Cesium.Color(...color.gl()),
-          outlineColor: new Cesium.Color(...color.brighten().gl()),
+          outlineColor: new Cesium.Color(...color.darken().gl()),
         });
         polyGraphics.merge(entity.polygon)
         entity.polygon = polyGraphics;
       }
-
-      return sa1s;
+      return {name: "Vehicle Km Travelled", geoJsonDataSources: [sa1s]};
     },
   },
   computed: {
