@@ -1,6 +1,7 @@
 <template>
   <!-- The Vue app main context -->
   <div id="app">
+    <TheNavBar/>
     <router-view ref="routerView" />
   </div>
 </template>
@@ -11,6 +12,7 @@ import TheNavBar from "@/components/TheNavBar.vue";
 
 export default Vue.extend({
   name: 'App',
+  components: {TheNavBar},
 });
 </script>
 

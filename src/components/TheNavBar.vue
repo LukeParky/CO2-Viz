@@ -4,7 +4,7 @@
     <b-navbar type="light" variant="light">
       <b-navbar-toggle target="nav-text-collapse" />
       <b-navbar-brand :to="{name: 'Map'}">
-        Digital Twin for Flood Resilience
+        Emissions Dashboard
       </b-navbar-brand>
       <b-collapse id="nav-text-collapse" is-nav>
         <b-navbar-nav>

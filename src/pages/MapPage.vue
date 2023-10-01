@@ -9,6 +9,39 @@
       :data-sources="dataSources"
       :scenarios="scenarios"
     />
+    <div id="filter-form" class="card">
+      <h2 class="card-title">Filters</h2>
+      <button>Select all</button>
+      <div class="form-group">
+        <div class="form-check">
+          <input type="checkbox" id="light-vehicle">
+          <label for="light-vehicle">Light Vehicle</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="car">
+          <label for="car">Car</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="bus">
+          <label for="bus">Bus</label>
+        </div>
+      </div>
+      <hr>
+      <div class="form-group">
+        <div class="form-check">
+          <input type="checkbox" id="petrol">
+          <label for="petrol">Petrol</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="diesel">
+          <label for="diesel">Diesel</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="hybrid">
+          <label for="hybrid">Hybrid</label>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -43,7 +76,9 @@ export default Vue.extend({
     // Limit scrolling on this page
     document.body.style.overflow = "hidden"
 
-    this.dataSources = {geoJsonDataSources: [await this.loadSa1s()]};
+    this.dataSources = {
+      geoJsonDataSources: [await this.loadSa1s()]
+    };
     this.scenarios = [
       await this.loadCo2Emissions(),
       await this.loadVehicleKmTravelled()
@@ -117,5 +152,11 @@ export default Vue.extend({
   bottom: 40px;
   right: 30px;
   height: 175px
+}
+
+#filter-form {
+  position: absolute;
+  bottom: 40px;
+  right: 30px;
 }
 </style>
