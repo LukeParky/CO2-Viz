@@ -91,7 +91,7 @@ export default Vue.extend({
   },
   methods: {
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
-      return Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s-no-water.geojson", {
+      return Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s_in_chch.geojson", {
         fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 0.2),
         stroke: Cesium.Color.ROYALBLUE.darken(0.5, new Cesium.Color()),
         strokeWidth: 10
