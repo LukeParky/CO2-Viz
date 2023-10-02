@@ -100,40 +100,46 @@ export default Vue.extend({
     },
 
     async loadCo2Emissions(): Promise<Scenario> {
-      const sa1s = await Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s-no-water.geojson");
+      const sa1s = await Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s_with_data.geojson");
       sa1s.show = false
-      const colorScale = chroma.scale(['Teal', 'DarkRed'])
+      const colorScale = chroma.scale(['RoyalBlue', 'IndianRed'])
       const sa1Entities = sa1s.entities.values;
-      for (const [i, entity] of sa1Entities.reverse().entries()) {
-        const dataNum = (i % 50)
-        const color = colorScale(dataNum / 50)
-        const polyGraphics = new Cesium.PolygonGraphics({
-          extrudedHeight: 10 * dataNum,
-          material: new Cesium.Color(...color.gl()),
-          outlineColor: new Cesium.Color(...color.darken().gl()),
-        });
-        polyGraphics.merge(entity.polygon)
-        entity.polygon = polyGraphics;
+      for (const entity of sa1Entities.reverse()) {
+        if (entity.polygon != null) {
+          const co2 = entity.properties["CO2 (Tonnes/Year)"].getValue()
+          const vkt = entity.properties["VKT (`000,000 km/Year)"].getValue()
+          const color = colorScale(vkt / 70)
+          const polyGraphics = new Cesium.PolygonGraphics({
+            extrudedHeight: co2 / 5,
+            material: new Cesium.Color(...color.gl()),
+            outlineColor: new Cesium.Color(...color.darken().gl()),
+          });
+          polyGraphics.merge(entity.polygon)
+          entity.polygon = polyGraphics;
+        }
       }
 
       return {name: "CO2 Emissions", geoJsonDataSources: [sa1s]};
     },
 
     async loadVehicleKmTravelled(): Promise<Scenario> {
-      const sa1s = await Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s-no-water.geojson");
+      const sa1s = await Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s_with_data.geojson");
       sa1s.show = false;
       const colorScale = chroma.scale(['RoyalBlue', 'IndianRed'])
       const sa1Entities = sa1s.entities.values;
       for (const [i, entity] of sa1Entities.entries()) {
-        const dataNum = (i % 50)
-        const color = colorScale(dataNum / 50)
-        const polyGraphics = new Cesium.PolygonGraphics({
-          extrudedHeight: 10 * dataNum,
-          material: new Cesium.Color(...color.gl()),
-          outlineColor: new Cesium.Color(...color.darken().gl()),
-        });
-        polyGraphics.merge(entity.polygon)
-        entity.polygon = polyGraphics;
+        if (entity.polygon != null) {
+          // console.log(entity)
+          const dataNum = (i % 50)
+          const color = colorScale(dataNum / 50)
+          const polyGraphics = new Cesium.PolygonGraphics({
+            extrudedHeight: 10 * dataNum,
+            material: new Cesium.Color(...color.gl()),
+            outlineColor: new Cesium.Color(...color.darken().gl()),
+          });
+          polyGraphics.merge(entity.polygon)
+          entity.polygon = polyGraphics;
+        }
       }
       return {name: "Vehicle Km Travelled", geoJsonDataSources: [sa1s]};
     },

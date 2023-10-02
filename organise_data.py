@@ -1,5 +1,5 @@
 import os
-
+import pandas as pd
 import geoapis.vector
 import geopandas as gpd
 import shapely
@@ -31,12 +31,13 @@ def find_sa1s_in_chch() -> gpd.GeoDataFrame:
     # All SA1s in bbox
     sa1s = vector_fetcher.run(92210)
     sa1s.set_index("SA12018_V1_00", verify_integrity=True, inplace=True)
+    sa1s.index = sa1s.index.astype('int64')
 
     # Filter to remove SA1s that represent inlets and other non-mainland features.
     sa1s_no_water = sa1s.loc[sa1s["LANDWATER_NAME"] == "Mainland"]
 
     # Remove unnecessary columns
-    sa1s_filtered = sa1s_no_water[["LAND_AREA_SQ_KM", "AREA_SQ_KM", "geometry"]]
+    sa1s_filtered = sa1s_no_water[["geometry"]]
 
     # Urban/Rural area polygons
     urban_rural = vector_fetcher.run(111198)
@@ -49,5 +50,20 @@ def find_sa1s_in_chch() -> gpd.GeoDataFrame:
     return sa1s_filtered.loc[sa1s_filtered.index.isin(sa1s_join_chch.index)]
 
 
-sa1s_in_chch = find_sa1s_in_chch()
-sa1s_in_chch.to_file("public/sa1s_in_chch.geojson")
+def get_emissions_data(sa1s: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    emissions_data = pd.read_excel("data/RAW_SA1_emissions.xlsx", header=1, index_col=0)
+    emissions_with_geom = sa1s.join(emissions_data)
+    return emissions_with_geom[["geometry", 'VKT (`000,000 km/Year)', 'CO2 (Tonnes/Year)']]
+
+
+# sa1s = find_sa1s_in_chch()
+# sa1s_reversed = sa1s.iloc[::-1]
+#
+# sa1s.to_file("public/sa1s_in_chch.geojson")
+# sa1s_reversed.to_file("public/sa1s_in_chch_rev.geojson")
+
+
+sa1s = gpd.read_file("public/sa1s_in_chch.geojson").set_index("SA12018_V1_00")
+x = get_emissions_data(sa1s)
+x.to_file("public/sa1s_with_data.geojson")
+x.drop("geometry", axis="columns").to_csv("data/sa1s_with_data.csv")
