@@ -67,7 +67,7 @@ export default Vue.extend({
         latitude: -43.514137213246535,
         longitude: 172.62835098005368
       },
-      dataSources: {} as MapViewerDataSourceOptions,
+      dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       scenarios: [] as Scenario[],
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
     }
@@ -76,14 +76,17 @@ export default Vue.extend({
     // Limit scrolling on this page
     document.body.style.overflow = "hidden"
 
-    this.dataSources = {
-      geoJsonDataSources: [await this.loadSa1s()]
-    };
-    this.scenarios = [
-      await this.loadCo2Emissions(),
-      await this.loadVehicleKmTravelled()
-    ];
+    this.loadSa1s().then((geojson) => {
+      if (this.dataSources.geoJsonDataSources == undefined) {
+        this.dataSources.geoJsonDataSources = [geojson]
+      } else {
+        this.dataSources.geoJsonDataSources?.push(geojson)
+      }
+    })
 
+    this.loadCo2Emissions().then((geoJson) => {
+      this.scenarios.push(geoJson)
+    })
   },
   beforeDestroy() {
     // Reset scrolling for other pages
