@@ -9,46 +9,46 @@
       :data-sources="dataSources"
       :scenarios="scenarios"
     />
-    <div id="filter-form" class="card">
-      <h2 class="card-title">Filters</h2>
-      <button>Select all</button>
-      <div class="form-group">
-        <div class="form-check">
-          <input type="checkbox" id="light-vehicle">
-          <label for="light-vehicle">Light Vehicle</label>
-        </div>
-        <div class="form-check">
-          <input type="checkbox" id="car">
-          <label for="car">Car</label>
-        </div>
-        <div class="form-check">
-          <input type="checkbox" id="bus">
-          <label for="bus">Bus</label>
-        </div>
-      </div>
-      <hr>
-      <div class="form-group">
-        <div class="form-check">
-          <input type="checkbox" id="petrol">
-          <label for="petrol">Petrol</label>
-        </div>
-        <div class="form-check">
-          <input type="checkbox" id="diesel">
-          <label for="diesel">Diesel</label>
-        </div>
-        <div class="form-check">
-          <input type="checkbox" id="hybrid">
-          <label for="hybrid">Hybrid</label>
-        </div>
-      </div>
-    </div>
+<!--    <div id="filter-form" class="card">-->
+<!--      <h2 class="card-title">Filters</h2>-->
+<!--      <button>Select all</button>-->
+<!--      <div class="form-group">-->
+<!--        <div class="form-check">-->
+<!--          <input type="checkbox" id="light-vehicle">-->
+<!--          <label for="light-vehicle">Light Vehicle</label>-->
+<!--        </div>-->
+<!--        <div class="form-check">-->
+<!--          <input type="checkbox" id="car">-->
+<!--          <label for="car">Car</label>-->
+<!--        </div>-->
+<!--        <div class="form-check">-->
+<!--          <input type="checkbox" id="bus">-->
+<!--          <label for="bus">Bus</label>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <hr>-->
+<!--      <div class="form-group">-->
+<!--        <div class="form-check">-->
+<!--          <input type="checkbox" id="petrol">-->
+<!--          <label for="petrol">Petrol</label>-->
+<!--        </div>-->
+<!--        <div class="form-check">-->
+<!--          <input type="checkbox" id="diesel">-->
+<!--          <label for="diesel">Diesel</label>-->
+<!--        </div>-->
+<!--        <div class="form-check">-->
+<!--          <input type="checkbox" id="hybrid">-->
+<!--          <label for="hybrid">Hybrid</label>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import * as Cesium from "cesium";
-import chroma from "chroma-js";
+import chroma, {Scale} from "chroma-js";
 import {MapViewer} from 'geo-visualisation-components/src/components';
 import titleMixin from "@/mixins/title";
 import {MapViewerDataSourceOptions, Scenario} from "geo-visualisation-components/dist/types/src/types";
@@ -102,7 +102,7 @@ export default Vue.extend({
     async loadCo2Emissions(): Promise<Scenario> {
       const sa1s = await Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s_with_data.geojson");
       sa1s.show = false
-      const colorScale = chroma.scale(['RoyalBlue', 'IndianRed'])
+      const colorScale = chroma.scale(chroma.brewer.Viridis)
       const sa1Entities = sa1s.entities.values;
       for (const entity of sa1Entities.reverse()) {
         if (entity.polygon != null) {
@@ -125,7 +125,7 @@ export default Vue.extend({
     async loadVehicleKmTravelled(): Promise<Scenario> {
       const sa1s = await Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s_with_data.geojson");
       sa1s.show = false;
-      const colorScale = chroma.scale(['RoyalBlue', 'IndianRed'])
+      const colorScale = chroma.scale(chroma.brewer.Viridis)
       const sa1Entities = sa1s.entities.values;
       for (const [i, entity] of sa1Entities.entries()) {
         if (entity.polygon != null) {
