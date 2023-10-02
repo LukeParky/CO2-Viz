@@ -4,7 +4,7 @@
 import Vue from "vue";
 
 /** The base title of the application, displayed in the document title */
-export const appBaseTitle = "BRANZ Visualisation";
+export const appBaseTitle = "Carbon Neutral Neighbourhoods";
 
 export default {
   /**
