@@ -9,39 +9,36 @@
       :data-sources="dataSources"
       :scenarios="scenarios"
     />
-<!--    <div id="filter-form" class="card">-->
-<!--      <h2 class="card-title">Filters</h2>-->
-<!--      <button>Select all</button>-->
-<!--      <div class="form-group">-->
-<!--        <div class="form-check">-->
-<!--          <input type="checkbox" id="light-vehicle">-->
-<!--          <label for="light-vehicle">Light Vehicle</label>-->
-<!--        </div>-->
-<!--        <div class="form-check">-->
-<!--          <input type="checkbox" id="car">-->
-<!--          <label for="car">Car</label>-->
-<!--        </div>-->
-<!--        <div class="form-check">-->
-<!--          <input type="checkbox" id="bus">-->
-<!--          <label for="bus">Bus</label>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--      <hr>-->
-<!--      <div class="form-group">-->
-<!--        <div class="form-check">-->
-<!--          <input type="checkbox" id="petrol">-->
-<!--          <label for="petrol">Petrol</label>-->
-<!--        </div>-->
-<!--        <div class="form-check">-->
-<!--          <input type="checkbox" id="diesel">-->
-<!--          <label for="diesel">Diesel</label>-->
-<!--        </div>-->
-<!--        <div class="form-check">-->
-<!--          <input type="checkbox" id="hybrid">-->
-<!--          <label for="hybrid">Hybrid</label>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
+    <div id="filter-form" class="card">
+      <h2 class="card-title">
+        Filters
+      </h2>
+      <div>{{ selectedVehicleClass }} | {{ selectedFuelType }}</div>
+      <div class="form-group">
+        <h3>Vehicle Class:</h3>
+        <div class="form-check" v-for="vehicleClass of vehicleClasses" :key="toKebabCase(vehicleClass)">
+          <input
+            type="radio"
+            :id="toKebabCase(vehicleClass)"
+            :value="toKebabCase(vehicleClass)"
+            v-model="selectedVehicleClass"
+          >
+          <label :for="toKebabCase(vehicleClass)">{{ vehicleClass }}</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <h3>Vehicle Fuel Type:</h3>
+        <div class="form-check" v-for="fuelType of fuelTypes" :key="toKebabCase(fuelType)">
+          <input
+            type="radio"
+            :id="toKebabCase(fuelType)"
+            :value="toKebabCase(fuelType)"
+            v-model="selectedFuelType"
+          >
+          <label :for="toKebabCase(fuelType)">{{ fuelType }}</label>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -70,8 +67,18 @@ export default Vue.extend({
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       scenarios: [] as Scenario[],
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
+      vehicleClasses: ["All Vehicle Classes", "Cars", "Light Vehicles", "Busses"],
+      fuelTypes: ["All Fuel Types", "Petrol", "Diesel", "Hybrid", "Plug-in Hybrid", "Electric"],
+      selectedVehicleClass: "",
+      selectedFuelType: "",
     }
   },
+
+  created() {
+    this.selectedVehicleClass = this.toKebabCase(this.vehicleClasses[0])
+    this.selectedFuelType = this.toKebabCase(this.fuelTypes[0])
+  },
+
   async mounted() {
     // Limit scrolling on this page
     document.body.style.overflow = "hidden"
@@ -93,6 +100,9 @@ export default Vue.extend({
     document.body.style.overflow = ""
   },
   methods: {
+    toKebabCase(str: string): string {
+      return str.split(" ").join("-").toLowerCase()
+    },
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
       return Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s_in_chch.geojson", {
         fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 0.2),
