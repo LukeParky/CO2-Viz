@@ -47,3 +47,8 @@ h1, h2, h3, h4 {
     left: 10px;
     font-size: 12px;
 }
+
+/* Add greying out on disabled for tags that may require it */
+:is(label, h1, h2, h3, h4, h5, h6)[disabled] {
+  color: grey;
+}

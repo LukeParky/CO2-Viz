@@ -27,15 +27,16 @@
         </div>
       </div>
       <div class="form-group">
-        <h3>Vehicle Fuel Type:</h3>
+        <h3 disabled>Vehicle Fuel Type:</h3>
         <div class="form-check" v-for="fuelType of fuelTypes" :key="toKebabCase(fuelType)">
           <input
             type="radio"
             :id="toKebabCase(fuelType)"
             :value="toKebabCase(fuelType)"
             v-model="selectedFuelType"
+            disabled
           >
-          <label :for="toKebabCase(fuelType)">{{ fuelType }}</label>
+          <label :for="toKebabCase(fuelType)" disabled>{{ fuelType }}</label>
         </div>
       </div>
     </div>
