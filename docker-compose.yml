@@ -1,0 +1,42 @@
+version: '3.8'
+
+volumes:
+  postgis_vol:
+  geoserver_vol:
+
+services:
+  postgis:
+    # Database to store all geospatial data
+    image: postgis/postgis
+    container_name: postgis_carbon_neutral
+    restart: always
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgis_vol:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: pg_isready -h 127.0.0.1 -U $POSTGRES_USER -d $POSTGRES_DB
+
+  geoserver:
+    # Serves geospatial web data through interactions with files and database
+    image: docker.osgeo.org/geoserver:2.21.2
+    container_name: geoserver_carbon_neutral
+    volumes:
+      - geoserver_vol:/opt/geoserver_data
+    depends_on:
+      - postgis
+    environment:
+      - SKIP_DEMO_DATA=true
+      - CORS_ENABLED=true
+    ports:
+      - "${GEOSERVER_PORT}:8080"
+    restart: always
+    healthcheck:
+      test: curl --fail -s http://localhost:8080/ || exit 1
+      interval: 1m30s
+      timeout: 10s
+      retries: 3

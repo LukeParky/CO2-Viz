@@ -1,9 +1,12 @@
 import os
-import pandas as pd
+
 import geoapis.vector
 import geopandas as gpd
+import pandas as pd
 import shapely
+import sqlalchemy as sqla
 from dotenv import load_dotenv
+from sqlalchemy.engine import Engine, create_engine
 
 
 def find_sa1s_in_chch() -> gpd.GeoDataFrame:
@@ -24,7 +27,6 @@ def find_sa1s_in_chch() -> gpd.GeoDataFrame:
     selected_polygon = gpd.GeoDataFrame(index=[0], crs=wgs_84, geometry=[shapely.from_wkt(bbox_wkt)])
     selected_polygon.to_crs(stats_native_crs, inplace=True)
 
-    load_dotenv(".env.local")
     stats_key = os.getenv("STATS_API_KEY")
     vector_fetcher = geoapis.vector.StatsNz(key=stats_key, bounding_polygon=selected_polygon, verbose=True)
 
@@ -34,10 +36,7 @@ def find_sa1s_in_chch() -> gpd.GeoDataFrame:
     sa1s.index = sa1s.index.astype('int64')
 
     # Filter to remove SA1s that represent inlets and other non-mainland features.
-    sa1s_no_water = sa1s.loc[sa1s["LANDWATER_NAME"] == "Mainland"]
-
-    # Remove unnecessary columns
-    sa1s_filtered = sa1s_no_water[["geometry"]]
+    sa1s_filtered = sa1s.loc[sa1s["LANDWATER_NAME"] == "Mainland"]
 
     # Urban/Rural area polygons
     urban_rural = vector_fetcher.run(111198)
@@ -56,14 +55,30 @@ def get_emissions_data(sa1s: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return emissions_with_geom[["geometry", 'VKT (`000,000 km/Year)', 'CO2 (Tonnes/Year)']]
 
 
-# sa1s = find_sa1s_in_chch()
-# sa1s_reversed = sa1s.iloc[::-1]
-#
-# sa1s.to_file("public/sa1s_in_chch.geojson")
-# sa1s_reversed.to_file("public/sa1s_in_chch_rev.geojson")
+def get_db_engine() -> Engine:
+    pg_user, pg_pass, pg_host, pg_port, pg_db = (os.getenv(key) for key in (
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "POSTGRES_HOST",
+        "POSTGRES_PORT",
+        "POSTGRES_DB"
+    ))
+    return create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}')
 
 
-sa1s = gpd.read_file("public/sa1s_in_chch.geojson").set_index("SA12018_V1_00")
-x = get_emissions_data(sa1s)
-x.to_file("public/sa1s_with_data.geojson")
-x.drop("geometry", axis="columns").to_csv("data/sa1s_with_data.csv")
+def add_sa1_pkey_constraint(engine: Engine) -> None:
+    meta = sqla.MetaData()
+    sa1_table = sqla.Table('sa1s', meta, autoload=True, autoload_with=engine)
+    if sa1_table.primary_key is None:
+        engine.execute(r'ALTER TABLE sa1s ADD CONSTRAINT sa1s_pk PRIMARY KEY ("SA12018_V1_00")')
+
+
+def main() -> None:
+    load_dotenv()
+    engine = get_db_engine()
+    sa1s = find_sa1s_in_chch()
+    sa1s.to_postgis("sa1s", engine, if_exists="append", index=True)
+    add_sa1_pkey_constraint(engine)
+
+
+main()
