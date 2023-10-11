@@ -16,14 +16,14 @@
       <div>{{ selectedVehicleClass }} | {{ selectedFuelType }}</div>
       <div class="form-group">
         <h3>Vehicle Class:</h3>
-        <div class="form-check" v-for="vehicleClass of vehicleClasses" :key="toKebabCase(vehicleClass)">
+        <div class="form-check" v-for="vehicleClass of vehicleClasses" :key="vehicleClass.key">
           <input
             type="radio"
-            :id="toKebabCase(vehicleClass)"
-            :value="toKebabCase(vehicleClass)"
+            :id="vehicleClass.key"
+            :value="vehicleClass.key"
             v-model="selectedVehicleClass"
           >
-          <label :for="toKebabCase(vehicleClass)">{{ vehicleClass }}</label>
+          <label :for="vehicleClass.key">{{ vehicleClass.display }}</label>
         </div>
       </div>
       <div class="form-group">
@@ -46,7 +46,7 @@
 <script lang="ts">
 import Vue from "vue";
 import * as Cesium from "cesium";
-import chroma, {Scale} from "chroma-js";
+import chroma from "chroma-js";
 import {MapViewer} from 'geo-visualisation-components/src/components';
 import titleMixin from "@/mixins/title";
 import {MapViewerDataSourceOptions, Scenario} from "geo-visualisation-components/dist/types/src/types";
@@ -68,7 +68,20 @@ export default Vue.extend({
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       scenarios: [] as Scenario[],
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
-      vehicleClasses: ["All Vehicle Classes", "Cars", "Light Vehicles", "Busses"],
+      vehicleClasses: [{
+        display: "All Vehicle Classes",
+        key: "all"
+      }, {
+        display: "Cars",
+        key: "car"
+      }, {
+        display: "Light Vehicles",
+        key: "light"
+      }, {
+        display: "Busses",
+        key: "bus"
+      }
+      ],
       fuelTypes: ["All Fuel Types", "Petrol", "Diesel", "Hybrid", "Plug-in Hybrid", "Electric"],
       selectedVehicleClass: "",
       selectedFuelType: "",
@@ -76,7 +89,7 @@ export default Vue.extend({
   },
 
   created() {
-    this.selectedVehicleClass = this.toKebabCase(this.vehicleClasses[0])
+    this.selectedVehicleClass = this.vehicleClasses[1].key
     this.selectedFuelType = this.toKebabCase(this.fuelTypes[0])
   },
 
@@ -91,26 +104,60 @@ export default Vue.extend({
         this.dataSources.geoJsonDataSources?.push(geojson)
       }
     })
-
-    this.loadCo2Emissions().then((geoJson) => {
-      this.scenarios.push(geoJson)
-    })
+    //
+    // this.loadCo2Emissions().then((geoJson) => {
+    //   this.scenarios.push(geoJson)
+    // })
   },
+
   beforeDestroy() {
     // Reset scrolling for other pages
     document.body.style.overflow = ""
   },
+
+  watch: {
+    selectedVehicleClass(selectedVehicleClass) {
+      this.loadSa1s().then((geojson) => {
+      // if (this.dataSources.geoJsonDataSources == undefined) {
+        this.dataSources.geoJsonDataSources?.pop()
+        this.dataSources.geoJsonDataSources = [geojson]
+      // } else {
+      //   this.dataSources.geoJsonDataSources?.push(geojson)
+      // }
+    })
+    }
+  },
+
   methods: {
     toKebabCase(str: string): string {
       return str.split(" ").join("-").toLowerCase()
     },
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
-      return Cesium.GeoJsonDataSource.load("http://localhost:8080/sa1s_in_chch.geojson", {
+      const sqlView = this.selectedVehicleClass === "all" ? "all_vehicles" : "vehicle_type";
+      const geoserverUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=VEHICLE_TYPE:${this.selectedVehicleClass}&outputFormat=application%2Fjson`
+      const sa1s = await Cesium.GeoJsonDataSource.load(geoserverUrl, {
         fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 0.2),
         stroke: Cesium.Color.ROYALBLUE.darken(0.5, new Cesium.Color()),
         strokeWidth: 10
 
       });
+      const colorScale = chroma.scale(chroma.brewer.Viridis)
+      const sa1Entities = sa1s.entities.values;
+      for (const entity of sa1Entities.reverse()) {
+        if (entity.polygon != null) {
+          const co2 = entity.properties["CO2 (Tonnes/Year)"]?.getValue()
+          const vkt = entity.properties["VKT ('000 km/Year)"]?.getValue()
+          const color = colorScale(vkt / 70 / 1000)
+          const polyGraphics = new Cesium.PolygonGraphics({
+            extrudedHeight: co2 / 5,
+            material: new Cesium.Color(...color.gl()),
+            outlineColor: new Cesium.Color(...color.darken().gl()),
+          });
+          polyGraphics.merge(entity.polygon)
+          entity.polygon = polyGraphics;
+        }
+      }
+      return sa1s;
     },
 
     async loadCo2Emissions(): Promise<Scenario> {
@@ -176,7 +223,7 @@ export default Vue.extend({
 
 #filter-form {
   position: absolute;
-  bottom: 40px;
+  bottom: 0px;
   right: 30px;
 }
 </style>

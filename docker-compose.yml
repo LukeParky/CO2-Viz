@@ -26,7 +26,7 @@ services:
     image: docker.osgeo.org/geoserver:2.21.2
     container_name: geoserver_carbon_neutral
     volumes:
-      - geoserver_vol:/opt/geoserver_data
+      - ./geoserver:/opt/geoserver_data
     depends_on:
       - postgis
     environment:

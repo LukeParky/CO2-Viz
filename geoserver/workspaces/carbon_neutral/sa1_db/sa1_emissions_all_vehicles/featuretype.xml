@@ -1,0 +1,61 @@
+<featureType>
+  <id>FeatureTypeInfoImpl-3a2bba0e:18b1a53ebb0:-7ff8</id>
+  <name>sa1_emissions_all_vehicles</name>
+  <nativeName>sa1_emissions_all_vehicles</nativeName>
+  <namespace>
+    <id>NamespaceInfoImpl--5b95edd0:18b1899daac:-7fe3</id>
+  </namespace>
+  <title>sa1_emissions_all_vehicles</title>
+  <keywords>
+    <string>features</string>
+    <string>sa1_emissions_all_vehicles</string>
+  </keywords>
+  <srs>EPSG:4326</srs>
+  <nativeBoundingBox>
+    <minx>172.3542928842</minx>
+    <maxx>172.80811065</maxx>
+    <miny>-43.6536124073</miny>
+    <maxy>-43.4026590737</maxy>
+  </nativeBoundingBox>
+  <latLonBoundingBox>
+    <minx>172.3542928842</minx>
+    <maxx>172.80811065</maxx>
+    <miny>-43.6536124073</miny>
+    <maxy>-43.4026590737</maxy>
+    <crs>EPSG:4326</crs>
+  </latLonBoundingBox>
+  <projectionPolicy>FORCE_DECLARED</projectionPolicy>
+  <enabled>true</enabled>
+  <metadata>
+    <entry key="JDBC_VIRTUAL_TABLE">
+      <virtualTable>
+        <name>sa1_emissions_all_vehicles</name>
+        <sql>SELECT&#xd;
+       sa1s.&quot;SA12018_V1_00&quot;,&#xd;
+       geometry,&#xd;
+       SUM(&quot;CO2 (Tonnes/Year)&quot;) AS &quot;CO2 (Tonnes/Year)&quot;,&#xd;
+       SUM(&quot;VKT (&apos;000 km/Year)&quot;) AS &quot;VKT (&apos;000 km/Year)&quot;&#xd;
+&#xd;
+FROM sa1s INNER JOIN vehicle_stats vs&#xd;
+    ON sa1s.&quot;SA12018_V1_00&quot; = vs.&quot;SA12018_V1_00&quot;&#xd;
+GROUP BY sa1s.&quot;SA12018_V1_00&quot;, sa1s.geometry
+</sql>
+        <escapeSql>false</escapeSql>
+      </virtualTable>
+    </entry>
+  </metadata>
+  <store class="dataStore">
+    <id>DataStoreInfoImpl-3a2bba0e:18b1a53ebb0:-7ffb</id>
+  </store>
+  <serviceConfiguration>false</serviceConfiguration>
+  <simpleConversionEnabled>false</simpleConversionEnabled>
+  <internationalTitle/>
+  <internationalAbstract/>
+  <maxFeatures>0</maxFeatures>
+  <numDecimals>0</numDecimals>
+  <padWithZeros>false</padWithZeros>
+  <forcedDecimal>false</forcedDecimal>
+  <overridingServiceSRS>false</overridingServiceSRS>
+  <skipNumberMatched>false</skipNumberMatched>
+  <circularArcPresent>false</circularArcPresent>
+</featureType>

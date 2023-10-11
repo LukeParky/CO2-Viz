@@ -4,7 +4,6 @@ import geoapis.vector
 import geopandas as gpd
 import pandas as pd
 import shapely
-import sqlalchemy as sqla
 from dotenv import load_dotenv
 from sqlalchemy.engine import Engine, create_engine
 
@@ -49,12 +48,6 @@ def find_sa1s_in_chch() -> gpd.GeoDataFrame:
     return sa1s_filtered.loc[sa1s_filtered.index.isin(sa1s_join_chch.index)]
 
 
-def get_emissions_data(sa1s: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    emissions_data = pd.read_excel("data/RAW_SA1_emissions.xlsx", header=1, index_col=0)
-    emissions_with_geom = sa1s.join(emissions_data)
-    return emissions_with_geom[["geometry", 'VKT (`000,000 km/Year)', 'CO2 (Tonnes/Year)']]
-
-
 def get_db_engine() -> Engine:
     pg_user, pg_pass, pg_host, pg_port, pg_db = (os.getenv(key) for key in (
         "POSTGRES_USER",
@@ -66,19 +59,31 @@ def get_db_engine() -> Engine:
     return create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}')
 
 
-def add_sa1_pkey_constraint(engine: Engine) -> None:
-    meta = sqla.MetaData()
-    sa1_table = sqla.Table('sa1s', meta, autoload=True, autoload_with=engine)
-    if sa1_table.primary_key is None:
-        engine.execute(r'ALTER TABLE sa1s ADD CONSTRAINT sa1s_pk PRIMARY KEY ("SA12018_V1_00")')
+def get_long_format_sa1_emissions() -> pd.DataFrame:
+    emissions_data = pd.read_excel("data/RAW_SA1_emissions.xlsx", header=[0, 1], index_col=0, sheet_name="Sheet3")
+    vehicle_types, variables = (level.values.tolist() for level in emissions_data.columns.levels)
+    # emissions_data.reset_index(inplace=True)
+    melts = []
+    for var in variables:
+        melt = emissions_data.melt(ignore_index=False, var_name="Vehicle Type", value_name=var,
+                                   value_vars=[(vehicle_type, var) for vehicle_type in vehicle_types])
+        melt.set_index('Vehicle Type', append=True, inplace=True)
+        melts.append(melt)
+    merged = pd.merge(melts[0], melts[1], left_index=True, right_index=True)
+    return merged.rename(columns=lambda name: name.replace("\n", " "))
 
 
 def main() -> None:
     load_dotenv()
     engine = get_db_engine()
+
+    emissions = get_long_format_sa1_emissions()
+    emissions.to_sql("vehicle_stats", engine, if_exists="replace", index=True,
+                     index_label=["SA12018_V1_00", "vehicle_type"])
+
     sa1s = find_sa1s_in_chch()
-    sa1s.to_postgis("sa1s", engine, if_exists="append", index=True)
-    add_sa1_pkey_constraint(engine)
+    sa1s_table_name = "sa1s"
+    sa1s.to_postgis(sa1s_table_name, engine, if_exists="replace", index=True)
 
 
 main()
