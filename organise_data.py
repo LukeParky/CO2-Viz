@@ -9,7 +9,6 @@ from sqlalchemy.engine import Engine, create_engine
 
 
 def find_sa1s_in_chch() -> gpd.GeoDataFrame:
-    stats_native_crs = 4326
     wgs_84 = 4326
     # Approximate bounding box of chch in WGS84
     lat1, lng1 = -43.41766, 172.36059
@@ -24,7 +23,6 @@ def find_sa1s_in_chch() -> gpd.GeoDataFrame:
 
     # bbox as GeoDataFrame in epsg:2193 for use by geoapis
     selected_polygon = gpd.GeoDataFrame(index=[0], crs=wgs_84, geometry=[shapely.from_wkt(bbox_wkt)])
-    selected_polygon.to_crs(stats_native_crs, inplace=True)
 
     stats_key = os.getenv("STATS_API_KEY")
     vector_fetcher = geoapis.vector.StatsNz(key=stats_key, bounding_polygon=selected_polygon, verbose=True)
@@ -60,7 +58,7 @@ def get_db_engine() -> Engine:
 
 
 def get_long_format_sa1_emissions() -> pd.DataFrame:
-    emissions_data = pd.read_excel("data/RAW_SA1_emissions.xlsx", header=[0, 1], index_col=0, sheet_name="Sheet3")
+    emissions_data = pd.read_excel("data/RAW_SA1_emissions(2).xlsx", header=[0, 1], index_col=0, sheet_name=2)
     vehicle_types, variables = (level.values.tolist() for level in emissions_data.columns.levels)
     # emissions_data.reset_index(inplace=True)
     melts = []

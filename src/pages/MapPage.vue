@@ -50,6 +50,7 @@ import chroma from "chroma-js";
 import {MapViewer} from 'geo-visualisation-components/src/components';
 import titleMixin from "@/mixins/title";
 import {MapViewerDataSourceOptions, Scenario} from "geo-visualisation-components/dist/types/src/types";
+import axios from "axios";
 
 export default Vue.extend({
   name: "MapPage",
@@ -98,12 +99,9 @@ export default Vue.extend({
     document.body.style.overflow = "hidden"
 
     this.loadSa1s().then((geojson) => {
-      if (this.dataSources.geoJsonDataSources == undefined) {
         this.dataSources.geoJsonDataSources = [geojson]
-      } else {
-        this.dataSources.geoJsonDataSources?.push(geojson)
-      }
-    })
+        this.styleSa1s(geojson);
+    });
     //
     // this.loadCo2Emissions().then((geoJson) => {
     //   this.scenarios.push(geoJson)
@@ -116,15 +114,11 @@ export default Vue.extend({
   },
 
   watch: {
-    selectedVehicleClass(selectedVehicleClass) {
-      this.loadSa1s().then((geojson) => {
-      // if (this.dataSources.geoJsonDataSources == undefined) {
-        this.dataSources.geoJsonDataSources?.pop()
-        this.dataSources.geoJsonDataSources = [geojson]
-      // } else {
-      //   this.dataSources.geoJsonDataSources?.push(geojson)
-      // }
-    })
+    selectedVehicleClass() {
+      const geoJsons = this.dataSources.geoJsonDataSources;
+      if (geoJsons != undefined && geoJsons.length > 0) {
+        this.styleSa1s(geoJsons[0])
+      }
     }
   },
 
@@ -133,31 +127,45 @@ export default Vue.extend({
       return str.split(" ").join("-").toLowerCase()
     },
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
-      const sqlView = this.selectedVehicleClass === "all" ? "all_vehicles" : "vehicle_type";
-      const geoserverUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=VEHICLE_TYPE:${this.selectedVehicleClass}&outputFormat=application%2Fjson`
+      const geoserverUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1s&outputFormat=application%2Fjson`
       const sa1s = await Cesium.GeoJsonDataSource.load(geoserverUrl, {
         fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 0.2),
         stroke: Cesium.Color.ROYALBLUE.darken(0.5, new Cesium.Color()),
         strokeWidth: 10
-
       });
+      return sa1s;
+    },
+
+    async styleSa1s(sa1s: Cesium.GeoJsonDataSource): Promise<void> {
+      const sqlView = this.selectedVehicleClass === "all" ? "all_vehicles" : "vehicle_type";
+      const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=VEHICLE_TYPE:${this.selectedVehicleClass}&outputFormat=application%2Fjson&propertyname=(SA12018_V1_00,CO2,VKT)`
+      const propertyCsv = await axios.get(propertyRequestUrl)
+      const emissionsData = propertyCsv.data.features
+
       const colorScale = chroma.scale(chroma.brewer.Viridis)
       const sa1Entities = sa1s.entities.values;
+      const sa1IdColumnName = "SA12018_V1_00"
       for (const entity of sa1Entities.reverse()) {
         if (entity.polygon != null) {
-          const co2 = entity.properties["CO2 (Tonnes/Year)"]?.getValue()
-          const vkt = entity.properties["VKT ('000 km/Year)"]?.getValue()
-          const color = colorScale(vkt / 70 / 1000)
-          const polyGraphics = new Cesium.PolygonGraphics({
-            extrudedHeight: co2 / 5,
-            material: new Cesium.Color(...color.gl()),
-            outlineColor: new Cesium.Color(...color.darken().gl()),
-          });
+          const entityData = emissionsData.find((emissionReading) => emissionReading.properties[sa1IdColumnName] == entity.properties[sa1IdColumnName]?.getValue())
+          let polyGraphics: Cesium.PolygonGraphics
+          if (entityData == undefined) {
+            polyGraphics = new Cesium.PolygonGraphics({show: false})
+          } else {
+            const co2 = entityData.properties["CO2"]
+            const vkt = entityData.properties["VKT"]
+            const color = colorScale(vkt / 70 / 1000)
+            polyGraphics = new Cesium.PolygonGraphics({
+              show: true,
+              extrudedHeight: co2 / 5,
+              material: new Cesium.Color(...color.gl()),
+              outlineColor: new Cesium.Color(...color.darken().gl()),
+            });
+          }
           polyGraphics.merge(entity.polygon)
           entity.polygon = polyGraphics;
         }
       }
-      return sa1s;
     },
 
     async loadCo2Emissions(): Promise<Scenario> {
@@ -208,7 +216,7 @@ export default Vue.extend({
   computed: {
     scenarioNames(): Array<string> {
       return this.scenarios.map(scenario => scenario.name);
-    }
+    },
   }
 });
 </script>

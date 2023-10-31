@@ -33,14 +33,19 @@
         <sql>SELECT&#xd;
        sa1s.&quot;SA12018_V1_00&quot;,&#xd;
        geometry,&#xd;
-       SUM(&quot;CO2 (Tonnes/Year)&quot;) AS &quot;CO2 (Tonnes/Year)&quot;,&#xd;
-       SUM(&quot;VKT (&apos;000 km/Year)&quot;) AS &quot;VKT (&apos;000 km/Year)&quot;&#xd;
+       SUM(&quot;CO2 (Tonnes/Year)&quot;) AS &quot;CO2&quot;,&#xd;
+       SUM(&quot;VKT (&apos;000 km/Year)&quot;) AS &quot;VKT&quot;&#xd;
 &#xd;
 FROM sa1s INNER JOIN vehicle_stats vs&#xd;
     ON sa1s.&quot;SA12018_V1_00&quot; = vs.&quot;SA12018_V1_00&quot;&#xd;
 GROUP BY sa1s.&quot;SA12018_V1_00&quot;, sa1s.geometry
 </sql>
         <escapeSql>false</escapeSql>
+        <geometry>
+          <name>geometry</name>
+          <type>Geometry</type>
+          <srid>-1</srid>
+        </geometry>
       </virtualTable>
     </entry>
   </metadata>

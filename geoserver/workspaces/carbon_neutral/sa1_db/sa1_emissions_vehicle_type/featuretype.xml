@@ -30,7 +30,7 @@
     <entry key="JDBC_VIRTUAL_TABLE">
       <virtualTable>
         <name>sa1_emissions_vehicle_type</name>
-        <sql>SELECT sa1s.&quot;SA12018_V1_00&quot;, geometry, &quot;CO2 (Tonnes/Year)&quot;, &quot;VKT (&apos;000 km/Year)&quot;, &quot;vehicle_type&quot;&#xd;
+        <sql>SELECT sa1s.&quot;SA12018_V1_00&quot;, geometry, &quot;CO2 (Tonnes/Year)&quot; as &quot;CO2&quot;, &quot;VKT (&apos;000 km/Year)&quot; as &quot;VKT&quot;, &quot;vehicle_type&quot;&#xd;
 FROM sa1s inner join vehicle_stats vs&#xd;
     ON sa1s.&quot;SA12018_V1_00&quot; = vs.&quot;SA12018_V1_00&quot;&#xd;
 WHERE VEHICLE_TYPE ILIKE &apos;%VEHICLE_TYPE%%&apos;
