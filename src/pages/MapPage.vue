@@ -13,30 +13,17 @@
       <h2 class="card-title">
         Filters
       </h2>
-      <div>{{ selectedVehicleClass }} | {{ selectedFuelType }}</div>
+      <div>{{ selectedFuelType }}</div>
       <div class="form-group">
-        <h3>Vehicle Class:</h3>
-        <div class="form-check" v-for="vehicleClass of vehicleClasses" :key="vehicleClass.key">
+        <h3>Car Fuel Type:</h3>
+        <div class="form-check" v-for="fuelType of fuelTypes" :key="fuelType.key">
           <input
             type="radio"
-            :id="vehicleClass.key"
-            :value="vehicleClass.key"
-            v-model="selectedVehicleClass"
-          >
-          <label :for="vehicleClass.key">{{ vehicleClass.display }}</label>
-        </div>
-      </div>
-      <div class="form-group">
-        <h3 disabled>Vehicle Fuel Type:</h3>
-        <div class="form-check" v-for="fuelType of fuelTypes" :key="toKebabCase(fuelType)">
-          <input
-            type="radio"
-            :id="toKebabCase(fuelType)"
-            :value="toKebabCase(fuelType)"
+            :id="fuelType.key"
+            :value="fuelType.key"
             v-model="selectedFuelType"
-            disabled
           >
-          <label :for="toKebabCase(fuelType)" disabled>{{ fuelType }}</label>
+          <label :for="fuelType.key">{{ fuelType.display }}</label>
         </div>
       </div>
     </div>
@@ -83,7 +70,17 @@ export default Vue.extend({
         key: "bus"
       }
       ],
-      fuelTypes: ["All Fuel Types", "Petrol", "Diesel", "Hybrid", "Plug-in Hybrid", "Electric"],
+      fuelTypes: [{
+        display: "All Fuel Types",
+        key: "all"
+      }, {
+        display: "Petrol",
+        key: "petrol"
+      }, {
+        display: "Diesel",
+        key: "diesel"
+      }
+      ],
       selectedVehicleClass: "",
       selectedFuelType: "",
     }
@@ -91,7 +88,7 @@ export default Vue.extend({
 
   created() {
     this.selectedVehicleClass = this.vehicleClasses[1].key
-    this.selectedFuelType = this.toKebabCase(this.fuelTypes[0])
+    this.selectedFuelType = this.fuelTypes[1].key
   },
 
   async mounted() {
@@ -99,8 +96,8 @@ export default Vue.extend({
     document.body.style.overflow = "hidden"
 
     this.loadSa1s().then((geojson) => {
-        this.dataSources.geoJsonDataSources = [geojson]
-        this.styleSa1s(geojson);
+      this.dataSources.geoJsonDataSources = [geojson]
+      this.styleSa1s(geojson);
     });
     //
     // this.loadCo2Emissions().then((geoJson) => {
@@ -114,7 +111,7 @@ export default Vue.extend({
   },
 
   watch: {
-    selectedVehicleClass() {
+    selectedFuelType() {
       const geoJsons = this.dataSources.geoJsonDataSources;
       if (geoJsons != undefined && geoJsons.length > 0) {
         this.styleSa1s(geoJsons[0])
@@ -137,8 +134,9 @@ export default Vue.extend({
     },
 
     async styleSa1s(sa1s: Cesium.GeoJsonDataSource): Promise<void> {
-      const sqlView = this.selectedVehicleClass === "all" ? "all_vehicles" : "vehicle_type2";
-      const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=VEHICLE_TYPE:${this.selectedVehicleClass}&outputFormat=application%2Fjson&propertyname=(SA12018_V1_00,CO2,VKT)`
+      const sqlView = this.selectedFuelType === "all" ? "all_cars" : "fuel_type";
+      const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(SA12018_V1_00,CO2,VKT)`
+      console.log(propertyRequestUrl)
       const propertyCsv = await axios.get(propertyRequestUrl)
       const emissionsData = propertyCsv.data.features
 
