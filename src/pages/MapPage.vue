@@ -137,7 +137,7 @@ export default Vue.extend({
     },
 
     async styleSa1s(sa1s: Cesium.GeoJsonDataSource): Promise<void> {
-      const sqlView = this.selectedVehicleClass === "all" ? "all_vehicles" : "vehicle_type";
+      const sqlView = this.selectedVehicleClass === "all" ? "all_vehicles" : "vehicle_type2";
       const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=VEHICLE_TYPE:${this.selectedVehicleClass}&outputFormat=application%2Fjson&propertyname=(SA12018_V1_00,CO2,VKT)`
       const propertyCsv = await axios.get(propertyRequestUrl)
       const emissionsData = propertyCsv.data.features

@@ -71,17 +71,37 @@ def get_long_format_sa1_emissions() -> pd.DataFrame:
     return merged.rename(columns=lambda name: name.replace("\n", " "))
 
 
+def split_vehicle_type(df: pd.DataFrame) -> pd.DataFrame:
+    def split_vehicle_class(row):
+        for v_class in vehicle_classes:
+            if row.startswith(v_class):
+                fuel_type = row.replace(v_class, '').strip().title()
+                return pd.Series([v_class, fuel_type], index=['Vehicle Class', 'Fuel Type'])
+        return pd.Series([None, None], index=['Vehicle Class', 'Fuel Type'])
+
+    vehicle_classes = ["Bus", "Car", "Light Vehicle", "Light Commercial Vehicle", "Commercial Vehicle"]
+    df.reset_index(inplace=True)
+    df[['vehicle_class', 'fuel_type']] = df['Vehicle Type'].apply(split_vehicle_class)
+    df.drop("Vehicle Type", axis=1, inplace=True)
+    df.rename(columns={"level_0": "SA12018_V1_00"}, inplace=True)
+    df.set_index(["SA12018_V1_00", "vehicle_class", "fuel_type"], inplace=True)
+    return df
+
+
+
+
 def main() -> None:
     load_dotenv()
     engine = get_db_engine()
 
     emissions = get_long_format_sa1_emissions()
+    emissions = split_vehicle_type(emissions)
     emissions.to_sql("vehicle_stats", engine, if_exists="replace", index=True,
-                     index_label=["SA12018_V1_00", "vehicle_type"])
-
-    sa1s = find_sa1s_in_chch()
-    sa1s_table_name = "sa1s"
-    sa1s.to_postgis(sa1s_table_name, engine, if_exists="replace", index=True)
+                     index_label=["SA12018_V1_00", "vehicle_class", "fuel_type"])
+    #
+    # sa1s = find_sa1s_in_chch()
+    # sa1s_table_name = "sa1s"
+    # sa1s.to_postgis(sa1s_table_name, engine, if_exists="replace", index=True)
 
 
 main()
