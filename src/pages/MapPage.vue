@@ -1,6 +1,12 @@
 <template>
   <!-- The page that shows the map for the Digital Twin -->
   <div class="full-height">
+    <BalancedSlider
+      v-if="sliderDefaultValues.length > 0"
+      :init-values="sliderDefaultValues"
+      @submit="changeUseRates($event)"
+      :disabled="selectedFuelType !== 'all'"
+    />
     <MapViewer
       :init-lat="christchurch.latitude"
       :init-long="christchurch.longitude"
@@ -38,12 +44,14 @@ import {MapViewer} from 'geo-visualisation-components/src/components';
 import titleMixin from "@/mixins/title";
 import {MapViewerDataSourceOptions, Scenario} from "geo-visualisation-components/dist/types/src/types";
 import axios from "axios";
+import BalancedSlider from "@/components/BalancedSlider.vue";
 
 export default Vue.extend({
   name: "MapPage",
   title: "Map",
   mixins: [titleMixin],
   components: {
+    BalancedSlider,
     MapViewer,
   },
 
@@ -81,6 +89,8 @@ export default Vue.extend({
         key: "diesel"
       }
       ],
+      vktUseRates: [] as {fuel_type: string, VKT: number, weight: number}[],
+      sliderDefaultValues: [] as {name: string, value: number}[],
       selectedVehicleClass: "",
       selectedFuelType: "",
     }
@@ -95,14 +105,14 @@ export default Vue.extend({
     // Limit scrolling on this page
     document.body.style.overflow = "hidden"
 
-    this.loadSa1s().then((geojson) => {
-      this.dataSources.geoJsonDataSources = [geojson]
-      this.styleSa1s(geojson);
-    });
-    //
-    // this.loadCo2Emissions().then((geoJson) => {
-    //   this.scenarios.push(geoJson)
-    // })
+    const geojson = await this.loadSa1s()
+    this.dataSources.geoJsonDataSources = [geojson]
+
+    this.vktUseRates = await this.fetchVktSums();
+    console.log(this.vktUseRates)
+    this.sliderDefaultValues = this.vktUseRates.map(obj => ({name: obj.fuel_type, value: obj.weight}))
+    await this.styleSa1s(geojson);
+
   },
 
   beforeDestroy() {
@@ -112,10 +122,7 @@ export default Vue.extend({
 
   watch: {
     selectedFuelType() {
-      const geoJsons = this.dataSources.geoJsonDataSources;
-      if (geoJsons != undefined && geoJsons.length > 0) {
-        this.styleSa1s(geoJsons[0])
-      }
+      this.styleSa1s()
     },
 
   },
@@ -134,12 +141,35 @@ export default Vue.extend({
       return sa1s;
     },
 
-    async styleSa1s(sa1s: Cesium.GeoJsonDataSource): Promise<void> {
+    async fetchVktSums(): Promise<{fuel_type: string, VKT: number, weight: number}[]>{
+      const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Avkt_sum&outputFormat=application%2Fjson&propertyname=(fuel_type,VKT)`
+      const propertyJson = await axios.get(propertyRequestUrl)
+      const features = propertyJson.data.features as {properties: {fuel_type: string, VKT: number}}[]
+
+      const fuel_to_vkts =  features.map(feature => feature.properties)
+      const total_vkt = fuel_to_vkts.reduce((partialSum, entry) => partialSum + entry.VKT, 0)
+      return fuel_to_vkts.map(entry => ({...entry, weight: entry.VKT / total_vkt * 100}))
+    },
+
+    changeUseRates(changeEvent: number[]) {
+      for (const i in changeEvent) {
+        this.vktUseRates[i].weight = changeEvent[i]
+      }
+      this.styleSa1s()
+    },
+
+
+    async styleSa1s(): Promise<void> {
+      const geoJsons = this.dataSources.geoJsonDataSources;
+      if (geoJsons == undefined || geoJsons.length > 0) {
+        return
+      }
+      const sa1s = geoJsons[0]
+
       const sqlView = this.selectedFuelType === "all" ? "all_cars" : "fuel_type";
       const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(SA12018_V1_00,CO2,VKT,AREA_SQ_KM)`
-      console.log(propertyRequestUrl)
-      const propertyCsv = await axios.get(propertyRequestUrl)
-      const emissionsData = propertyCsv.data.features
+      const propertyJson = await axios.get(propertyRequestUrl)
+      const emissionsData = propertyJson.data.features
 
       const colorScale = chroma.scale(chroma.brewer.Viridis)
       const sa1Entities = sa1s.entities.values;
