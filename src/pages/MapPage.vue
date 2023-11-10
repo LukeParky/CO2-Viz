@@ -116,7 +116,8 @@ export default Vue.extend({
       if (geoJsons != undefined && geoJsons.length > 0) {
         this.styleSa1s(geoJsons[0])
       }
-    }
+    },
+
   },
 
   methods: {
@@ -135,7 +136,7 @@ export default Vue.extend({
 
     async styleSa1s(sa1s: Cesium.GeoJsonDataSource): Promise<void> {
       const sqlView = this.selectedFuelType === "all" ? "all_cars" : "fuel_type";
-      const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(SA12018_V1_00,CO2,VKT)`
+      const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(SA12018_V1_00,CO2,VKT,AREA_SQ_KM)`
       console.log(propertyRequestUrl)
       const propertyCsv = await axios.get(propertyRequestUrl)
       const emissionsData = propertyCsv.data.features
@@ -150,12 +151,13 @@ export default Vue.extend({
           if (entityData == undefined) {
             polyGraphics = new Cesium.PolygonGraphics({show: false})
           } else {
+            const area = entityData.properties["AREA_SQ_KM"]
             const co2 = entityData.properties["CO2"]
             const vkt = entityData.properties["VKT"]
-            const color = colorScale(vkt / 70 / 1000)
+            const color = colorScale(vkt / area / 100000)
             polyGraphics = new Cesium.PolygonGraphics({
               show: true,
-              extrudedHeight: co2 / 5,
+              extrudedHeight: co2 / (area * 10),
               material: new Cesium.Color(...color.gl()),
               outlineColor: new Cesium.Color(...color.darken().gl()),
             });
