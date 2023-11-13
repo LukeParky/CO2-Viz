@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="balanced-slider">
     <div v-for="(initValue, i) in initValues" :key="i">
       <input
         v-if="i === 0"
@@ -21,10 +21,27 @@
         v-model="reactiveValues[i]"
         disabled
       >
-      <label :for="`slider-${i}`">{{ initValue.name }} {{ roundToFixed(reactiveValues[i]) }}%</label>
+      <label
+        :for="`slider-${i}`"
+        :disabled="disabled"
+      >
+        {{ initValue.name }}: {{ roundToFixed(reactiveValues[i]) }}%
+      </label>
     </div>
-    <button @click="$emit('submit', reactiveValues)">Select percentages shares</button>
-    <button @click="value = initValues[0].value">Reset to default</button>
+    <b-button
+      @click="$emit('submit', reactiveValues)"
+      size="sm"
+      :disabled="disabled"
+    >
+      Update
+    </b-button>
+    <b-button
+      @click="onResetDefaultClicked"
+      size="sm"
+      :disabled="disabled"
+    >
+      Reset to default
+    </b-button>
   </div>
 </template>
 
@@ -65,7 +82,6 @@ export default {
   watch: {
     value(newValue) {
       const reactedValues = [];
-      console.log(this.initValues)
       for (const [i, initValue] of this.initValues.entries()) {
         if (i === 0) {
           reactedValues.push(newValue)
@@ -75,7 +91,6 @@ export default {
           reactedValues.push(updatedSubValue)
         }
       }
-      // console.log(reactedValues)
       this.$emit('input', newValue)
       this.$emit('change-sliders', reactedValues)
       this.reactiveValues = reactedValues
@@ -83,6 +98,10 @@ export default {
   },
 
   methods: {
+    onResetDefaultClicked() {
+      this.value = this.initValues[0].value
+      this.$emit('submit', this.reactiveValues)
+    },
     roundToFixed(number, decimalPlaces = 0) {
       const factorForIntegerRounding = 10 ** decimalPlaces
       return (Math.round(number * factorForIntegerRounding) / factorForIntegerRounding).toFixed(decimalPlaces);
@@ -92,5 +111,15 @@ export default {
 </script>
 
 <style scoped>
+#balanced-slider {
+  padding: 5px;
+}
 
+.btn {
+  margin: 2px
+}
+
+label {
+  padding-left: 10px;
+}
 </style>

@@ -23,6 +23,10 @@ h1, h2, h3, h4 {
     font-weight: 400;
 }
 
+label {
+    margin-left: 0.5rem;
+}
+
 #controls {
     /* Appearance */
     background-color: white;
