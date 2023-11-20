@@ -200,11 +200,11 @@ export default Vue.extend({
           if (entityData == undefined) {
             polyGraphics = new Cesium.PolygonGraphics({show: false})
           } else {
-            const {area_sq_km, vkt, co2} = this.getStyleInputVariables(entityData.properties)
-            const color = colorScale(vkt / area_sq_km / 100000)
+            const {vkt, co2} = this.getStyleInputVariables(entityData.properties)
+            const color = colorScale(vkt / 50000)
             polyGraphics = new Cesium.PolygonGraphics({
               show: true,
-              extrudedHeight: co2 / (area_sq_km * 10),
+              extrudedHeight: co2 / 5,
               material: new Cesium.Color(...color.gl()),
               outlineColor: new Cesium.Color(...color.darken().gl()),
             });
