@@ -40,9 +40,19 @@ import * as Cesium from "cesium";
 import chroma from "chroma-js";
 import {MapViewer} from 'geo-visualisation-components/src/components';
 import titleMixin from "@/mixins/title";
-import {MapViewerDataSourceOptions, Scenario} from "geo-visualisation-components/dist/types/src/types";
+import {MapViewerDataSourceOptions, Scenario} from "geo-visualisation-components/src/types";
 import axios from "axios";
 import BalancedSlider from "@/components/BalancedSlider.vue";
+
+interface Sa1Emissions {
+  SA12018_V1_00: number,
+  AREA_SQ_KM: number,
+  CO2?: number,
+  VKT: number,
+
+  [k: `CO2_${string}`]: number | undefined,
+}
+
 
 export default Vue.extend({
   name: "MapPage",
@@ -131,7 +141,7 @@ export default Vue.extend({
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
       const geoserverUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1s&outputFormat=application%2Fjson`
       const sa1s = await Cesium.GeoJsonDataSource.load(geoserverUrl, {
-        fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 0.2),
+        fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 1),
         stroke: Cesium.Color.ROYALBLUE.darken(0.5, new Cesium.Color()),
         strokeWidth: 10
       });
@@ -155,19 +165,13 @@ export default Vue.extend({
       this.styleSa1s()
     },
 
-    getStyleInputVariables(sa1: {
-      AREA_SQ_KM: number,
-      CO2?: number,
-      CO2_diesel?: number,
-      CO2_petrol?: number
-      VKT: number,
-    }): { area_sq_km: number, vkt: number, co2: number } {
-      let co2 = sa1.CO2
+    getStyleInputVariables(sa1: Sa1Emissions): { area_sq_km: number, vkt: number, co2: number } {
+      let co2 = sa1.CO2;
       if (co2 === undefined) {
         co2 = 0;
         for (const {fuel_type, weight} of this.vktUseRates) {
-          const defaultWeight = this.sliderDefaultValues.find((defVal) => defVal.name === fuel_type)?.value
-          const fuelCo2Contribution = sa1[`CO2_${fuel_type}`] as number
+          const defaultWeight = this.sliderDefaultValues.find((defVal) => defVal.name === fuel_type)?.value;
+          const fuelCo2Contribution = sa1[`CO2_${fuel_type}`]
           if (defaultWeight !== undefined && fuelCo2Contribution !== undefined) {
             co2 += (weight / defaultWeight) * fuelCo2Contribution
           }
@@ -188,30 +192,30 @@ export default Vue.extend({
       const propertiesToFind = 'SA12018_V1_00,VKT,AREA_SQ_KM,' + (this.selectedFuelType === "all" ? "CO2_Petrol,CO2_Diesel" : "CO2")
       const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(${propertiesToFind})`
       const propertyJson = await axios.get(propertyRequestUrl)
-      const emissionsData = propertyJson.data.features
-
+      const emissionsData = propertyJson.data.features as { properties: Sa1Emissions }[]
       const colorScale = chroma.scale(chroma.brewer.Viridis)
       const sa1Entities = sa1s.entities.values;
-      const sa1IdColumnName = "SA12018_V1_00"
-      for (const entity of sa1Entities.reverse()) {
-        if (entity.polygon != null) {
-          const entityData = emissionsData.find((emissionReading) => emissionReading.properties[sa1IdColumnName] == entity.properties[sa1IdColumnName]?.getValue())
-          let polyGraphics: Cesium.PolygonGraphics
-          if (entityData == undefined) {
-            polyGraphics = new Cesium.PolygonGraphics({show: false})
-          } else {
-            const {vkt, co2} = this.getStyleInputVariables(entityData.properties)
-            const color = colorScale(vkt / 50000)
-            polyGraphics = new Cesium.PolygonGraphics({
-              show: true,
-              extrudedHeight: co2 / 5,
-              material: new Cesium.Color(...color.gl()),
-              outlineColor: new Cesium.Color(...color.darken().gl()),
-            });
-          }
-          polyGraphics.merge(entity.polygon)
-          entity.polygon = polyGraphics;
+      const sa1IdColumnName = "SA12018_V1_00";
+      for (const entity of sa1Entities) {
+        if (entity.polygon == undefined || entity.properties == undefined)
+          continue;
+        const entityData = emissionsData.find((emissionReading: { properties: Sa1Emissions }) => emissionReading.properties[sa1IdColumnName] == entity.properties?.[sa1IdColumnName]?.getValue())
+        let polyGraphics: Cesium.PolygonGraphics
+        if (entityData == undefined) {
+          polyGraphics = new Cesium.PolygonGraphics({show: false})
+        } else {
+          const {vkt, co2} = this.getStyleInputVariables(entityData.properties)
+          const color = colorScale(vkt / 50000)
+          polyGraphics = new Cesium.PolygonGraphics({
+            show: true,
+            extrudedHeight: co2 / 5,
+            material: new Cesium.Color(...color.gl()),
+            outlineColor: new Cesium.Color(...color.darken().gl()),
+          });
         }
+        polyGraphics.merge(entity.polygon)
+        entity.polygon = polyGraphics;
+
       }
       console.log("Loading ended")
     },
