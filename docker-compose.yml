@@ -40,3 +40,11 @@ services:
       interval: 1m30s
       timeout: 10s
       retries: 3
+
+  www:
+    # Webserver to visualise and interact with the data
+    build: .
+    container_name: www_digital_twin
+    ports:
+      - "8080:80"
+

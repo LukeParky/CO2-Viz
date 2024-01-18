@@ -1,3 +1,6 @@
+geoserver/
+tmp/
+
 ### Node template
 # Logs
 logs
@@ -7,7 +10,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# Diagnostic reports (https://nodejs.org/api/report.html)
+# Diagnostic reports (https://nodejs.org/api/report.html)npm i
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Runtime data
