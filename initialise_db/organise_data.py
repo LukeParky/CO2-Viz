@@ -9,6 +9,7 @@ from sqlalchemy.engine import Engine, create_engine
 
 
 def find_sa1s_in_chch() -> gpd.GeoDataFrame:
+    print("Adding chch sa1s to database")
     wgs_84 = 4326
     # Approximate bounding box of chch in WGS84
     lat1, lng1 = -43.41766, 172.36059
@@ -54,11 +55,16 @@ def get_db_engine() -> Engine:
         "POSTGRES_PORT",
         "POSTGRES_DB"
     ))
-    return create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}')
+    engine = create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}', pool_pre_ping=True)
+    with engine.connect():
+        print(f"Connection to {engine} successful")
+    return engine
 
 
 def get_long_format_sa1_emissions() -> pd.DataFrame:
-    emissions_data = pd.read_excel("data/RAW_SA1_emissions(2).xlsx", header=[0, 1], index_col=0, sheet_name=2)
+    data_file = "data/RAW_SA1_emissions(2).xlsx"
+    print("Converting to long format DataFrame")
+    emissions_data = pd.read_excel(data_file, header=[0, 1], index_col=0, sheet_name=2)
     vehicle_types, variables = (level.values.tolist() for level in emissions_data.columns.levels)
     # emissions_data.reset_index(inplace=True)
     melts = []
@@ -81,6 +87,7 @@ def split_vehicle_type(df: pd.DataFrame) -> pd.DataFrame:
 
     vehicle_classes = ["Bus", "Car", "Light Vehicle", "Light Commercial Vehicle", "Commercial Vehicle"]
     df.reset_index(inplace=True)
+    print("Splitting vehicle class and fuel type")
     df[['vehicle_class', 'fuel_type']] = df['Vehicle Type'].apply(split_vehicle_class)
     df.drop("Vehicle Type", axis=1, inplace=True)
     df.rename(columns={"level_0": "SA12018_V1_00"}, inplace=True)
@@ -93,15 +100,19 @@ def split_vehicle_type(df: pd.DataFrame) -> pd.DataFrame:
 def main() -> None:
     load_dotenv()
     engine = get_db_engine()
+    print(f"Initialising database {engine}")
+
 
     emissions = get_long_format_sa1_emissions()
     emissions = split_vehicle_type(emissions)
     emissions.to_sql("vehicle_stats", engine, if_exists="replace", index=True,
                      index_label=["SA12018_V1_00", "vehicle_class", "fuel_type"])
-    #
-    # sa1s = find_sa1s_in_chch()
-    # sa1s_table_name = "sa1s"
-    # sa1s.to_postgis(sa1s_table_name, engine, if_exists="replace", index=True)
 
+    sa1s = find_sa1s_in_chch()
+    sa1s_table_name = "sa1s"
+    sa1s.to_postgis(sa1s_table_name, engine, if_exists="replace", index=True)
 
-main()
+    print("Initalised database successfully")
+
+if __name__ == '__main__':
+    main()

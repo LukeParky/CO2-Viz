@@ -1,0 +1,22 @@
+# YML file for setting up the Digital-Twin Python environment
+# Locked down most package versions to reduce docker build to,e
+
+name: co2sa1
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - geoalchemy2
+  - geopandas==0.12.2
+  - openpyxl
+  - pandas==1.5.3
+  - pip
+  - psycopg2==2.9.3
+  - python==3.11
+  - python-dotenv==1.0.0
+  - sqlalchemy==1.4.49
+  - pip:
+      - geoapis
+
+
+prefix:

@@ -43,8 +43,18 @@ services:
 
   www:
     # Webserver to visualise and interact with the data
-    build: .
+    build:
+      context: ./www
     container_name: www_digital_twin
     ports:
       - "8080:80"
 
+  initialise_db:
+    build:
+      context: initialise_db
+    container_name: setup_carbon_neutral
+    env_file:
+      - .env
+      - .env.docker-override
+    depends_on:
+      - postgis

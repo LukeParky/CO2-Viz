@@ -35,14 +35,15 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import axios from "axios";
 import * as Cesium from "cesium";
 import chroma from "chroma-js";
 import {MapViewer} from 'geo-visualisation-components/src/components';
-import titleMixin from "@/mixins/title";
 import {MapViewerDataSourceOptions, Scenario} from "geo-visualisation-components/src/types";
-import axios from "axios";
+import Vue from "vue";
+
 import BalancedSlider from "@/components/BalancedSlider.vue";
+import titleMixin from "@/mixins/title";
 
 interface Sa1Emissions {
   SA12018_V1_00: number,
