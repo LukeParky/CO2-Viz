@@ -57,6 +57,7 @@ def get_db_engine() -> Engine:
         "POSTGRES_DB"
     ))
     engine = create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}', pool_pre_ping=True)
+    print(f"Attempting to connect to {engine}")
     with engine.connect():
         print(f"Connection to {engine} successful")
     return engine
@@ -96,6 +97,7 @@ def split_vehicle_type(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> None:
+    print(f"Checking database initialisation")
     load_dotenv()
     engine = get_db_engine()
     print(f"Initialising database {engine}")
