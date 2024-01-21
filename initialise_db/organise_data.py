@@ -4,6 +4,7 @@ import geoapis.vector
 import geopandas as gpd
 import pandas as pd
 import shapely
+import sqlalchemy
 from dotenv import load_dotenv
 from sqlalchemy.engine import Engine, create_engine
 
@@ -66,7 +67,6 @@ def get_long_format_sa1_emissions() -> pd.DataFrame:
     print("Converting to long format DataFrame")
     emissions_data = pd.read_excel(data_file, header=[0, 1], index_col=0, sheet_name=2)
     vehicle_types, variables = (level.values.tolist() for level in emissions_data.columns.levels)
-    # emissions_data.reset_index(inplace=True)
     melts = []
     for var in variables:
         melt = emissions_data.melt(ignore_index=False, var_name="Vehicle Type", value_name=var,
@@ -95,24 +95,31 @@ def split_vehicle_type(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-
-
 def main() -> None:
     load_dotenv()
     engine = get_db_engine()
     print(f"Initialising database {engine}")
 
+    vehicle_stats_table_name = "vehicle_stats"
+    if sqlalchemy.inspect(engine).has_table(vehicle_stats_table_name):
+        print(f"Table {vehicle_stats_table_name} exists, skipping")
+    else:
+        print(f"Table {vehicle_stats_table_name} does not exist, initialising")
+        emissions = get_long_format_sa1_emissions()
+        emissions = split_vehicle_type(emissions)
+        emissions.to_sql(vehicle_stats_table_name, engine, if_exists="replace", index=True,
+                         index_label=["SA12018_V1_00", "vehicle_class", "fuel_type"])
 
-    emissions = get_long_format_sa1_emissions()
-    emissions = split_vehicle_type(emissions)
-    emissions.to_sql("vehicle_stats", engine, if_exists="replace", index=True,
-                     index_label=["SA12018_V1_00", "vehicle_class", "fuel_type"])
-
-    sa1s = find_sa1s_in_chch()
     sa1s_table_name = "sa1s"
-    sa1s.to_postgis(sa1s_table_name, engine, if_exists="replace", index=True)
+    if sqlalchemy.inspect(engine).has_table(sa1s_table_name):
+        print(f"Table {sa1s_table_name} exists, skipping")
+    else:
+        print(f"Table {sa1s_table_name} does not exist, initialising")
+        sa1s = find_sa1s_in_chch()
+        sa1s.to_postgis(sa1s_table_name, engine, if_exists="replace", index=True)
 
-    print("Initalised database successfully")
+    print("Database initialised")
+
 
 if __name__ == '__main__':
     main()
