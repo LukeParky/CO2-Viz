@@ -56,4 +56,5 @@ services:
       - .env
       - .env.docker-override
     depends_on:
-      - postgis
+      postgis:
+        condition: service_healthy
