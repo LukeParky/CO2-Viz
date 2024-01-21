@@ -70,6 +70,7 @@ export default Vue.extend({
         latitude: -43.514137213246535,
         longitude: 172.62835098005368
       },
+      geoserverHost: `${process.env.VUE_APP_WEB_HOST}:${process.env.VUE_APP_GEOSERVER_PORT}`,
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       scenarios: [] as Scenario[],
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
@@ -140,7 +141,7 @@ export default Vue.extend({
       return str.split(" ").join("-").toLowerCase()
     },
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
-      const geoserverUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1s&outputFormat=application%2Fjson`
+      const geoserverUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1s&outputFormat=application%2Fjson`
       const sa1s = await Cesium.GeoJsonDataSource.load(geoserverUrl, {
         fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 1),
         stroke: Cesium.Color.ROYALBLUE.darken(0.5, new Cesium.Color()),
@@ -150,7 +151,7 @@ export default Vue.extend({
     },
 
     async fetchVktSums(): Promise<{ fuel_type: string, VKT: number, weight: number }[]> {
-      const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Avkt_sum&outputFormat=application%2Fjson&propertyname=(fuel_type,VKT)`
+      const propertyRequestUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Avkt_sum&outputFormat=application%2Fjson&propertyname=(fuel_type,VKT)`
       const propertyJson = await axios.get(propertyRequestUrl)
       const features = propertyJson.data.features as { properties: { fuel_type: string, VKT: number } }[]
 
