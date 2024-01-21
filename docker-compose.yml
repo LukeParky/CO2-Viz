@@ -1,8 +1,7 @@
 version: '3.8'
 
 volumes:
-  postgis_vol2:
-  geoserver_vol:
+  postgis_vol:
 
 services:
   postgis:
@@ -13,7 +12,7 @@ services:
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:
-      - postgis_vol2:/var/lib/postgresql/data
+      - postgis_vol:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
