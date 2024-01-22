@@ -1,25 +1,25 @@
-FROM continuumio/miniconda3 as base
-#FROM ubuntu:jammy
+FROM continuumio/miniconda3 as build
 
 WORKDIR app/
-
-## Install Miniconda
-#ENV PATH="/root/miniconda3/bin:${PATH}"
-#ARG PATH="/root/miniconda3/bin:${PATH}"
-#
-#RUN apt-get update \
-#    && apt install -y wget \
-#    && rm -rf /var/lib/apt/lists/*
-#
-#RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-#    && mkdir /root/.conda \
-#    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-#    && rm -f Miniconda3-latest-Linux-x86_64.sh
-#RUN conda --version
 
 COPY environment.yml .
 RUN conda env create -f environment.yml
 
+SHELL ["conda", "run", "-n", "co2sa1", "/bin/bash", "-c"]
+RUN conda-pack --ignore-missing-files -n co2sa1 -o /tmp/env.tar \
+  && mkdir /venv \
+  && cd /venv \
+  && tar xf /tmp/env.tar \
+  && rm /tmp/env.tar
+RUN /venv/bin/conda-unpack
+
+
+FROM ubuntu:jammy as runtime
+
+COPY --from=build /venv /venv
+
 COPY . .
 
-ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "co2sa1", "python", "organise_data.py"]
+SHELL ["/bin/bash", "-c"]
+ENTRYPOINT source /venv/bin/activate && \
+           python organise_data.py

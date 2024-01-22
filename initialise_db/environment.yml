@@ -6,17 +6,18 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - geoalchemy2
+  - conda-pack>=0.7.1
+  - geoalchemy2==0.14.3
   - geopandas==0.12.2
-  - openpyxl
+  - openpyxl==3.1.2
   - pandas==1.5.3
-  - pip
+  - pip>=23.3.2
   - psycopg2==2.9.3
   - python==3.11
   - python-dotenv==1.0.0
   - sqlalchemy==1.4.49
   - pip:
-      - geoapis
+      - geoapis==0.3.2
 
 
 prefix:
