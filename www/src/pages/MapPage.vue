@@ -192,7 +192,7 @@ export default Vue.extend({
 
       const sqlView = this.selectedFuelType === "all" ? "all_cars" : "fuel_type";
       const propertiesToFind = 'SA12018_V1_00,VKT,AREA_SQ_KM,' + (this.selectedFuelType === "all" ? "CO2_Petrol,CO2_Diesel" : "CO2")
-      const propertyRequestUrl = `http://localhost:8087/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(${propertiesToFind})`
+      const propertyRequestUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(${propertiesToFind})`
       const propertyJson = await axios.get(propertyRequestUrl)
       const emissionsData = propertyJson.data.features as { properties: Sa1Emissions }[]
       const colorScale = chroma.scale(chroma.brewer.Viridis)
