@@ -1,3 +1,4 @@
+import logging
 import os
 
 import geoapis.vector
@@ -8,9 +9,14 @@ import sqlalchemy
 from dotenv import load_dotenv
 from sqlalchemy.engine import Engine, create_engine
 
+from initialise_geoserver import initialise_geoserver
+from setup_logging import setup_logging
+
+log = logging.getLogger(__name__)
+
 
 def find_sa1s_in_chch() -> gpd.GeoDataFrame:
-    print("Adding chch sa1s to database")
+    log.info("Adding chch sa1s to database")
     wgs_84 = 4326
     # Approximate bounding box of chch in WGS84
     lat1, lng1 = -43.41766, 172.36059
@@ -57,15 +63,15 @@ def get_db_engine() -> Engine:
         "POSTGRES_DB"
     ))
     engine = create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}', pool_pre_ping=True)
-    print(f"Attempting to connect to {engine}")
+    log.info(f"Attempting to connect to {engine}")
     with engine.connect():
-        print(f"Connection to {engine} successful")
+        log.info(f"Connection to {engine} successful")
     return engine
 
 
 def get_long_format_sa1_emissions() -> pd.DataFrame:
     data_file = "data/RAW_SA1_emissions(2).xlsx"
-    print("Converting to long format DataFrame")
+    log.info("Converting to long format DataFrame")
     emissions_data = pd.read_excel(data_file, header=[0, 1], index_col=0, sheet_name=2)
     vehicle_types, variables = (level.values.tolist() for level in emissions_data.columns.levels)
     melts = []
@@ -88,7 +94,7 @@ def split_vehicle_type(df: pd.DataFrame) -> pd.DataFrame:
 
     vehicle_classes = ["Bus", "Car", "Light Vehicle", "Light Commercial Vehicle", "Commercial Vehicle"]
     df.reset_index(inplace=True)
-    print("Splitting vehicle class and fuel type")
+    log.info("Splitting vehicle class and fuel type")
     df[['vehicle_class', 'fuel_type']] = df['Vehicle Type'].apply(split_vehicle_class)
     df.drop("Vehicle Type", axis=1, inplace=True)
     df.rename(columns={"level_0": "SA12018_V1_00"}, inplace=True)
@@ -97,16 +103,17 @@ def split_vehicle_type(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> None:
-    print(f"Checking database initialisation")
+    setup_logging()
+    log.info(f"Checking database initialisation")
     load_dotenv()
     engine = get_db_engine()
-    print(f"Initialising database {engine}")
+    log.info(f"Initialising database {engine}")
 
     vehicle_stats_table_name = "vehicle_stats"
     if sqlalchemy.inspect(engine).has_table(vehicle_stats_table_name):
-        print(f"Table {vehicle_stats_table_name} exists, skipping")
+        log.info(f"Table {vehicle_stats_table_name} exists, skipping")
     else:
-        print(f"Table {vehicle_stats_table_name} does not exist, initialising")
+        log.info(f"Table {vehicle_stats_table_name} does not exist, initialising")
         emissions = get_long_format_sa1_emissions()
         emissions = split_vehicle_type(emissions)
         emissions.to_sql(vehicle_stats_table_name, engine, if_exists="replace", index=True,
@@ -114,13 +121,15 @@ def main() -> None:
 
     sa1s_table_name = "sa1s"
     if sqlalchemy.inspect(engine).has_table(sa1s_table_name):
-        print(f"Table {sa1s_table_name} exists, skipping")
+        log.info(f"Table {sa1s_table_name} exists, skipping")
     else:
-        print(f"Table {sa1s_table_name} does not exist, initialising")
+        log.info(f"Table {sa1s_table_name} does not exist, initialising")
         sa1s = find_sa1s_in_chch()
         sa1s.to_postgis(sa1s_table_name, engine, if_exists="replace", index=True)
 
-    print("Database initialised")
+    log.info("Database initialised")
+    log.info("Initialising geoserver")
+    initialise_geoserver()
 
 
 if __name__ == '__main__':
