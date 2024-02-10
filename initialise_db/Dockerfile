@@ -2,10 +2,17 @@ FROM continuumio/miniconda3 as build
 
 WORKDIR app/
 
-COPY environment.yml .
-RUN conda env create -f environment.yml
+# Install mamba for faster conda solves
+RUN conda install -c conda-forge mamba
 
+# Create Conda environment
+COPY environment.yml .
+RUN mamba env create -f environment.yml
+
+# Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "co2sa1", "/bin/bash", "-c"]
+
+# Pack conda environment to be shared to runtime image
 RUN conda-pack --ignore-missing-files -n co2sa1 -o /tmp/env.tar \
   && mkdir /venv \
   && cd /venv \
