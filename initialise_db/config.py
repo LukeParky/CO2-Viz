@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 # Generic type, used for static type checking
 T = TypeVar("T", str, bool, int, float)
 
+load_dotenv("..")
 load_dotenv()
 
 
