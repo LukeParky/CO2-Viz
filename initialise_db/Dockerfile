@@ -1,7 +1,5 @@
 FROM continuumio/miniconda3 as build
 
-WORKDIR app/
-
 # Install mamba for faster conda solves
 RUN conda install -c conda-forge mamba
 
@@ -23,9 +21,18 @@ RUN /venv/bin/conda-unpack
 
 FROM ubuntu:jammy as runtime
 
-COPY --from=build /venv /venv
+# Create a user without root access so that the docker container is more secure
+RUN addgroup --system nonroot \
+    && adduser --system --group nonroot
+USER nonroot
 
-COPY . .
+WORKDIR app/
+
+# Copy python virtual environment from build layer
+COPY --chown=nonroot:nonroot --chmod=544 --from=build /venv /venv
+
+COPY --chown=nonroot:nonroot --chmod=544 ./data ./data
+COPY --chown=nonroot:nonroot --chmod=544 *.py .
 
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT source /venv/bin/activate && \
