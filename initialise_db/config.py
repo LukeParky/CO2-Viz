@@ -1,4 +1,5 @@
 import os
+from dataclasses import dataclass, field
 from typing import TypeVar
 
 from dotenv import load_dotenv
@@ -75,3 +76,18 @@ def _cast_str(str_to_cast: str, cast_to: T) -> T:
         raise ValueError(f"{str_to_cast} being casted to bool but is not in {truth_values} or {false_values}")
     # General case
     return cast_to(str_to_cast)
+
+
+class EnvVariable:
+    POSTGRES_HOST = get_env_variable("POSTGRES_HOST")
+    POSTGRES_PORT = get_env_variable("POSTGRES_PORT")
+    POSTGRES_DB = get_env_variable("POSTGRES_DB")
+    POSTGRES_USER = get_env_variable("POSTGRES_USER")
+    POSTGRES_PASSWORD = get_env_variable("POSTGRES_PASSWORD")
+
+    GEOSERVER_HOST = get_env_variable("GEOSERVER_HOST")
+    GEOSERVER_PORT = get_env_variable("GEOSERVER_PORT")
+    GEOSERVER_ADMIN_NAME = get_env_variable("GEOSERVER_ADMIN_NAME")
+    GEOSERVER_ADMIN_PASSWORD = get_env_variable("GEOSERVER_ADMIN_PASSWORD")
+
+    STATS_API_KEY = get_env_variable("STATS_API_KEY")
