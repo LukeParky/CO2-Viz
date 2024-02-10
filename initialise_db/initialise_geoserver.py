@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 import requests
 
-from config import get_env_variable
+from config import EnvVariable as Env
 from setup_logging import setup_logging
 
 log = logging.getLogger(__name__)
@@ -18,9 +18,7 @@ def get_geoserver_url() -> str:
     str
         The full GeoServer URL
     """
-    gs_host = get_env_variable("GEOSERVER_HOST")
-    gs_port = get_env_variable("GEOSERVER_PORT")
-    return f"{gs_host}:{gs_port}/geoserver/rest"
+    return f"{Env.GEOSERVER_HOST}:{Env.GEOSERVER_PORT}/geoserver/rest"
 
 
 def create_workspace_if_not_exists(workspace_name: str) -> None:
@@ -48,7 +46,7 @@ def create_workspace_if_not_exists(workspace_name: str) -> None:
     response = requests.post(
         f"{get_geoserver_url()}/workspaces",
         json=req_body,
-        auth=(get_env_variable("GEOSERVER_ADMIN_NAME"), get_env_variable("GEOSERVER_ADMIN_PASSWORD"))
+        auth=(Env.GEOSERVER_ADMIN_NAME, Env.GEOSERVER_ADMIN_PASSWORD)
     )
     if response.status_code == HTTPStatus.CREATED:
         log.info(f"Created new workspace {workspace_name}.")
@@ -63,7 +61,7 @@ def create_workspace_if_not_exists(workspace_name: str) -> None:
 def create_datastore_layer(workspace_name, data_store_name: str, layer_name, metadata_elem: str = "") -> None:
     db_exists_response = requests.get(
         f'{get_geoserver_url()}/workspaces/{workspace_name}/datastores/{data_store_name}/featuretypes.json',
-        auth=(get_env_variable("GEOSERVER_ADMIN_NAME"), get_env_variable("GEOSERVER_ADMIN_PASSWORD")),
+        auth=(Env.GEOSERVER_ADMIN_NAME, Env.GEOSERVER_ADMIN_PASSWORD),
     )
     response_data = db_exists_response.json()
     # Parse JSON structure to get list of feature names
@@ -107,7 +105,7 @@ def create_datastore_layer(workspace_name, data_store_name: str, layer_name, met
         params={"configure": "all"},
         headers={"Content-type": "text/xml"},
         data=data,
-        auth=(get_env_variable("GEOSERVER_ADMIN_NAME"), get_env_variable("GEOSERVER_ADMIN_PASSWORD")),
+        auth=(Env.GEOSERVER_ADMIN_NAME, Env.GEOSERVER_ADMIN_PASSWORD),
     )
     if response.status_code == HTTPStatus.CREATED:
         log.info(f"Created new datastore layer {workspace_name}:{layer_name}.")
@@ -191,7 +189,7 @@ def create_db_store_if_not_exists(db_name: str, workspace_name: str, new_data_st
     # Create request to check if database store already exists
     db_exists_response = requests.get(
         f'{get_geoserver_url()}/workspaces/{workspace_name}/datastores',
-        auth=(get_env_variable("GEOSERVER_ADMIN_NAME"), get_env_variable("GEOSERVER_ADMIN_PASSWORD")),
+        auth=(Env.GEOSERVER_ADMIN_NAME, Env.GEOSERVER_ADMIN_PASSWORD),
     )
     response_data = db_exists_response.json()
 
@@ -213,8 +211,8 @@ def create_db_store_if_not_exists(db_name: str, workspace_name: str, new_data_st
             <host>postgis</host>
             <port>5432</port>
             <database>{db_name}</database>
-            <user>{get_env_variable("POSTGRES_USER")}</user>
-            <passwd>{get_env_variable("POSTGRES_PASSWORD")}</passwd>
+            <user>{Env.POSTGRES_USER}</user>
+            <passwd>{Env.POSTGRES_PASSWORD}</passwd>
             <dbtype>postgis</dbtype>
           </connectionParameters>
         </dataStore>
@@ -225,7 +223,7 @@ def create_db_store_if_not_exists(db_name: str, workspace_name: str, new_data_st
         params={"configure": "all"},
         headers={"Content-type": "text/xml"},
         data=create_db_store_data,
-        auth=(get_env_variable("GEOSERVER_ADMIN_NAME"), get_env_variable("GEOSERVER_ADMIN_PASSWORD")),
+        auth=(Env.GEOSERVER_ADMIN_NAME, Env.GEOSERVER_ADMIN_PASSWORD),
     )
     if response.status_code == HTTPStatus.CREATED:
         log.info(f"Created new db store {workspace_name}.")
@@ -344,7 +342,7 @@ def initialise_geoserver():
     workspace_name = "carbon_neutral"
     create_workspace_if_not_exists(workspace_name)
 
-    db_name = get_env_variable("POSTGRES_DB")
+    db_name = Env.POSTGRES_DB
     data_store_name = f"{db_name} PostGIS"
     create_db_store_if_not_exists(db_name, workspace_name, data_store_name)
 
