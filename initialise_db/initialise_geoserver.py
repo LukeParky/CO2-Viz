@@ -247,7 +247,8 @@ def create_vkt_sum_view(workspace_name: str, data_store_name: str):
                     <name>{vkt_sum_layer_name}</name>
                     <sql>SELECT&#xd;
                         fuel_type,&#xd;
-                        SUM(&quot;VKT (&apos;000 km/Year)&quot;) AS &quot;VKT&quot;&#xd;
+                        SUM(&quot;VKT (&apos;000 km/Year)&quot;) AS &quot;VKT&quot;,&#xd;
+                        SUM(&quot;CO2 (Tonnes/Year)&quot;) AS &quot;CO2&quot;&#xd;
                         &#xd;
                         FROM sa1s inner join vehicle_stats vs &#xd;
                         ON sa1s.&quot;SA12018_V1_00&quot; = vs.&quot;SA12018_V1_00&quot;&#xd;

@@ -17,6 +17,13 @@
       @submit="changeUseRates($event)"
       :disabled="selectedFuelType !== 'all'"
     />
+    <div
+      id="totals-summary"
+      class="card"
+    >
+      Total CO2: {{ formattedTotals.CO2 }}
+      Total Vehicle Km Travelled: {{ formattedTotals.VKT }}
+    </div>
     <div id="filter-form" class="card">
       <div class="form-group">
         <h3>Car Fuel Type:</h3>
@@ -44,6 +51,7 @@ import Vue from "vue";
 
 import BalancedSlider from "@/components/BalancedSlider.vue";
 import titleMixin from "@/mixins/title";
+import {roundToFixed} from "@/utils";
 
 interface Sa1Emissions {
   SA12018_V1_00: number,
@@ -74,7 +82,7 @@ export default Vue.extend({
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       scenarios: [] as Scenario[],
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
-      vktUseRates: [] as { fuel_type: string, VKT: number, weight: number }[],
+      vktUseRates: [] as { fuel_type: string, VKT: number, CO2: number, weight: number }[],
       sliderDefaultValues: [] as { name: string, value: number }[],
       selectedFuelType: "",
     }
@@ -120,10 +128,10 @@ export default Vue.extend({
       return sa1s;
     },
 
-    async fetchVktSums(): Promise<{ fuel_type: string, VKT: number, weight: number }[]> {
-      const propertyRequestUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Avkt_sum&outputFormat=application%2Fjson&propertyname=(fuel_type,VKT)`
+    async fetchVktSums(): Promise<{ fuel_type: string, VKT: number, CO2: number, weight: number }[]> {
+      const propertyRequestUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Avkt_sum&outputFormat=application%2Fjson&propertyname=(fuel_type,VKT,CO2)`
       const propertyJson = await axios.get(propertyRequestUrl)
-      const features = propertyJson.data.features as { properties: { fuel_type: string, VKT: number } }[]
+      const features = propertyJson.data.features as { properties: { fuel_type: string, VKT: number, CO2: number } }[]
 
       const fuel_to_vkts = features.map(feature => feature.properties)
       const total_vkt = fuel_to_vkts.reduce((partialSum, entry) => partialSum + entry.VKT, 0)
@@ -143,9 +151,9 @@ export default Vue.extend({
         co2 = 0;
         for (const {fuel_type, weight} of this.vktUseRates) {
           const defaultWeight = this.sliderDefaultValues.find((defVal) => defVal.name === fuel_type)?.value;
-          const fuelCo2Contribution = sa1[`CO2_${fuel_type}`]
-          if (defaultWeight !== undefined && fuelCo2Contribution !== undefined) {
-            co2 += (weight / defaultWeight) * fuelCo2Contribution
+          const sa1FuelCo2Contribution = sa1[`CO2_${fuel_type}`]
+          if (defaultWeight !== undefined && sa1FuelCo2Contribution !== undefined) {
+            co2 += (weight / defaultWeight) * sa1FuelCo2Contribution
           }
         }
       }
@@ -214,6 +222,27 @@ export default Vue.extend({
       }))
       fuelTypeOptions.push(...fuelTypesAsDisplayKey)
       return fuelTypeOptions
+    },
+
+    totals(): { CO2: number, VKT: number } {
+      let co2Sum = 0;
+      for (const {fuel_type, weight, CO2} of this.vktUseRates) {
+        const defaultWeight = this.sliderDefaultValues.find((defVal) => defVal.name === fuel_type)?.value;
+        if (defaultWeight !== undefined) {
+          co2Sum += (weight / defaultWeight) * CO2
+        }
+      }
+
+      const VKT = this.vktUseRates.reduce((partialSum, entry) => partialSum + entry.VKT, 0)
+      return {VKT, CO2: co2Sum}
+    },
+
+    formattedTotals(): { CO2: string, VKT: string } {
+      const co2Rounded = parseInt(roundToFixed(this.totals.CO2));
+      const vktRounded = parseInt(roundToFixed(this.totals.VKT * 1000));
+      const CO2 = `${co2Rounded.toLocaleString()} Tonnes / Year`
+      const VKT = `${vktRounded.toLocaleString()} km / Year`
+      return {CO2, VKT}
     }
   }
 });
