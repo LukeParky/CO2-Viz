@@ -25,7 +25,7 @@
         :for="`slider-${i}`"
         :disabled="disabled"
       >
-        {{ initValue.name }}: {{ roundToFixed(reactiveValues[i], 2) }}%
+        {{ initValue.name }}: {{ formattedSliderValue(i) }}
       </label>
     </div>
     <b-button
@@ -46,6 +46,8 @@
 </template>
 
 <script>
+import {roundToFixed} from "@/utils";
+
 export default {
   name: "BalancedSlider",
 
@@ -114,10 +116,10 @@ export default {
       this.value = this.initValues[0].value
       this.$emit('submit', this.reactiveValues)
     },
-    roundToFixed(number, decimalPlaces = 0) {
-      const factorForIntegerRounding = 10 ** decimalPlaces
-      return (Math.round(number * factorForIntegerRounding) / factorForIntegerRounding).toFixed(decimalPlaces);
-    },
+
+    formattedSliderValue(i) {
+      return `${roundToFixed(this.reactiveValues[i], 2)}%`
+    }
   }
 }
 </script>
