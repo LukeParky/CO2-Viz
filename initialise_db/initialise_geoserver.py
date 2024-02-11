@@ -337,7 +337,7 @@ def create_sa1_emissions_fuel_type_view(workspace_name, data_store_name):
 
 
 def initialise_geoserver():
-    log.debug("Creating sa1 database views if they do not exist")
+    log.info("Creating sa1 database views if they do not exist")
 
     workspace_name = "carbon_neutral"
     create_workspace_if_not_exists(workspace_name)
@@ -350,6 +350,7 @@ def initialise_geoserver():
     create_vkt_sum_view(workspace_name, data_store_name)
     create_sa1_emissions_all_cars_view(workspace_name, data_store_name)
     create_sa1_emissions_fuel_type_view(workspace_name, data_store_name)
+    log.info("Geoserver initialised")
 
 
 if __name__ == '__main__':
