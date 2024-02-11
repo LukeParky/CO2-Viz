@@ -25,7 +25,7 @@
         :for="`slider-${i}`"
         :disabled="disabled"
       >
-        {{ initValue.name }}: {{ roundToFixed(reactiveValues[i]) }}%
+        {{ initValue.name }}: {{ roundToFixed(reactiveValues[i], 2) }}%
       </label>
     </div>
     <b-button
@@ -54,9 +54,21 @@ export default {
       type: Array,
       required: true,
       validator: function (arr) {
-        if (arr.length == 0) return false; // Array must have values
-        if (!arr.every(elem => elem.value >= 0 && elem.value <= 100)) return false; // All element values must be between 0 and 100
-        return (arr.reduce((partialSum, elem) => partialSum + elem.value, 0) === 100) // The element values must sum to 100
+        if (arr.length === 0) {
+          console.error("initValues must have values")
+          return false; // Array must have values
+        }
+        if (!arr.every(elem => elem.value >= 0 && elem.value <= 100)){
+          console.error("All initValues must be between 0 and 100")
+          return false; // All element values must be between 0 and 100
+        }
+        const sum = arr.reduce((partialSum, elem) => partialSum + elem.value, 0)
+        const sum2dp = Math.round(sum * 100) / 100
+        if (sum2dp !== 100) {
+          console.error(`initValues must sum to 100, instead got ${sum}`)
+          return false; // The element values must sum to 100
+        }
+        return true;
       },
       default() {
         return []
