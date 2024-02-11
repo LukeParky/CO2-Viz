@@ -83,10 +83,10 @@ def get_db_engine() -> Engine:
 
 
 def read_emissions_and_filter_by_sa1s(sa1s: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    data_file = "data/RAW_SA1_emissions.xlsx"
+    data_file = "data/revised_BRANZ_SA1_emissions.xlsx"
     log.info(f"Reading {data_file} into memory")
-    emissions_data = pd.read_excel(data_file, header=[0, 1], index_col=0, sheet_name=2)
-    log.info(f"Filtering {data_file} for relevant SA1s")
+    emissions_data = pd.read_excel(data_file, header=[0, 1], index_col=0, sheet_name=3)
+    log.info("Filtering data for relevant SA1s")
     return emissions_data.loc[emissions_data.index.isin(sa1s.index)]
 
 
@@ -95,6 +95,8 @@ def get_long_format_sa1_emissions(emissions_data) -> pd.DataFrame:
     vehicle_types, variables = (level.values.tolist() for level in emissions_data.columns.levels)
     melts = []
     for var in variables:
+        if var.startswith("Unnamed"):
+            break
         melt = emissions_data.melt(ignore_index=False, var_name="Vehicle Type", value_name=var,
                                    value_vars=[(vehicle_type, var) for vehicle_type in vehicle_types])
         melt.set_index('Vehicle Type', append=True, inplace=True)
@@ -104,17 +106,18 @@ def get_long_format_sa1_emissions(emissions_data) -> pd.DataFrame:
 
 
 def split_vehicle_type(df: pd.DataFrame) -> pd.DataFrame:
-    def split_vehicle_class(row):
-        for v_class in vehicle_classes:
-            if row.startswith(v_class):
-                fuel_type = row.replace(v_class, '').strip().title()
-                return pd.Series([v_class, fuel_type], index=['Vehicle Class', 'Fuel Type'])
-        return pd.Series([None, None], index=['Vehicle Class', 'Fuel Type'])
+    def split_fuel_type(row):
+        for f_type in fuel_types:
+            if row.endswith(f_type):
+                vehicle_class = row.replace(f_type, '').strip().title()
+                return pd.Series([vehicle_class, f_type], index=['Vehicle Class', 'Fuel Type'])
+        # If a row does not have a desginated fuel type from fuel_types, assume it to be Diesel.
+        return pd.Series([row, "Diesel"], index=['Vehicle Class', 'Fuel Type'])
 
-    vehicle_classes = ["Bus", "Car", "Light Vehicle", "Light Commercial Vehicle", "Commercial Vehicle"]
+    fuel_types = ["Petrol", "Diesel", "Electric", "Plugin Hybrid", "Hybrid"]
     df.reset_index(inplace=True)
     log.info("Splitting vehicle class and fuel type")
-    df[['vehicle_class', 'fuel_type']] = df['Vehicle Type'].apply(split_vehicle_class)
+    df[['vehicle_class', 'fuel_type']] = df['Vehicle Type'].apply(split_fuel_type)
     df.drop("Vehicle Type", axis=1, inplace=True)
     df.rename(columns={"level_0": "SA12018_V1_00"}, inplace=True)
     df.set_index(["SA12018_V1_00", "vehicle_class", "fuel_type"], inplace=True)
