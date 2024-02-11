@@ -20,7 +20,7 @@
     <div id="filter-form" class="card">
       <div class="form-group">
         <h3>Car Fuel Type:</h3>
-        <div class="form-check" v-for="fuelType of fuelTypes" :key="fuelType.key">
+        <div class="form-check" v-for="fuelType of fuelTypeOptions" :key="fuelType.key">
           <input
             type="radio"
             :id="fuelType.key"
@@ -74,41 +74,16 @@ export default Vue.extend({
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       scenarios: [] as Scenario[],
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
-      vehicleClasses: [{
-        display: "All Vehicle Classes",
-        key: "all"
-      }, {
-        display: "Cars",
-        key: "car"
-      }, {
-        display: "Light Vehicles",
-        key: "light"
-      }, {
-        display: "Busses",
-        key: "bus"
-      }
-      ],
-      fuelTypes: [{
-        display: "All Fuel Types",
-        key: "all"
-      }, {
-        display: "Petrol",
-        key: "petrol"
-      }, {
-        display: "Diesel",
-        key: "diesel"
-      }
-      ],
       vktUseRates: [] as { fuel_type: string, VKT: number, weight: number }[],
       sliderDefaultValues: [] as { name: string, value: number }[],
-      selectedVehicleClass: "",
       selectedFuelType: "",
     }
   },
 
-  created() {
-    this.selectedVehicleClass = this.vehicleClasses[1].key
-    this.selectedFuelType = this.fuelTypes[0].key
+  async created() {
+    this.selectedFuelType = this.fuelTypeOptions[0].key
+    this.vktUseRates = await this.fetchVktSums();
+    this.sliderDefaultValues = this.vktUseRates.map(obj => ({name: obj.fuel_type, value: obj.weight}))
   },
 
   async mounted() {
@@ -118,8 +93,6 @@ export default Vue.extend({
     const geojson = await this.loadSa1s()
     this.dataSources.geoJsonDataSources = [geojson]
 
-    this.vktUseRates = await this.fetchVktSums();
-    this.sliderDefaultValues = this.vktUseRates.map(obj => ({name: obj.fuel_type, value: obj.weight}))
     await this.styleSa1s();
 
   },
@@ -137,9 +110,6 @@ export default Vue.extend({
   },
 
   methods: {
-    toKebabCase(str: string): string {
-      return str.split(" ").join("-").toLowerCase()
-    },
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
       const geoserverUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1s&outputFormat=application%2Fjson`
       const sa1s = await Cesium.GeoJsonDataSource.load(geoserverUrl, {
@@ -191,7 +161,7 @@ export default Vue.extend({
       const sa1s = geoJsons[0]
 
       const sqlView = this.selectedFuelType === "all" ? "all_cars" : "fuel_type";
-      const propertiesToFind = 'SA12018_V1_00,VKT,AREA_SQ_KM,' + (this.selectedFuelType === "all" ? "CO2_Petrol,CO2_Diesel" : "CO2")
+      const propertiesToFind = 'SA12018_V1_00,VKT,AREA_SQ_KM,' + (this.selectedFuelType === "all" ? this.co2PrefixedFuelTypes : "CO2")
       const propertyRequestUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(${propertiesToFind})`
       const propertyJson = await axios.get(propertyRequestUrl)
       const emissionsData = propertyJson.data.features as { properties: Sa1Emissions }[]
@@ -224,9 +194,27 @@ export default Vue.extend({
 
   },
   computed: {
-    scenarioNames(): Array<string> {
-      return this.scenarios.map(scenario => scenario.name);
+    fuelTypes(): string[] {
+      return this.vktUseRates.map(vktUseRate => vktUseRate.fuel_type)
     },
+
+    co2PrefixedFuelTypes(): string {
+      const fuelTypesPrefixed = this.fuelTypes.map(fuelType => {
+        const fuelTypeNoSpaces = fuelType.replace(" ", "_");
+        return `CO2_${fuelTypeNoSpaces}`;
+      });
+      return fuelTypesPrefixed.join(",")
+    },
+
+    fuelTypeOptions(): { display: string, key: string }[] {
+      const fuelTypeOptions = [{display: "All Fuel Types", key: "all"}];
+      const fuelTypesAsDisplayKey = this.fuelTypes.map(fuelType => ({
+        display: fuelType,
+        key: fuelType.toLowerCase().split(" ")[0]
+      }))
+      fuelTypeOptions.push(...fuelTypesAsDisplayKey)
+      return fuelTypeOptions
+    }
   }
 });
 </script>

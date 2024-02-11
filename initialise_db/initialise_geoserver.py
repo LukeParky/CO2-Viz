@@ -252,8 +252,8 @@ def create_vkt_sum_view(workspace_name: str, data_store_name: str):
                         FROM sa1s inner join vehicle_stats vs &#xd;
                         ON sa1s.&quot;SA12018_V1_00&quot; = vs.&quot;SA12018_V1_00&quot;&#xd;
                         &#xd;
-                        WHERE vehicle_class=&apos;Car&apos;&#xd;
-                        GROUP BY fuel_type
+                        GROUP BY fuel_type&#xd;
+                        ORDER BY &quot;VKT&quot; DESC
                     </sql>
                     <escapeSql>false</escapeSql>
                 </virtualTable>
@@ -272,17 +272,18 @@ def create_sa1_emissions_all_cars_view(workspace_name: str, data_store_name: str
                 <virtualTable>
                     <name>sa1_emissions_all_cars</name>
                     <sql>SELECT sa1s.&quot;SA12018_V1_00&quot;,&#xd;
-                        &quot;geometry&quot;,&#xd;
-                        &quot;AREA_SQ_KM&quot;,&#xd;
-                        sum(&quot;VKT (&apos;000 km/Year)&quot;) AS &quot;VKT&quot;,&#xd;
-                        sum(CASE WHEN fuel_type ILIKE &apos;Petrol&apos; THEN &quot;CO2 (Tonnes/Year)&quot; END) AS &quot;CO2_Petrol&quot;,&#xd;
-                        sum(CASE WHEN fuel_type ILIKE &apos;Diesel&apos; THEN &quot;CO2 (Tonnes/Year)&quot; END) AS &quot;CO2_Diesel&quot;&#xd;
+                                &quot;geometry&quot;,&#xd;
+                                &quot;AREA_SQ_KM&quot;,&#xd;
+                                sum(&quot;VKT (&apos;000 km/Year)&quot;)                                            AS &quot;VKT&quot;,&#xd;
+                                sum(CASE WHEN fuel_type ILIKE &apos;Petrol&apos; THEN &quot;CO2 (Tonnes/Year)&quot; END) AS &quot;CO2_Petrol&quot;,&#xd;
+                                sum(CASE WHEN fuel_type ILIKE &apos;Diesel&apos; THEN &quot;CO2 (Tonnes/Year)&quot; END) AS &quot;CO2_Diesel&quot;,&#xd;
+                                sum(CASE WHEN fuel_type ILIKE &apos;Electric&apos; THEN &quot;CO2 (Tonnes/Year)&quot; END) AS &quot;CO2_Electric&quot;,&#xd;
+                                sum(CASE WHEN fuel_type ILIKE &apos;Hybrid&apos; THEN &quot;CO2 (Tonnes/Year)&quot; END) AS &quot;CO2_Hybrid&quot;,&#xd;
+                                sum(CASE WHEN fuel_type ILIKE &apos;Plugin Hybrid&apos; THEN &quot;CO2 (Tonnes/Year)&quot; END) AS &quot;CO2_Plugin_Hybrid&quot;&#xd;
                         &#xd;
                         FROM vehicle_stats&#xd;
-                        join sa1s&#xd;
-                        on vehicle_stats.&quot;SA12018_V1_00&quot; = sa1s.&quot;SA12018_V1_00&quot;&#xd;
-                        &#xd;
-                        WHERE vehicle_class ILIKE &apos;Car&apos;&#xd;
+                            join sa1s&#xd;
+                                on vehicle_stats.&quot;SA12018_V1_00&quot; = sa1s.&quot;SA12018_V1_00&quot;&#xd;
                         &#xd;
                         GROUP BY sa1s.&quot;SA12018_V1_00&quot;, &quot;geometry&quot;, &quot;AREA_SQ_KM&quot;
                     </sql>
@@ -315,8 +316,7 @@ def create_sa1_emissions_fuel_type_view(workspace_name, data_store_name):
                         &#xd;
                         FROM sa1s INNER JOIN vehicle_stats vs&#xd;
                         ON sa1s.&quot;SA12018_V1_00&quot; = vs.&quot;SA12018_V1_00&quot;&#xd;
-                        WHERE fuel_type ILIKE &apos;%FUEL_TYPE%%&apos;&#xd;
-                        AND vehicle_class=&apos;Car&apos;
+                        WHERE fuel_type ILIKE &apos;%FUEL_TYPE%%&apos;
                     </sql>
                     <escapeSql>false</escapeSql>
                     <geometry>
