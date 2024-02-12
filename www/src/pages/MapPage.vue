@@ -5,6 +5,7 @@
       :init-lat="christchurch.latitude"
       :init-long="christchurch.longitude"
       :init-height="20000"
+      :init-base-layer="baseLayer"
       :cesium-access-token="cesiumApiToken"
       :data-sources="dataSources"
       :scenarios="scenarios"
@@ -78,6 +79,7 @@ export default Vue.extend({
         latitude: -43.514137213246535,
         longitude: 172.62835098005368
       },
+      baseLayer: new Cesium.ImageryLayer(new Cesium.OpenStreetMapImageryProvider({}), {}),
       geoserverHost: `${process.env.VUE_APP_GEOSERVER_HOST}:${process.env.VUE_APP_GEOSERVER_PORT}`,
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       scenarios: [] as Scenario[],
