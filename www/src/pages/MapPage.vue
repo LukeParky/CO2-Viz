@@ -21,8 +21,8 @@
       id="totals-summary"
       class="card"
     >
-      Total CO2: {{ formattedTotals.CO2 }}
-      Total Vehicle Km Travelled: {{ formattedTotals.VKT }}
+      <p>Total CO2: {{ formattedTotals.CO2 }}</p>
+      <p>Total Vehicle Km Travelled: {{ formattedTotals.VKT }}</p>
     </div>
     <div id="filter-form" class="card">
       <div class="form-group">
@@ -268,6 +268,13 @@ export default Vue.extend({
 }
 
 #balanced-slider {
+  position: absolute;
+  top: 180px;
+  left: 30px;
+  padding: 5px;
+}
+
+#totals-summary {
   position: absolute;
   top: 75px;
   left: 30px;
