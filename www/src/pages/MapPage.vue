@@ -78,7 +78,7 @@ export default Vue.extend({
         latitude: -43.514137213246535,
         longitude: 172.62835098005368
       },
-      geoserverHost: `${process.env.VUE_APP_WEB_HOST}:${process.env.VUE_APP_GEOSERVER_PORT}`,
+      geoserverHost: `${process.env.VUE_APP_GEOSERVER_HOST}:${process.env.VUE_APP_GEOSERVER_PORT}`,
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       scenarios: [] as Scenario[],
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
@@ -119,7 +119,7 @@ export default Vue.extend({
 
   methods: {
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
-      const geoserverUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1s&outputFormat=application%2Fjson`
+      const geoserverUrl = `${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1s&outputFormat=application%2Fjson`
       const sa1s = await Cesium.GeoJsonDataSource.load(geoserverUrl, {
         fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 1),
         stroke: Cesium.Color.ROYALBLUE.darken(0.5, new Cesium.Color()),
@@ -129,7 +129,7 @@ export default Vue.extend({
     },
 
     async fetchVktSums(): Promise<{ fuel_type: string, VKT: number, CO2: number, weight: number }[]> {
-      const propertyRequestUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Avkt_sum&outputFormat=application%2Fjson&propertyname=(fuel_type,VKT,CO2)`
+      const propertyRequestUrl = `${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Avkt_sum&outputFormat=application%2Fjson&propertyname=(fuel_type,VKT,CO2)`
       const propertyJson = await axios.get(propertyRequestUrl)
       const features = propertyJson.data.features as { properties: { fuel_type: string, VKT: number, CO2: number } }[]
 
@@ -170,7 +170,7 @@ export default Vue.extend({
 
       const sqlView = this.selectedFuelType === "all" ? "all_cars" : "fuel_type";
       const propertiesToFind = 'SA12018_V1_00,VKT,AREA_SQ_KM,' + (this.selectedFuelType === "all" ? this.co2PrefixedFuelTypes : "CO2")
-      const propertyRequestUrl = `http://${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(${propertiesToFind})`
+      const propertyRequestUrl = `${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(${propertiesToFind})`
       const propertyJson = await axios.get(propertyRequestUrl)
       const emissionsData = propertyJson.data.features as { properties: Sa1Emissions }[]
       const colorScale = chroma.scale(chroma.brewer.Viridis)
