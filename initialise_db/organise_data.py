@@ -83,7 +83,7 @@ def get_db_engine() -> Engine:
 
 
 def read_emissions_and_filter_by_sa1s(sa1s: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    data_file = "data/revised_BRANZ_SA1_emissions.xlsx"
+    data_file = Env.DATA_FILE
     log.info(f"Reading {data_file} into memory")
     emissions_data = pd.read_excel(data_file, header=[0, 1], index_col=0, sheet_name=3)
     log.info("Filtering data for relevant SA1s")

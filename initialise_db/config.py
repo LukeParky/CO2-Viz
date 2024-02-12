@@ -1,4 +1,5 @@
 import os
+import pathlib
 from dataclasses import dataclass, field
 from typing import TypeVar
 
@@ -80,6 +81,8 @@ def _cast_str(str_to_cast: str, cast_to: T) -> T:
 
 
 class EnvVariable:
+    DATA_FILE = get_env_variable("DATA_FILE", cast_to=pathlib.Path)
+
     POSTGRES_HOST = get_env_variable("POSTGRES_HOST")
     POSTGRES_PORT = get_env_variable("POSTGRES_PORT")
     POSTGRES_DB = get_env_variable("POSTGRES_DB")

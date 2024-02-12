@@ -58,6 +58,8 @@ services:
     build:
       context: initialise_db
     container_name: initialise_db_carbon_neutral
+    volumes:
+    - "./initialise_db/data:/app/data"
     env_file:
       - .env
       - .env.docker-override
