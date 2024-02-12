@@ -173,7 +173,7 @@ export default Vue.extend({
       const propertyRequestUrl = `${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(${propertiesToFind})`
       const propertyJson = await axios.get(propertyRequestUrl)
       const emissionsData = propertyJson.data.features as { properties: Sa1Emissions }[]
-      const colorScale = chroma.scale(chroma.brewer.Viridis)
+      const colorScale = chroma.scale(chroma.brewer.Reds)
       const sa1Entities = sa1s.entities.values;
       const sa1IdColumnName = "SA12018_V1_00";
       for (const entity of sa1Entities) {
