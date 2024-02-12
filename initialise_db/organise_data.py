@@ -19,10 +19,10 @@ log = logging.getLogger(__name__)
 
 def find_sa1s_in_areas_of_interest() -> gpd.GeoDataFrame:
     sa1_dfs = [
-        # find_sa1s_in_area("Auckland", approx_area=Bbox()),
-        # find_sa1s_in_area("Wellington", approx_area=Bbox()),
+        find_sa1s_in_area("Auckland", approx_area=Bbox(-37.11973, 174.56626, -36.66668, 175.00701)),
+        find_sa1s_in_area("Wellington", approx_area=Bbox(-41.36836, 174.69794, -41.13047, 174.90839)),
         find_sa1s_in_area("Christchurch", approx_area=Bbox(-43.62712, 172.36059, -43.41766, 172.81524)),
-        # find_sa1s_in_area("Oamaru", approx_area=Bbox())
+        find_sa1s_in_area("Oamaru", approx_area=Bbox(-45.11886, 170.912129, -45.04020,  171.02564))
     ]
     return pd.concat(sa1_dfs)
 
@@ -46,8 +46,8 @@ class Bbox:
         return gpd.GeoDataFrame(index=[0], crs=self.crs, geometry=[shapely.from_wkt(self.as_shapely_polygon().wkt)])
 
 
-def find_sa1s_in_area(name: str, approx_area: Bbox) -> gpd.GeoDataFrame:
-    log.info(f"Adding {name} sa1s to database")
+def find_sa1s_in_area(area_name: str, approx_area: Bbox) -> gpd.GeoDataFrame:
+    log.info(f"Adding {area_name} sa1s to database")
     vector_fetcher = geoapis.vector.StatsNz(key=Env.STATS_API_KEY, bounding_polygon=approx_area.as_gdf(), verbose=True)
 
     # All SA1s in bbox
@@ -56,17 +56,20 @@ def find_sa1s_in_area(name: str, approx_area: Bbox) -> gpd.GeoDataFrame:
     sa1s.index = sa1s.index.astype('int64')
 
     # Filter to remove SA1s that represent inlets and other non-mainland features.
-    sa1s_filtered = sa1s.loc[sa1s["LANDWATER_NAME"] == "Mainland"]
+    sa1s_filtered_no_water = sa1s.loc[sa1s["LANDWATER_NAME"] == "Mainland"]
 
     # Urban/Rural area polygons
     urban_rural = vector_fetcher.run(111198)
     # Find SA1s that are within the urban area Polygon
-    urban_area = urban_rural.loc[urban_rural['UR2023_V1_00_NAME'] == name]
-    sa1s_join_urban_area = sa1s_filtered.sjoin(urban_area, how='inner', predicate='intersects')
+    urban_area = urban_rural.loc[urban_rural['UR2023_V1_00_NAME'] == area_name]
+    sa1s_join_urban_area = sa1s_filtered_no_water.sjoin(urban_area, how='inner', predicate='intersects')
 
     # Filter sa1s for those values that exist in the spatial join above
     # Keeps data more simple than using the spatial join
-    return sa1s_filtered.loc[sa1s_filtered.index.isin(sa1s_join_urban_area.index)]
+    sa1s_in_urban_area = sa1s_filtered_no_water.loc[sa1s_filtered_no_water.index.isin(sa1s_join_urban_area.index)]
+    # Add urban area name
+    sa1s_in_urban_area['UR2023_V1_00_NAME'] = sa1s_join_urban_area["UR2023_V1_00_NAME"]
+    return sa1s_in_urban_area
 
 
 def get_db_engine() -> Engine:

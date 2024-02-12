@@ -2,9 +2,9 @@
   <!-- The page that shows the map for the Digital Twin -->
   <div class="full-height">
     <MapViewer
-      :init-lat="christchurch.latitude"
-      :init-long="christchurch.longitude"
-      :init-height="20000"
+      :init-lat="initLat"
+      :init-long="initLong"
+      :init-height="initHeight"
       :init-base-layer="baseLayer"
       :cesium-access-token="cesiumApiToken"
       :data-sources="dataSources"
@@ -51,7 +51,6 @@ import {MapViewerDataSourceOptions, Scenario} from "geo-visualisation-components
 import Vue from "vue";
 
 import BalancedSlider from "@/components/BalancedSlider.vue";
-import titleMixin from "@/mixins/title";
 import {roundToFixed} from "@/utils";
 
 interface Sa1Emissions {
@@ -65,17 +64,25 @@ interface Sa1Emissions {
 
 
 export default Vue.extend({
-  name: "MapPage",
-  title: "Map",
-  mixins: [titleMixin],
+  name: "Co2Sa1Viewer",
   components: {
     BalancedSlider,
     MapViewer,
   },
 
+  props: {
+    initHeight: Number,
+    initLong: Number,
+    initLat: Number,
+    urbanAreaName: {
+      type: String,
+      required: true
+    }
+  },
+
   data() {
     return {
-      christchurch: {
+      wellington: {
         latitude: -43.514137213246535,
         longitude: 172.62835098005368
       },
@@ -121,7 +128,18 @@ export default Vue.extend({
 
   methods: {
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
-      const geoserverUrl = `${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1s&outputFormat=application%2Fjson`
+      const geoserverUrl = axios.getUri({
+        url: `${this.geoserverHost}/geoserver/carbon_neutral/ows`,
+        params: {
+          service: "WFS",
+          version: "1.0.0",
+          request: "GetFeature",
+          outputFormat: "application/json",
+          typeName: "carbon_neutral:sa1s",
+          cql_filter: `UR2023_V1_00_NAME ILIKE '${this.urbanAreaName}'`
+        }
+      })
+
       const sa1s = await Cesium.GeoJsonDataSource.load(geoserverUrl, {
         fill: Cesium.Color.fromAlpha(Cesium.Color.ROYALBLUE, 1),
         stroke: Cesium.Color.ROYALBLUE.darken(0.5, new Cesium.Color()),
@@ -131,7 +149,18 @@ export default Vue.extend({
     },
 
     async fetchVktSums(): Promise<{ fuel_type: string, VKT: number, CO2: number, weight: number }[]> {
-      const propertyRequestUrl = `${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Avkt_sum&outputFormat=application%2Fjson&propertyname=(fuel_type,VKT,CO2)`
+      const propertyRequestUrl = axios.getUri({
+        url: `${this.geoserverHost}/geoserver/carbon_neutral/ows`,
+        params: {
+          service: "WFS",
+          version: "1.0.0",
+          request: "GetFeature",
+          outputFormat: "application/json",
+          typeName: "carbon_neutral:vkt_sum",
+          propertyname: "(fuel_type,VKT,CO2)",
+          cql_filter: `UR2023_V1_00_NAME ILIKE '${this.urbanAreaName}'`
+        }
+      })
       const propertyJson = await axios.get(propertyRequestUrl)
       const features = propertyJson.data.features as { properties: { fuel_type: string, VKT: number, CO2: number } }[]
 
@@ -171,11 +200,23 @@ export default Vue.extend({
       const sa1s = geoJsons[0]
 
       const sqlView = this.selectedFuelType === "all" ? "all_cars" : "fuel_type";
-      const propertiesToFind = 'SA12018_V1_00,VKT,AREA_SQ_KM,' + (this.selectedFuelType === "all" ? this.co2PrefixedFuelTypes : "CO2")
-      const propertyRequestUrl = `${this.geoserverHost}/geoserver/carbon_neutral/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=carbon_neutral%3Asa1_emissions_${sqlView}&viewparams=FUEL_TYPE:${this.selectedFuelType}&outputFormat=application%2Fjson&propertyname=(${propertiesToFind})`
-      const propertyJson = await axios.get(propertyRequestUrl)
+      const co2Properties = this.selectedFuelType === "all" ? this.co2PrefixedFuelTypes : "CO2";
+      const propertyRequestUrl = axios.getUri({
+        url: `${this.geoserverHost}/geoserver/carbon_neutral/ows`,
+        params: {
+          service: "WFS",
+          version: "1.0.0",
+          request: "GetFeature",
+          outputFormat: "application/json",
+          typeName: `carbon_neutral:sa1_emissions_${sqlView}`,
+          viewparams: `FUEL_TYPE:${this.selectedFuelType}`,
+          propertyname: `(SA12018_V1_00,VKT,AREA_SQ_KM,${co2Properties})`,
+          cql_filter: `UR2023_V1_00_NAME ILIKE '${this.urbanAreaName}'`
+        }
+      });
+      const propertyJson = await axios.get(propertyRequestUrl);
       const emissionsData = propertyJson.data.features as { properties: Sa1Emissions }[]
-      const colorScale = chroma.scale(chroma.brewer.Reds)
+      const colorScale = chroma.scale(chroma.brewer.Reds);
       const sa1Entities = sa1s.entities.values;
       const sa1IdColumnName = "SA12018_V1_00";
       for (const entity of sa1Entities) {

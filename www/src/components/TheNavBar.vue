@@ -2,14 +2,23 @@
   <!-- Navigation Bar to allow switching between different pages in the app -->
   <div>
     <b-navbar type="light" variant="light">
-      <b-navbar-toggle target="nav-text-collapse" />
+      <b-navbar-toggle target="nav-text-collapse"/>
       <b-navbar-brand :to="{name: 'Map'}">
         Carbon Neutral Neighbourhoods
       </b-navbar-brand>
       <b-collapse id="nav-text-collapse" is-nav>
         <b-navbar-nav>
-          <b-nav-item :to="{name: 'Map'}">
-            Map
+          <b-nav-item :to="{name: 'Auckland'}">
+            Auckland
+          </b-nav-item>
+          <b-nav-item :to="{name: 'Wellington'}">
+            Wellington
+          </b-nav-item>
+          <b-nav-item :to="{name: 'Christchurch'}">
+            Christchurch
+          </b-nav-item>
+          <b-nav-item :to="{name: 'Oamaru'}">
+            Oamaru
           </b-nav-item>
         </b-navbar-nav>
       </b-collapse>

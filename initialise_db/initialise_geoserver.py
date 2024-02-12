@@ -79,17 +79,17 @@ def create_datastore_layer(workspace_name, data_store_name: str, layer_name, met
             <title>{layer_name}</title>
             <srs>EPSG:4326</srs>
             <nativeBoundingBox>
-                <minx>172.35427856445312</minx>
-                <maxx>172.80812072753906</maxx>
-                <miny>-43.65361404418945</miny>
-                <maxy>-43.40265655517578</maxy>
+                <minx>170.0</minx>
+                <maxx>176.0</maxx>
+                <miny>-46.0</miny>
+                <maxy>-37.0</maxy>
                 <crs>EPSG:4326</crs>
             </nativeBoundingBox>
             <latLonBoundingBox>
-                <minx>172.35427856445312</minx>
-                <maxx>172.80812072753906</maxx>
-                <miny>-43.65361404418945</miny>
-                <maxy>-43.40265655517578</maxy>
+                <minx>170.0</minx>
+                <maxx>176.0</maxx>
+                <miny>-46.0</miny>
+                <maxy>-37.0</maxy>
                 <crs>EPSG:4326</crs>
             </latLonBoundingBox>
             <store>
