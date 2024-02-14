@@ -2,7 +2,7 @@
   <!-- Navigation Bar to allow switching between different pages in the app -->
   <div>
     <b-navbar type="light" variant="light">
-      <b-navbar-toggle target="nav-text-collapse"/>
+      <b-navbar-toggle target="nav-text-collapse" />
       <b-navbar-brand :to="{name: 'Map'}">
         Carbon Neutral Neighbourhoods
       </b-navbar-brand>
