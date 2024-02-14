@@ -1,5 +1,5 @@
 <template>
-  <!-- The page that shows the map for the Digital Twin -->
+  <!-- The component that renders a CO2/VKT map for a given area of SA1s -->
   <div class="full-height">
     <MapViewer
       :init-lat="initLat"

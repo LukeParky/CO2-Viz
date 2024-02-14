@@ -1,5 +1,5 @@
 <template>
-  <!-- The page that shows the map for the Digital Twin -->
+  <!-- The page that shows the map for the Christchurch area, comparing CO2 and VKT for each SA1 area -->
   <div class="full-height">
     <Co2Sa1Viewer
       :init-lat="christchurch.latitude"
