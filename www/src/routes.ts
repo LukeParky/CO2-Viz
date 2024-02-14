@@ -3,6 +3,7 @@ import AucklandCo2Sa1Page from "@/pages/AucklandCo2Sa1Page.vue";
 import ChristchurchCo2Sa1Page from "@/pages/ChristchurchCo2Sa1Page.vue"
 import OamaruCo2Sa1Page from "@/pages/OamaruCo2Sa1Page.vue"
 import WellingtonCo2Sa1Page from "@/pages/WellingtonCo2Sa1Page.vue";
+import AboutPage from "@/pages/AboutPage.vue";
 
 /**
  * Sets router url endpoints to specific pages
@@ -27,6 +28,11 @@ const routes: RouteConfig[] = [
     path: "/wellington",
     name: "Wellington",
     component: WellingtonCo2Sa1Page
+  },
+  {
+    path: "/about",
+    name: "About",
+    component: AboutPage
   },
   {
     path: '*',
