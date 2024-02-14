@@ -20,6 +20,9 @@
           <b-nav-item :to="{name: 'Oamaru'}">
             Oamaru
           </b-nav-item>
+          <b-nav-item :to="{name: 'About'}">
+            About
+          </b-nav-item>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
