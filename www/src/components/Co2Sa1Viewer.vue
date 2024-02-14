@@ -71,9 +71,24 @@ export default Vue.extend({
   },
 
   props: {
-    initHeight: Number,
-    initLong: Number,
-    initLat: Number,
+    /** Initial latitude for map view */
+    initLat: {
+      type: Number,
+      required: true,
+      validator: (value: number) => -90 <= value && value <= 90,
+    },
+    /** Initial longitude for map view */
+    initLong: {
+      type: Number,
+      required: true,
+      validator: (value: number) => -180 <= value && value <= 180,
+    },
+    /** Initial height of the camera in metres. Default is 2000m */
+    initHeight: {
+      type: Number,
+      default: 2000,
+    },
+    /** Urban area name for filtering areas, given from the StatsNZ Urban Rural dataset, UR2023_V1_00_NAME */
     urbanAreaName: {
       type: String,
       required: true
