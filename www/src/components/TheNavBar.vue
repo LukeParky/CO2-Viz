@@ -3,7 +3,7 @@
   <div>
     <b-navbar type="light" variant="light">
       <b-navbar-toggle target="nav-text-collapse" />
-      <b-navbar-brand :to="{name: 'Map'}">
+      <b-navbar-brand :to="{name: 'Christchurch'}">
         Carbon Neutral Neighbourhoods
       </b-navbar-brand>
       <b-collapse id="nav-text-collapse" is-nav>
