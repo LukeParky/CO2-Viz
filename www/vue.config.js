@@ -9,6 +9,7 @@ const cesiumSource = 'node_modules/cesium/Source';
  * @type {import('@vue/cli-service').ProjectOptions}
  */
 module.exports = {
+  transpileDependencies: ["geo-visualisation-components"],
   configureWebpack: {
     plugins: [
       new NodePolyfillPlugin(),

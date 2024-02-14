@@ -119,19 +119,11 @@ export default Vue.extend({
   },
 
   async mounted() {
-    // Limit scrolling on this page
-    document.body.style.overflow = "hidden"
-
     const geojson = await this.loadSa1s()
     this.dataSources.geoJsonDataSources = [geojson]
 
     await this.styleSa1s();
 
-  },
-
-  beforeDestroy() {
-    // Reset scrolling for other pages
-    document.body.style.overflow = ""
   },
 
   watch: {
