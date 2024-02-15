@@ -1,16 +1,23 @@
 <template>
   <!-- The page that shows the map for the Christchurch area, comparing CO2 and VKT for each SA1 area -->
   <div class="full-height">
-    <h1>ChCh mode share</h1>
+    <ModeShareViewer
+      :init-lat="christchurch.latitude"
+      :init-long="christchurch.longitude"
+      :urban-area-name="christchurch.urbanAreaName"
+      :init-height="initHeight"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import titleMixin from "@/mixins/title";
+import ModeShareViewer from "./ModeShareViewer.vue"
 
 export default Vue.extend({
   name: "ChristchurchCo2Sa1Page",
+  components: {ModeShareViewer},
   title: "Christchurch Map",
   mixins: [titleMixin],
 
