@@ -1,15 +1,18 @@
+import logging
 import os
 import pathlib
-from dataclasses import dataclass, field
 from typing import TypeVar
 
 from dotenv import load_dotenv
+from sqlalchemy.engine import create_engine, Engine
 
 # Generic type, used for static type checking
 T = TypeVar("T", str, bool, int, float)
 
 load_dotenv("..")
 load_dotenv()
+
+log = logging.getLogger(__name__)
 
 
 def get_env_variable(var_name: str, default: T = None, allow_empty: bool = False, cast_to: type = str) -> T:
@@ -81,7 +84,8 @@ def _cast_str(str_to_cast: str, cast_to: T) -> T:
 
 
 class EnvVariable:
-    DATA_FILE = get_env_variable("DATA_FILE", cast_to=pathlib.Path)
+    EMISSIONS_DATA = get_env_variable("EMISSIONS_DATA", cast_to=pathlib.Path)
+    MEANS_OF_TRAVEL_DATA = get_env_variable("MEANS_OF_TRAVEL_DATA", cast_to=pathlib.Path)
 
     POSTGRES_HOST = get_env_variable("POSTGRES_HOST")
     POSTGRES_PORT = get_env_variable("POSTGRES_PORT")
@@ -95,3 +99,16 @@ class EnvVariable:
     GEOSERVER_ADMIN_PASSWORD = get_env_variable("GEOSERVER_ADMIN_PASSWORD")
 
     STATS_API_KEY = get_env_variable("STATS_API_KEY")
+
+
+def get_db_engine() -> Engine:
+    pg_user = EnvVariable.POSTGRES_USER
+    pg_pass = EnvVariable.POSTGRES_PASSWORD
+    pg_host = EnvVariable.POSTGRES_HOST
+    pg_port = EnvVariable.POSTGRES_PORT
+    pg_db = EnvVariable.POSTGRES_DB
+    engine = create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}', pool_pre_ping=True)
+    log.info(f"Attempting to connect to {engine}")
+    with engine.connect():
+        log.info(f"Connection to {engine} successful")
+    return engine
