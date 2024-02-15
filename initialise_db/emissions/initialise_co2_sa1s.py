@@ -53,22 +53,24 @@ def get_long_format_sa1_emissions(emissions_data) -> pd.DataFrame:
 
 
 def split_vehicle_type(df: pd.DataFrame) -> pd.DataFrame:
-    def split_fuel_type(row):
-        for f_type in fuel_types:
-            if row.endswith(f_type):
-                vehicle_class = row.replace(f_type, '').strip().title()
-                return pd.Series([vehicle_class, f_type], index=['Vehicle Class', 'Fuel Type'])
-        # If a row does not have a desginated fuel type from fuel_types, assume it to be Diesel.
-        return pd.Series([row, "Diesel"], index=['Vehicle Class', 'Fuel Type'])
-
     fuel_types = ["Petrol", "Diesel", "Electric", "Plugin Hybrid", "Hybrid"]
-    df.reset_index(inplace=True)
     log.info("Splitting vehicle class and fuel type")
-    df[['vehicle_class', 'fuel_type']] = df['Vehicle Type'].apply(split_fuel_type)
-    df.drop("Vehicle Type", axis=1, inplace=True)
-    df.rename(columns={"level_0": "SA12018_V1_00"}, inplace=True)
-    df.set_index(["SA12018_V1_00", "vehicle_class", "fuel_type"], inplace=True)
-    return df
+    df = df.reset_index()
+    # Splitting vehicle class and fuel type
+    # Regular expression pattern to capture both vehicle class and fuel type
+    pattern = f'(?P<vehicle_class>.*?)\s*({"|".join(fuel_types)})$'
+
+    # Extracting vehicle class and fuel type
+    df[['vehicle_class', 'fuel_type']] = df['Vehicle Type'].str.extract(pattern)
+
+    # Values that don't specify a valid fuel type are set to na, so replace these with valid values.
+    df['fuel_type'].fillna("Diesel", inplace=True)
+    df['vehicle_class'].fillna(df['Vehicle Type'], inplace=True)
+
+    # Clean up dataframe, renaming columns and deleting redundant columns
+    df = df.drop(columns=["Vehicle Type"])
+    df = df.rename(columns={"level_0": "SA12018_V1_00"})
+    return df.set_index(["SA12018_V1_00", "vehicle_class", "fuel_type"])
 
 
 def initialise_co2_sa1s(engine: sqlalchemy.engine.Engine) -> None:
@@ -91,6 +93,7 @@ def initialise_co2_sa1s(engine: sqlalchemy.engine.Engine) -> None:
         emissions = read_emissions_and_filter_by_sa1s(sa1_ids)
         emissions = get_long_format_sa1_emissions(emissions)
         emissions = split_vehicle_type(emissions)
+        log.info(f"Saving {vehicle_stats_table_name} to database.")
         emissions.to_sql(vehicle_stats_table_name, engine, if_exists="replace", index=True,
                          index_label=[index_col, "vehicle_class", "fuel_type"])
         log.info(f"Table {vehicle_stats_table_name} initialised.")
