@@ -8,7 +8,6 @@
       :init-base-layer="baseLayer"
       :cesium-access-token="cesiumApiToken"
       :data-sources="dataSources"
-      :scenarios="scenarios"
     />
     <BalancedSlider
       id="balanced-slider"
@@ -47,7 +46,7 @@ import axios from "axios";
 import * as Cesium from "cesium";
 import chroma from "chroma-js";
 import {MapViewer} from 'geo-visualisation-components/src/components';
-import {MapViewerDataSourceOptions, Scenario} from "geo-visualisation-components/src/types";
+import {MapViewerDataSourceOptions} from "geo-visualisation-components/src/types";
 import Vue from "vue";
 
 import BalancedSlider from "@/components/BalancedSlider.vue";
@@ -83,28 +82,23 @@ export default Vue.extend({
       required: true,
       validator: (value: number) => -180 <= value && value <= 180,
     },
+    /** Urban area name for filtering areas, given from the StatsNZ Urban Rural dataset, UR2023_V1_00_NAME */
+    urbanAreaName: {
+      type: String,
+      required: true
+    },
     /** Initial height of the camera in metres. Default is 2000m */
     initHeight: {
       type: Number,
       default: 2000,
     },
-    /** Urban area name for filtering areas, given from the StatsNZ Urban Rural dataset, UR2023_V1_00_NAME */
-    urbanAreaName: {
-      type: String,
-      required: true
-    }
   },
 
   data() {
     return {
-      wellington: {
-        latitude: -43.514137213246535,
-        longitude: 172.62835098005368
-      },
       baseLayer: new Cesium.ImageryLayer(new Cesium.OpenStreetMapImageryProvider({}), {}),
       geoserverHost: `${process.env.VUE_APP_GEOSERVER_HOST}:${process.env.VUE_APP_GEOSERVER_PORT}`,
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
-      scenarios: [] as Scenario[],
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
       vktUseRates: [] as { fuel_type: string, VKT: number, CO2: number, weight: number }[],
       sliderDefaultValues: [] as { name: string, value: number }[],
