@@ -14,9 +14,14 @@
           <b-nav-item :to="{name: routerLocations.WellingtonCo2Sa1Page}">
             Wellington
           </b-nav-item>
-          <b-nav-item :to="{name: routerLocations.ChristchurchCo2Sa1Page}">
-            Christchurch
-          </b-nav-item>
+          <b-nav-item-dropdown text="Christchurch">
+            <b-nav-item :to="{name: routerLocations.ChristchurchCo2Sa1Page}">
+              Emissions
+            </b-nav-item>
+            <b-nav-item :to="{name: routerLocations.ChristchurchModeSharePage}">
+              Mode Share
+            </b-nav-item>
+          </b-nav-item-dropdown>
           <b-nav-item :to="{name: routerLocations.OamaruCo2Sa1Page}">
             Oamaru
           </b-nav-item>
