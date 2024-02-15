@@ -17,29 +17,49 @@ enum routerLocations {
  */
 const routes: RouteConfig[] = [
   {
-    path: "/mode-share/christchurch",
-    name: routerLocations.ChristchurchModeSharePage,
-    component: pages.modeShare.Christchurch
+    path: "/emissions",
+    component: pages.emissions.EmissionsBase,
+    children: [
+      {
+        path: "",
+        redirect: {name: routerLocations.ChristchurchCo2Sa1Page}
+      },
+      {
+        path: "auckland",
+        name: routerLocations.AucklandCo2Sa1Page,
+        component: pages.emissions.Auckland
+      },
+      {
+        path: "christchurch",
+        name: routerLocations.ChristchurchCo2Sa1Page,
+        component: pages.emissions.Christchurch
+      },
+      {
+        path: "oamaru",
+        name: routerLocations.OamaruCo2Sa1Page,
+        component: pages.emissions.Oamaru
+      },
+      {
+        path: "wellington",
+        name: routerLocations.WellingtonCo2Sa1Page,
+        component: pages.emissions.Wellington
+      },
+    ]
   },
   {
-    path: "/auckland",
-    name: routerLocations.AucklandCo2Sa1Page,
-    component: pages.emissions.Auckland
-  },
-  {
-    path: "/christchurch",
-    name: routerLocations.ChristchurchCo2Sa1Page,
-    component: pages.emissions.Christchurch
-  },
-  {
-    path: "/oamaru",
-    name: routerLocations.OamaruCo2Sa1Page,
-    component: pages.emissions.Oamaru
-  },
-  {
-    path: "/wellington",
-    name: routerLocations.WellingtonCo2Sa1Page,
-    component: pages.emissions.Wellington
+    path: "/mode-share",
+    component: pages.modeShare.ModeShareBase,
+    children: [
+      {
+        path: "",
+        redirect: {name: routerLocations.ChristchurchModeSharePage}
+      },
+      {
+        path: "christchurch",
+        name: routerLocations.ChristchurchModeSharePage,
+        component: pages.modeShare.Christchurch
+      },
+    ]
   },
   {
     path: "/about",
