@@ -67,7 +67,7 @@ def setup_logging(log_level: LogLevel = LogLevel.DEBUG) -> None:
     warnings.simplefilter("ignore")
     # List of loggers to prevent messages from reaching the root logger
     loggers_to_exclude = [
-        "urllib3", "fiona", "pyproj"
+        "urllib3", "fiona", "pyproj", "geoapis"
     ]
     # Iterate through the loggers to exclude
     for logger_name in loggers_to_exclude:
