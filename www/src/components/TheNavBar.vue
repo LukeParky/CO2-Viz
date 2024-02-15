@@ -3,29 +3,29 @@
   <div>
     <b-navbar type="light" variant="light">
       <b-navbar-toggle target="nav-text-collapse" />
-      <b-navbar-brand :to="{name: routerLocations.RootPage}">
+      <b-navbar-brand :to="{name: routerLocations.Root.Root}">
         Carbon Neutral Neighbourhoods
       </b-navbar-brand>
       <b-collapse id="nav-text-collapse" is-nav>
         <b-navbar-nav>
-          <b-nav-item :to="{name: routerLocations.AucklandCo2Sa1Page}">
+          <b-nav-item :to="{name: routerLocations.Emissions.Auckland}">
             Auckland
           </b-nav-item>
-          <b-nav-item :to="{name: routerLocations.WellingtonCo2Sa1Page}">
+          <b-nav-item :to="{name: routerLocations.Emissions.Wellington}">
             Wellington
           </b-nav-item>
           <b-nav-item-dropdown text="Christchurch">
-            <b-nav-item :to="{name: routerLocations.ChristchurchCo2Sa1Page}">
+            <b-nav-item :to="{name: routerLocations.Emissions.Christchurch}">
               Emissions
             </b-nav-item>
-            <b-nav-item :to="{name: routerLocations.ChristchurchModeSharePage}">
+            <b-nav-item :to="{name: routerLocations.ModeShare.Christchurch}">
               Mode Share
             </b-nav-item>
           </b-nav-item-dropdown>
-          <b-nav-item :to="{name: routerLocations.OamaruCo2Sa1Page}">
+          <b-nav-item :to="{name: routerLocations.Emissions.Oamaru}">
             Oamaru
           </b-nav-item>
-          <b-nav-item :to="{name: routerLocations.AboutPage}">
+          <b-nav-item :to="{name: routerLocations.Root.About}">
             About
           </b-nav-item>
         </b-navbar-nav>
@@ -36,13 +36,13 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {routerLocations} from "@/routes";
+import {RouterLocations} from "@/routes";
 
 export default Vue.extend({
   name: "TheNavBar",
   data() {
     return {
-      routerLocations
+      routerLocations: RouterLocations
     }
   }
 })
