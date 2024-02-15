@@ -13,7 +13,7 @@
 <script lang="ts">
 import Vue from "vue";
 
-import Co2Sa1Viewer from "@/components/Co2Sa1Viewer.vue";
+import Co2Sa1Viewer from "./Co2Sa1Viewer.vue";
 import titleMixin from "@/mixins/title";
 
 export default Vue.extend({
