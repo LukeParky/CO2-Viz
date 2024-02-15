@@ -2,14 +2,26 @@ import {RouteConfig} from "vue-router";
 import * as pages from "@/pages";
 
 
-enum routerLocations {
-  AboutPage = "ABOUT_PAGE",
-  AucklandCo2Sa1Page = "AUCKLAND_CO2_SA1_PAGE",
-  ChristchurchCo2Sa1Page = "CHRISTCHURCH_CO2_SA1_PAGE",
-  ChristchurchModeSharePage = "CHRISTCHURCH_MODE_SHARE_PAGE",
-  OamaruCo2Sa1Page = "OAMARU_CO2_SA1_PAGE",
-  RootPage = "ROOT_PAGE",
-  WellingtonCo2Sa1Page = "WELLINGTON_CO2_SA1_PAGE"
+enum EmissionsLocations {
+  Auckland = "EMISSIONS_AUCKLAND",
+  Christchurch = "EMISSIONS_CHRISTCHURCH",
+  Oamaru = "EMISSIONS_OAMARU",
+  Wellington = "EMISSIONS_WELLINGTON"
+}
+
+enum ModeShareLocations {
+  Christchurch = "MODE_SHARE_CHRISTCHURCH",
+}
+
+enum RootLocations {
+  About = "ROOT_ABOUT",
+  Root = "ROOT_ROOT",
+}
+
+const RouterLocations = {
+  Emissions: EmissionsLocations,
+  ModeShare: ModeShareLocations,
+  Root: RootLocations,
 }
 
 /**
@@ -21,29 +33,29 @@ const routes: RouteConfig[] = [
     component: pages.emissions.EmissionsBase,
     children: [
       {
-        path: "",
-        redirect: {name: routerLocations.ChristchurchCo2Sa1Page}
-      },
-      {
         path: "auckland",
-        name: routerLocations.AucklandCo2Sa1Page,
+        name: RouterLocations.Emissions.Auckland,
         component: pages.emissions.Auckland
       },
       {
         path: "christchurch",
-        name: routerLocations.ChristchurchCo2Sa1Page,
+        name: RouterLocations.Emissions.Christchurch,
         component: pages.emissions.Christchurch
       },
       {
         path: "oamaru",
-        name: routerLocations.OamaruCo2Sa1Page,
+        name: RouterLocations.Emissions.Oamaru,
         component: pages.emissions.Oamaru
       },
       {
         path: "wellington",
-        name: routerLocations.WellingtonCo2Sa1Page,
+        name: RouterLocations.Emissions.Wellington,
         component: pages.emissions.Wellington
       },
+      {
+        path: "*",
+        redirect: {name: RouterLocations.Emissions.Christchurch}
+      }
     ]
   },
   {
@@ -51,26 +63,26 @@ const routes: RouteConfig[] = [
     component: pages.modeShare.ModeShareBase,
     children: [
       {
-        path: "",
-        redirect: {name: routerLocations.ChristchurchModeSharePage}
-      },
-      {
         path: "christchurch",
-        name: routerLocations.ChristchurchModeSharePage,
+        name: RouterLocations.ModeShare.Christchurch,
         component: pages.modeShare.Christchurch
       },
+      {
+        path: "*",
+        redirect: {name: RouterLocations.ModeShare.Christchurch}
+      }
     ]
   },
   {
     path: "/about",
-    name: routerLocations.AboutPage,
+    name: RouterLocations.Root.About,
     component: pages.AboutPage
   },
   {
     path: '*',
-    name: routerLocations.RootPage,
-    redirect: {name: routerLocations.ChristchurchCo2Sa1Page}
+    name: RouterLocations.Root.Root,
+    redirect: {name: RouterLocations.Emissions.Christchurch}
   }
 ];
 export default routes;
-export {routerLocations}
+export {RouterLocations}
