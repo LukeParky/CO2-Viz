@@ -130,13 +130,13 @@ export default Vue.extend({
   methods: {
     async loadSa1s(): Promise<Cesium.GeoJsonDataSource> {
       const geoserverUrl = axios.getUri({
-        url: `${this.geoserverHost}/geoserver/carbon_neutral/ows`,
+        url: `${this.geoserverHost}/geoserver/sa1_emissions/ows`,
         params: {
           service: "WFS",
           version: "1.0.0",
           request: "GetFeature",
           outputFormat: "application/json",
-          typeName: "carbon_neutral:sa1s",
+          typeName: "sa1_emissions:sa1s",
           cql_filter: `UR2023_V1_00_NAME ILIKE '${this.urbanAreaName}'`
         }
       })
@@ -151,13 +151,13 @@ export default Vue.extend({
 
     async fetchVktSums(): Promise<{ fuel_type: string, VKT: number, CO2: number, weight: number }[]> {
       const propertyRequestUrl = axios.getUri({
-        url: `${this.geoserverHost}/geoserver/carbon_neutral/ows`,
+        url: `${this.geoserverHost}/geoserver/sa1_emissions/ows`,
         params: {
           service: "WFS",
           version: "1.0.0",
           request: "GetFeature",
           outputFormat: "application/json",
-          typeName: "carbon_neutral:vkt_sum",
+          typeName: "sa1_emissions:vkt_sum",
           propertyname: "(fuel_type,VKT,CO2)",
           cql_filter: `UR2023_V1_00_NAME ILIKE '${this.urbanAreaName}'`
         }
@@ -203,13 +203,13 @@ export default Vue.extend({
       const sqlView = this.selectedFuelType === "all" ? "all_cars" : "fuel_type";
       const co2Properties = this.selectedFuelType === "all" ? this.co2PrefixedFuelTypes : "CO2";
       const propertyRequestUrl = axios.getUri({
-        url: `${this.geoserverHost}/geoserver/carbon_neutral/ows`,
+        url: `${this.geoserverHost}/geoserver/sa1_emissions/ows`,
         params: {
           service: "WFS",
           version: "1.0.0",
           request: "GetFeature",
           outputFormat: "application/json",
-          typeName: `carbon_neutral:sa1_emissions_${sqlView}`,
+          typeName: `sa1_emissions:sa1_emissions_${sqlView}`,
           viewparams: `FUEL_TYPE:${this.selectedFuelType}`,
           propertyname: `(SA12018_V1_00,VKT,AREA_SQ_KM,${co2Properties})`,
           cql_filter: `UR2023_V1_00_NAME ILIKE '${this.urbanAreaName}'`

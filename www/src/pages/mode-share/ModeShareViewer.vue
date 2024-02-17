@@ -77,13 +77,13 @@ export default Vue.extend({
   methods: {
     async loadSa2s(): Promise<Cesium.GeoJsonDataSource> {
       const geoserverUrl = axios.getUri({
-        url: `${this.geoserverHost}/geoserver/carbon_neutral/ows`,
+        url: `${this.geoserverHost}/geoserver/sa2_mode_share/ows`,
         params: {
           service: "WFS",
           version: "1.0.0",
           request: "GetFeature",
           outputFormat: "application/json",
-          typeName: "carbon_neutral:sa2s",
+          typeName: "sa2_mode_share:sa2s",
           cql_filter: `UR2023_V1_00_NAME ILIKE '${this.urbanAreaName}'`
         }
       })
