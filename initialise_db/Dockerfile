@@ -38,4 +38,4 @@ COPY --chown=nonroot:nonroot --chmod=544 *.py .
 
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT source /venv/bin/activate && \
-           python organise_data.py
+           python initialise_all_data_sources.py

@@ -7,6 +7,7 @@ import sqlalchemy
 import stats_nz_geographies
 from config import EnvVariable as Env
 from config import get_db_engine
+from geoalchemy2 import Geometry
 
 log = logging.getLogger(__name__)
 
@@ -26,13 +27,35 @@ def find_sa2s_in_area(area_of_interest: stats_nz_geographies.AreaOfInterest) -> 
     ]
 
 
-def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> gpd.GeoDataFrame:
+def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> pd.DataFrame:
     mode_shares = pd.read_csv(Env.MEANS_OF_TRAVEL_DATA)
     mode_shares = mode_shares.loc[
         mode_shares["SA2_code_usual_residence_address"].isin(sa2_ids.index)
         | mode_shares["SA2_code_workplace_address"].isin(sa2_ids.index)]
     return mode_shares.set_index(["SA2_code_usual_residence_address", "SA2_code_workplace_address"],
                                  verify_integrity=True)
+
+
+def set_suppressed_values_as_zero(mode_shares: pd.DataFrame) -> pd.DataFrame:
+    return mode_shares.replace(-999, 0)
+
+
+def convert_mode_share_df_to_gdf(mode_shares: pd.DataFrame) -> gpd.GeoDataFrame:
+    mode_share_data_crs = 2193
+    wgs_84 = 4326
+    usual_residence_points = gpd.points_from_xy(mode_shares["SA2_usual_residence_easting"],
+                                                mode_shares["SA2_usual_residence_northing"],
+                                                crs=mode_share_data_crs).to_crs(wgs_84)
+    usual_workplace_points = gpd.points_from_xy(mode_shares["SA2_workplace_easting"],
+                                                mode_shares["SA2_workplace_northing"],
+                                                crs=mode_share_data_crs).to_crs(wgs_84)
+    mode_shares = mode_shares.drop(columns=["SA2_usual_residence_easting",
+                                            "SA2_usual_residence_northing",
+                                            "SA2_workplace_easting",
+                                            "SA2_workplace_northing"])
+    mode_shares["SA2_usual_residence"] = usual_residence_points
+    mode_shares["SA2_workplace"] = usual_workplace_points
+    return gpd.GeoDataFrame(mode_shares, geometry="SA2_usual_residence")
 
 
 def initialise_mode_share(engine: sqlalchemy.engine.Engine) -> None:
@@ -53,8 +76,17 @@ def initialise_mode_share(engine: sqlalchemy.engine.Engine) -> None:
     else:
         log.info(f"Table {mode_share_table_name} does not exist, initialising...")
         mode_shares = find_mode_shares_in_areas_of_interest(sa2_ids)
-        mode_shares.to_sql(mode_share_table_name, engine, if_exists="replace", index=True,
-                           index_label=["SA2_code_usual_residence_address", "SA2_code_workplace_address"])
+        mode_shares = set_suppressed_values_as_zero(mode_shares)
+        mode_shares_gdf = convert_mode_share_df_to_gdf(mode_shares)
+        mode_shares_gdf.to_postgis(mode_share_table_name,
+                                   engine,
+                                   if_exists="replace",
+                                   index=True,
+                                   index_label=["SA2_code_usual_residence_address", "SA2_code_workplace_address"],
+                                   dtype={  # dtype must be specified for additional geometry columns
+                                       "SA2_usual_residence": Geometry("POINT", srid=4326),
+                                       "SA2_workplace": Geometry("POINT", srid=4326),
+                                   })
         log.info(f"Table {mode_share_table_name} initialised.")
 
 
