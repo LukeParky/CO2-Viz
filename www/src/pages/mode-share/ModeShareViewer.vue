@@ -2,7 +2,7 @@
   <!-- The component that renders a CO2/VKT map for a given area of SA1s -->
   <div class="full-screen">
     <iframe
-      src="https://www.flowmap.blue/1oZqsz8f0VlcmeLv35_OOe9TBDrTBWx4IhGIl9lodb2Q/c2bb2e1/embed"
+      src="https://www.flowmap.blue/1oZqsz8f0VlcmeLv35_OOe9TBDrTBWx4IhGIl9lodb2Q/c2bb2e1"
       width="100%"
       height="1080px"
       frameborder="0"
