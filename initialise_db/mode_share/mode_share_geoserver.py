@@ -18,9 +18,7 @@ def create_mode_share_view(workspace_name: str, data_store_name: str):
                 <virtualTable>
                     <name>{mode_share_layer_name}</name>
                     <sql>SELECT &quot;SA2_code_usual_residence_address&quot;,&#xd;
-                        &quot;SA2_usual_residence&quot;,&#xd;
                         &quot;SA2_code_workplace_address&quot;,&#xd;
-                        &quot;SA2_workplace&quot;,&#xd;
                         &quot;Work_at_home&quot;,&#xd;
                         &quot;Passenger_in_a_car_truck_van_or_company_bus&quot;,&#xd;
                         (&quot;Drive_a_private_car_truck_or_van&quot; + &quot;Drive_a_company_car_truck_or_van&quot;) as Drive,&#xd;
@@ -33,16 +31,6 @@ def create_mode_share_view(workspace_name: str, data_store_name: str):
                         FROM mode_share
                     </sql>
                     <escapeSql>false</escapeSql>
-                    <geometry>
-                      <name>SA2_usual_residence</name>
-                      <type>Geometry</type>
-                      <srid>-1</srid>
-                    </geometry>
-                    <geometry>
-                      <name>SA2_workplace</name>
-                      <type>Geometry</type>
-                      <srid>-1</srid>
-                    </geometry>
                 </virtualTable>
             </entry>
         </metadata>
