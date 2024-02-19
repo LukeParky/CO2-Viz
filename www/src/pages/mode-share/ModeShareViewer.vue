@@ -1,13 +1,12 @@
 <template>
   <!-- The component that renders a CO2/VKT map for a given area of SA1s -->
-  <div class="full-height">
-    <MapViewer
-      :init-lat="initLat"
-      :init-long="initLong"
-      :init-height="initHeight"
-      :init-base-layer="baseLayer"
-      :cesium-access-token="cesiumApiToken"
-      :data-sources="dataSources"
+  <div class="full-screen">
+    <iframe
+      src="https://www.flowmap.blue/1oZqsz8f0VlcmeLv35_OOe9TBDrTBWx4IhGIl9lodb2Q/c2bb2e1/embed"
+      width="100%"
+      height="1080px"
+      frameborder="0"
+      allowfullscreen
     />
   </div>
 </template>
@@ -100,5 +99,9 @@ export default Vue.extend({
 </script>
 
 <style>
-
+.full-screen {
+  overflow: hidden;
+  height: 100%;
+  width: 100%
+}
 </style>
