@@ -16,6 +16,7 @@ dependencies:
   - python==3.11
   - python-dotenv==1.0.0
   - sqlalchemy==1.4.49
+  - xlsxwriter==3.1.9
   - pip:
       - geoapis==0.3.2
 

@@ -31,7 +31,7 @@ WORKDIR app/
 # Copy python virtual environment from build layer
 COPY --chown=nonroot:nonroot --chmod=544 --from=build /venv /venv
 
-COPY --chown=nonroot:nonroot --chmod=544 ./data ./data
+COPY --chown=nonroot:nonroot --chmod=744 ./data ./data
 COPY --chown=nonroot:nonroot --chmod=544 mode_share mode_share
 COPY --chown=nonroot:nonroot --chmod=544 emissions emissions
 COPY --chown=nonroot:nonroot --chmod=544 *.py .
