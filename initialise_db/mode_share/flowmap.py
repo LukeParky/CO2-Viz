@@ -50,9 +50,9 @@ def find_flows(engine: sqlalchemy.engine.Engine, urban_area_name: str) -> pd.Dat
 def get_workbook_config_page(urban_area_name: str, columns: List[str]) -> pd.DataFrame:
     return pd.DataFrame(columns=["property", "value"], data=[
         ["title", f"{urban_area_name} Mode Shares"],
-        ["description", "description"],
-        ["source.name", "source.name"],
-        ["source.url", "soruce.url"],
+        ["description", f"Means of travel to work for the {urban_area_name} area"],
+        ["source.name", "2018 Census Main means of travel to work by Statistical Area 2"],
+        ["source.url", "https://datafinder.stats.govt.nz/table/104720-2018-census-main-means-of-travel-to-work-by-statistical-area-2/"],
         ["createdBy.name", "Geospatial Research Institute | Toi Hangarau"],
         ["createdBy.url", "http://geospatial.ac.nz"],
         ["mapbox.mapStyle", ""],
@@ -92,7 +92,7 @@ def save_flow_map_to_gsheet(gspread_client: gspread.Client,
     locations_sheet = spreadsheet.add_worksheet("locations",
                                                 rows=len(sa2_locations) + 1,
                                                 cols=len(sa2_locations.columns))
-    locations_sheet.update(df_to_gspread_list(sa2_locations))
+    locations_sheet.update(df_to_gspread_list(sa2_locations.reset_index(drop=False)))
 
     for column_name in flow_columns:
         flow_data = flows[['origin', 'dest', column_name]].rename(columns={column_name: "count"})
