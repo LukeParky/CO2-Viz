@@ -10,7 +10,10 @@ enum EmissionsLocations {
 }
 
 enum ModeShareLocations {
+  Auckland = "MODE_SHARE_AUCKLAND",
   Christchurch = "MODE_SHARE_CHRISTCHURCH",
+  Oamaru = "MODE_SHARE_OAMARU",
+  Wellington = "MODE_SHARE_WELLINGTON"
 }
 
 enum RootLocations {
@@ -63,9 +66,24 @@ const routes: RouteConfig[] = [
     component: pages.modeShare.ModeShareBase,
     children: [
       {
+        path: "auckland",
+        name: RouterLocations.ModeShare.Auckland,
+        component: pages.modeShare.Auckland
+      },
+      {
         path: "christchurch",
         name: RouterLocations.ModeShare.Christchurch,
         component: pages.modeShare.Christchurch
+      },
+      {
+        path: "wellington",
+        name: RouterLocations.ModeShare.Wellington,
+        component: pages.modeShare.Wellington
+      },
+      {
+        path: "oamaru",
+        name: RouterLocations.ModeShare.Oamaru,
+        component: pages.modeShare.Oamaru
       },
       {
         path: "*",
