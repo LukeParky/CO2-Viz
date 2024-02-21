@@ -18,7 +18,7 @@ import ModeShareViewer from "./ModeShareViewer.vue"
 export default Vue.extend({
   name: "ChristchurchCo2Sa1Page",
   components: {ModeShareViewer},
-  title: "Christchurch Map",
+  title: "Christchurch Mode Shares",
   mixins: [titleMixin],
 
   data() {
