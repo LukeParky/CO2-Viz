@@ -119,7 +119,7 @@ def save_flow_map_sheets(engine: sqlalchemy.engine.Engine) -> None:
         return
     log.info(f"Initialising table {flow_sheets_table_name}.")
 
-    gspread_client = gspread.service_account(EnvVariable.GOOGLE_SERVICE_ACCOUNT_KEY_FILE.as_posix())
+    gspread_client = gspread.service_account_from_dict(EnvVariable.GOOGLE_CREDENTIALS)
     urban_areas = pd.read_sql('SELECT DISTINCT "UR2023_V1_00_NAME" FROM sa2s',
                               engine).to_numpy().flatten()
     flow_sheet_url_data = []
