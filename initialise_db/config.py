@@ -1,13 +1,10 @@
 import logging
 import os
 import pathlib
-from typing import TypeVar
+from typing import Optional
 
 from dotenv import load_dotenv
 from sqlalchemy.engine import create_engine, Engine
-
-# Generic type, used for static type checking
-T = TypeVar("T", str, bool, int, float)
 
 load_dotenv("..")
 load_dotenv()
@@ -15,21 +12,19 @@ load_dotenv()
 log = logging.getLogger(__name__)
 
 
-def get_env_variable(var_name: str, default: T = None, allow_empty: bool = False, cast_to: type = str) -> T:
+def get_env_variable(var_name: str, default: str = None, allow_empty: bool = False) -> str:
     """
-    Reads an environment variable, with settings to allow defaults, empty values, and type casting
-    To read a boolean EXAMPLE_ENV_VAR=False use get_env_variable("EXAMPLE_ENV_VAR", cast_to=bool)
+    Reads a string environment variable, with settings to allow defaults, empty values.
+    To read a boolean user get_bool_env_variable
 
     Parameters
     ----------
     var_name : str
         The name of the environment variable to retrieve.
     default : T = None
-        Default return value if the environment variable does not exist. Doesn't override empty string vars.
+        Default return value if the environment variable does not exist.
     allow_empty : bool
-        If False then a KeyError will be raised if the environment variable is empty.
-    cast_to : Callable[[str], T]
-        The type to cast to e.g. str, int, or bool
+        If False then a ValueError will be raised if the environment variable is empty.
 
     Returns
     -------
@@ -39,53 +34,54 @@ def get_env_variable(var_name: str, default: T = None, allow_empty: bool = False
     ------
     KeyError
         If allow_empty is False and the environment variable is empty string or None
-    ValueError
-        If cast_to is not compatible with the value stored.
     """
-    env_var = os.getenv(var_name, default)
+    env_var = os.getenv(var_name)
+    if default is not None and env_var in (None, ""):
+        # Set env_var to default, but do not override empty str with None
+        env_var = default
     if not allow_empty and env_var in (None, ""):
         raise KeyError(f"Environment variable {var_name} not set, and allow_empty is False")
-    return _cast_str(env_var, cast_to)
+    return env_var
 
 
-def _cast_str(str_to_cast: str, cast_to: T) -> T:
+def get_bool_env_variable(var_name: str, default: Optional[bool] = None, allow_empty: bool = False) -> bool:
     """
-    Takes a string and casts it to necessary primitive builtin types. Tested with int, float, and bool.
-    For bools, this detects if the value is in the case-insensitive sets {"True", "T", "1"} or {"False", "F", "0"}
-    and raises a ValueError if not. For example _cast_str("False", bool) -> False
+    Reads an environment variable and attempts to cast to bool, with settings to allow defaults, empty values.
+    For bool we have the problem where bool("False") == True but we want this function to return False
 
     Parameters
     ----------
-    str_to_cast : str
-        The string that is going to be casted to the type
-    cast_to : Callable[[str], T]
-        The type to cast to e.g. bool
+    var_name : str
+        The name of the environment variable to retrieve.
+    default : Optional[bool] = None
+        Default return value if the environment variable does not exist.
+    allow_empty : bool
+        If False then a KeyError will be raised if the environment variable is empty.
 
     Returns
     -------
-    The string casted to type T defined by cast_to.
+    bool
+        The environment variable, or default if it does not exist
 
     Raises
     ------
-    ValueError if [cast_to] is not compatible with the value stored.
+    ValueError
+        If allow_empty is False and the environment variable is empty string or None
     """
-    # Special cases i.e. casts that aren't of the form int("7") -> 7
-    if cast_to == bool:
-        # For bool we have the problem where bool("False") == True but we want this function to return False
-        truth_values = {"true", "t", "1"}
-        false_values = {"false", "f", "0"}
-        if str_to_cast.lower() in truth_values:
-            return True
-        elif str_to_cast.lower() in false_values:
-            return False
-        raise ValueError(f"{str_to_cast} being casted to bool but is not in {truth_values} or {false_values}")
-    # General case
-    return cast_to(str_to_cast)
+    env_variable = get_env_variable(var_name, default, allow_empty)
+    truth_values = {"true", "t", "1"}
+    false_values = {"false", "f", "0"}
+    if env_variable.lower() in truth_values:
+        return True
+    elif env_variable.lower() in false_values:
+        return False
+    raise ValueError(f"Environment variable {var_name}={env_variable} being casted to bool "
+                     f"but is not in {truth_values} or {false_values}")
 
 
 class EnvVariable:
-    EMISSIONS_DATA = get_env_variable("EMISSIONS_DATA", cast_to=pathlib.Path)
-    MEANS_OF_TRAVEL_DATA = get_env_variable("MEANS_OF_TRAVEL_DATA", cast_to=pathlib.Path)
+    EMISSIONS_DATA = pathlib.Path(get_env_variable("EMISSIONS_DATA"))
+    MEANS_OF_TRAVEL_DATA = pathlib.Path(get_env_variable("MEANS_OF_TRAVEL_DATA"))
 
     POSTGRES_HOST = get_env_variable("POSTGRES_HOST")
     POSTGRES_PORT = get_env_variable("POSTGRES_PORT")
