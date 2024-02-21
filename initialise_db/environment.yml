@@ -9,6 +9,7 @@ dependencies:
   - conda-pack>=0.7.1
   - geoalchemy2==0.14.3
   - geopandas==0.12.2
+  - gspread==5.12.4
   - openpyxl==3.1.2
   - pandas==1.5.3
   - pip>=23.3.2
@@ -16,6 +17,7 @@ dependencies:
   - python==3.11
   - python-dotenv==1.0.0
   - sqlalchemy==1.4.49
+  - tqdm==4.66.2
   - xlsxwriter==3.1.9
   - pip:
       - geoapis==0.3.2

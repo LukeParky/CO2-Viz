@@ -7,6 +7,7 @@ node_modules
 www/.env.local
 .env.*.local
 .env
+initialise_db/*.keys/
 
 # Log files
 npm-debug.log*
