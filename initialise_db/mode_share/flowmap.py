@@ -101,14 +101,20 @@ def save_flow_map_to_gsheet(gspread_client: gspread.Client,
                                                cols=len(sa2_locations.columns))
         flow_sheet.update(df_to_gspread_list(flow_data))
 
-    spreadsheet.share(email_address=None, perm_type="anyone", role="reader", with_link=True).raise_for_status()
-    transfer_ownership_response = spreadsheet.share(email_address=EnvVariable.ADMIN_EMAIL,
-                                                    perm_type="user",
-                                                    role="writer",
-                                                    notify=True)
-    transfer_ownership_response.raise_for_status()
-    owner_permission_id = transfer_ownership_response.json()["id"]
-    spreadsheet.transfer_ownership(owner_permission_id).raise_for_status()
+    permissions = spreadsheet.list_permissions()
+    if not any(permission["id"] == "anyoneWithLink" and permission["role"] == "reader"
+               for permission in permissions):
+        spreadsheet.share(email_address=None, perm_type="anyone", role="reader", with_link=True).raise_for_status()
+    if not any(permission["emailAddress"] == EnvVariable.ADMIN_EMAIL and (
+            permission["role"] == "writer" or permission["pendingOwner"])
+               for permission in permissions):
+        transfer_ownership_response = spreadsheet.share(email_address=EnvVariable.ADMIN_EMAIL,
+                                                        perm_type="user",
+                                                        role="writer",
+                                                        notify=True)
+        transfer_ownership_response.raise_for_status()
+        owner_permission_id = transfer_ownership_response.json()["id"]
+        spreadsheet.transfer_ownership(owner_permission_id).raise_for_status()
     return spreadsheet.url
 
 
@@ -142,7 +148,7 @@ def save_flow_map_sheets(engine: sqlalchemy.engine.Engine) -> None:
                 break
             except gspread.exceptions.APIError as e:
                 if attempt >= num_attempts - 1:
-                    raise e
+                    raise gspread.exceptions.APIError from e
                 refresh_time = 500
                 progress_bar = tqdm(range(refresh_time),
                                     desc="Google Sheets API limit hit, waiting for limit refresh...")
