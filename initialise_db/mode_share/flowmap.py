@@ -144,8 +144,13 @@ def save_flow_map_sheets(engine: sqlalchemy.engine.Engine) -> None:
                 if attempt >= num_attempts - 1:
                     raise e
                 refresh_time = 500
-                for _ in tqdm(range(refresh_time), desc="Google Sheets API limit hit, waiting for limit refresh..."):
+                progress_bar = tqdm(range(refresh_time),
+                                    desc="Google Sheets API limit hit, waiting for limit refresh...")
+                for _ in progress_bar:
                     time.sleep(1)
+                    log_interval_s = 10
+                    if progress_bar.n % log_interval_s == 0:
+                        log.info(str(progress_bar))
 
     flow_sheet_df = pd.DataFrame(flow_sheet_url_data).set_index("urban_area")
     flow_sheet_df.to_sql(flow_sheets_table_name, engine, if_exists="replace", index=True)
