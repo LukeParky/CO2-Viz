@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from config import get_db_engine
 from emissions.emissions_geoserver import initialise_geoserver_emissions
 from emissions.initialise_co2_sa1s import initialise_co2_sa1s
-from mode_share.flowmap import save_flow_map_files
+from mode_share.flowmap import save_flow_map_sheets
 from mode_share.initialise_mode_share import initialise_mode_share
 from mode_share.mode_share_geoserver import initialise_geoserver_mode_share
 from setup_logging import setup_logging
@@ -26,9 +26,9 @@ def main():
     initialise_geoserver_emissions()
     initialise_geoserver_mode_share()
     log.info("Geoserver initialised")
-    log.info("Creating flow map files")
-    save_flow_map_files(engine)
-    log.info("Flow map files created")
+    log.info("Initialising flow map Google Sheets")
+    save_flow_map_sheets(engine)
+    log.info("Flow map Google Sheets initialised")
 
 
 if __name__ == '__main__':

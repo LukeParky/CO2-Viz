@@ -80,6 +80,7 @@ def get_bool_env_variable(var_name: str, default: Optional[bool] = None, allow_e
 
 
 class EnvVariable:
+    ADMIN_EMAIL = get_env_variable("ADMIN_EMAIL", default="luke.parkinson@canterbury.ac.nz")
     EMISSIONS_DATA = pathlib.Path(get_env_variable("EMISSIONS_DATA"))
     MEANS_OF_TRAVEL_DATA = pathlib.Path(get_env_variable("MEANS_OF_TRAVEL_DATA"))
 
@@ -95,6 +96,7 @@ class EnvVariable:
     GEOSERVER_ADMIN_PASSWORD = get_env_variable("GEOSERVER_ADMIN_PASSWORD")
 
     STATS_API_KEY = get_env_variable("STATS_API_KEY")
+    GOOGLE_SERVICE_ACCOUNT_KEY_FILE = pathlib.Path(get_env_variable("GOOGLE_SERVICE_ACCOUNT_KEY_FILE"))
 
 
 def get_db_engine() -> Engine:

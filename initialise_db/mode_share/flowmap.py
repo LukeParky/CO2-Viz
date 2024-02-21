@@ -1,9 +1,12 @@
 import logging
-import pathlib
+import time
+from typing import List, Union
 
+import gspread
 import pandas as pd
 import sqlalchemy
-from config import get_db_engine
+from config import EnvVariable, get_db_engine
+from tqdm import tqdm
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +47,7 @@ def find_flows(engine: sqlalchemy.engine.Engine, urban_area_name: str) -> pd.Dat
     return pd.read_sql(all_flows_query, engine, params={"urban_area_name": urban_area_name})
 
 
-def get_workbook_config_page(urban_area_name: str, columns: list) -> pd.DataFrame:
+def get_workbook_config_page(urban_area_name: str, columns: List[str]) -> pd.DataFrame:
     return pd.DataFrame(columns=["property", "value"], data=[
         ["title", f"{urban_area_name} Mode Shares"],
         ["description", "description"],
@@ -61,30 +64,93 @@ def get_workbook_config_page(urban_area_name: str, columns: list) -> pd.DataFram
     ])
 
 
-def save_flow_map_to_workbook(file_path: pathlib.Path, config_sheet: pd.DataFrame, sa2_locations: pd.DataFrame,
-                              flows: pd.DataFrame, flow_columns: list):
-    with pd.ExcelWriter(file_path, engine="xlsxwriter") as excel_writer:
-        config_sheet.to_excel(excel_writer, sheet_name="properties", index=False)
-        sa2_locations.to_excel(excel_writer, sheet_name="locations")
+def save_flow_map_to_gsheet(gspread_client: gspread.Client,
+                            spreadsheet_name: str,
+                            config_sheet: pd.DataFrame,
+                            sa2_locations: pd.DataFrame,
+                            flows: pd.DataFrame,
+                            flow_columns: list) -> str:
+    def df_to_gspread_list(df: pd.DataFrame) -> List[Union[str, List]]:
+        # noinspection PyTypeChecker
+        return [df.columns.values.tolist()] + df.values.tolist()
 
-        for column_name in flow_columns:
-            sheet = flows[['origin', 'dest', column_name]].rename(columns={column_name: "count"})
-            sheet.to_excel(excel_writer, sheet_name=column_name, index=False)
+    log.info(f"Uploading Google Sheet {spreadsheet_name}")
+    if len(gspread_client.openall(spreadsheet_name)) > 0:
+        spreadsheet = gspread_client.open(spreadsheet_name)
+    else:
+        spreadsheet = gspread_client.create(spreadsheet_name)
+    for worksheet in spreadsheet.worksheets():
+        worksheet.clear()
+        if worksheet.index == 0:
+            worksheet.update_title("properties")
+        else:
+            spreadsheet.del_worksheet(worksheet)
+
+    properties_sheet = spreadsheet.sheet1
+    properties_sheet.update(df_to_gspread_list(config_sheet))
+
+    locations_sheet = spreadsheet.add_worksheet("locations",
+                                                rows=len(sa2_locations) + 1,
+                                                cols=len(sa2_locations.columns))
+    locations_sheet.update(df_to_gspread_list(sa2_locations))
+
+    for column_name in flow_columns:
+        flow_data = flows[['origin', 'dest', column_name]].rename(columns={column_name: "count"})
+        flow_sheet = spreadsheet.add_worksheet(column_name,
+                                               rows=len(flow_data) + 1,
+                                               cols=len(sa2_locations.columns))
+        flow_sheet.update(df_to_gspread_list(flow_data))
+
+    spreadsheet.share(email_address=None, perm_type="anyone", role="reader", with_link=True).raise_for_status()
+    transfer_ownership_response = spreadsheet.share(email_address=EnvVariable.ADMIN_EMAIL,
+                                                    perm_type="user",
+                                                    role="writer",
+                                                    notify=True)
+    transfer_ownership_response.raise_for_status()
+    owner_permission_id = transfer_ownership_response.json()["id"]
+    spreadsheet.transfer_ownership(owner_permission_id).raise_for_status()
+    return spreadsheet.url
 
 
-def save_flow_map_files(engine: sqlalchemy.engine.Engine) -> None:
-    urban_areas = pd.read_sql('SELECT DISTINCT "UR2023_V1_00_NAME" FROM sa2s', engine).to_numpy().flatten()
-    data_dir = pathlib.Path("./data/flows")
-    data_dir.mkdir(parents=True, exist_ok=True)
+def save_flow_map_sheets(engine: sqlalchemy.engine.Engine) -> None:
+    flow_sheets_table_name = "flow_sheets"
+    if sqlalchemy.inspect(engine).has_table(flow_sheets_table_name):
+        log.info(f"Table {flow_sheets_table_name} exists, skipping.")
+        return
+    log.info(f"Initialising table {flow_sheets_table_name}.")
+
+    gspread_client = gspread.service_account(EnvVariable.GOOGLE_SERVICE_ACCOUNT_KEY_FILE.as_posix())
+    urban_areas = pd.read_sql('SELECT DISTINCT "UR2023_V1_00_NAME" FROM sa2s',
+                              engine).to_numpy().flatten()
+    flow_sheet_url_data = []
     for urban_area in urban_areas:
         sa2_locations = find_sa2_locations(engine, urban_area)
         flows = find_flows(engine, urban_area)
-        file_path = data_dir / f"{urban_area}.xlsx"
+        spreadsheet_name = f"flows_{urban_area}"
         flow_columns = [col for col in flows.columns if col not in {'origin', 'dest'}]
         workbook_config_sheet = get_workbook_config_page(urban_area, flow_columns)
-        save_flow_map_to_workbook(file_path, workbook_config_sheet, sa2_locations, flows, flow_columns)
+        num_attempts = 3
+        for attempt in range(num_attempts):
+            try:
+                sheet_url = save_flow_map_to_gsheet(gspread_client,
+                                                    spreadsheet_name,
+                                                    workbook_config_sheet,
+                                                    sa2_locations,
+                                                    flows,
+                                                    flow_columns)
+                flow_sheet_url_data.append({"urban_area": urban_area, "sheet_url": sheet_url})
+                break
+            except gspread.exceptions.APIError as e:
+                if attempt >= num_attempts - 1:
+                    raise e
+                refresh_time = 500
+                for _ in tqdm(range(refresh_time), desc="Google Sheets API limit hit, waiting for limit refresh..."):
+                    time.sleep(1)
+
+    flow_sheet_df = pd.DataFrame(flow_sheet_url_data).set_index("urban_area")
+    flow_sheet_df.to_sql(flow_sheets_table_name, engine, if_exists="replace", index=True)
 
 
 if __name__ == '__main__':
     engine = get_db_engine()
-    save_flow_map_files(engine)
+    save_flow_map_sheets(engine)
