@@ -22,13 +22,13 @@ def main():
     initialise_co2_sa1s(engine)
     initialise_mode_share(engine)
     log.info("Database initialised")
+    log.info("Initialising flow map Google Sheets")
+    save_flow_map_sheets(engine)
+    log.info("Flow map Google Sheets initialised")
     log.info("Initialising geoserver")
     initialise_geoserver_emissions()
     initialise_geoserver_mode_share()
     log.info("Geoserver initialised")
-    log.info("Initialising flow map Google Sheets")
-    save_flow_map_sheets(engine)
-    log.info("Flow map Google Sheets initialised")
 
 
 if __name__ == '__main__':

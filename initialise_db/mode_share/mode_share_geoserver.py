@@ -37,7 +37,11 @@ def create_mode_share_view(workspace_name: str, data_store_name: str):
     """
     create_datastore_layer(workspace_name, data_store_name, layer_name=mode_share_layer_name,
                            metadata_elem=mode_share_query
-)
+                           )
+
+
+def create_flow_sheets_view(workspace_name: str, data_store_name: str) -> None:
+    create_datastore_layer(workspace_name, data_store_name, layer_name="flow_sheets")
 
 
 def initialise_geoserver_mode_share():
@@ -52,4 +56,5 @@ def initialise_geoserver_mode_share():
 
     create_sa2_view(workspace_name, data_store_name)
     create_mode_share_view(workspace_name, data_store_name)
+    create_flow_sheets_view(workspace_name, data_store_name)
     log.info("SA2 mode share database views initialised")
