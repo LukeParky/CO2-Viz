@@ -1,3 +1,5 @@
+import base64
+import json
 import logging
 import os
 import pathlib
@@ -93,10 +95,10 @@ class EnvVariable:
     GEOSERVER_HOST = get_env_variable("GEOSERVER_HOST")
     GEOSERVER_PORT = get_env_variable("GEOSERVER_PORT")
     GEOSERVER_ADMIN_NAME = get_env_variable("GEOSERVER_ADMIN_NAME")
-    GEOSERVER_ADMIN_PASSWORD = get_env_variable("GEOSERVER_ADMIN_PASSWORD")
+    GEOSERVER_ADMIN_PASSWORD: str = get_env_variable("GEOSERVER_ADMIN_PASSWORD")
 
-    STATS_API_KEY = get_env_variable("STATS_API_KEY")
-    GOOGLE_SERVICE_ACCOUNT_KEY_FILE = pathlib.Path(get_env_variable("GOOGLE_SERVICE_ACCOUNT_KEY_FILE"))
+    STATS_API_KEY: str = get_env_variable("STATS_API_KEY")
+    GOOGLE_CREDENTIALS: dict = json.loads(base64.b64decode(get_env_variable("GOOGLE_CREDENTIALS_BASE64")))
 
 
 def get_db_engine() -> Engine:
