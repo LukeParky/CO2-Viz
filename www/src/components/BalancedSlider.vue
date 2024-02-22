@@ -15,7 +15,8 @@
         :for="`slider-${i}`"
         :disabled="disabled"
       >
-        {{ initValue.name }}: {{ formattedSliderValue(i) }}
+        {{ initValue.name }}:
+        <span class="value">{{ formattedSliderValue(i) }}</span>
       </label>
     </div>
     <b-button
@@ -118,14 +119,21 @@ export default Vue.extend({
 
 <style scoped>
 #balanced-slider {
+  min-width: inherit;
   padding: 5px;
 }
 
 .btn {
-  margin: 2px
+  float: right;
+  margin: 15px 5px 5px 5px
+}
+
+.slider {
+  min-width: 12em;
 }
 
 label {
-  padding-left: 10px;
+  display: inline;
+  min-width: 10em;
 }
 </style>

@@ -9,34 +9,24 @@
       :cesium-access-token="cesiumApiToken"
       :data-sources="dataSources"
     />
-    <BalancedSlider
-      id="balanced-slider"
-      class="card"
-      v-if="sliderDefaultValues.length > 0"
-      :init-values="sliderDefaultValues"
-      @submit="changeUseRates($event)"
-      :disabled="selectedFuelType !== 'all'"
-    />
     <div
-      id="totals-summary"
+      id="control-card"
       class="card"
     >
-      <p>Total CO2: {{ formattedTotals.CO2 }}</p>
-      <p>Total Vehicle Km Travelled: {{ formattedTotals.VKT }}</p>
-    </div>
-    <div id="filter-form" class="card">
-      <div class="form-group">
-        <h3>Car Fuel Type:</h3>
-        <div class="form-check" v-for="fuelType of fuelTypeOptions" :key="fuelType.key">
-          <input
-            type="radio"
-            :id="fuelType.key"
-            :value="fuelType.key"
-            v-model="selectedFuelType"
-          >
-          <label :for="fuelType.key">{{ fuelType.display }}</label>
-        </div>
-      </div>
+      <p>
+        Total CO2:
+        <span class="value">{{ formattedTotals.CO2 }}</span>
+      </p>
+      <p>
+        Total Vehicle Km Travelled:
+        <span class="value">{{ formattedTotals.VKT }}</span>
+      </p>
+      <BalancedSlider
+        v-if="sliderDefaultValues.length > 0"
+        :init-values="sliderDefaultValues"
+        @submit="changeUseRates($event)"
+        :disabled="selectedFuelType !== 'all'"
+      />
     </div>
   </div>
 </template>
@@ -297,32 +287,13 @@ export default Vue.extend({
   position: absolute;
   bottom: 40px;
   right: 30px;
-  height: 175px
+  height: 175px;
 }
 
-#filter-form {
+#control-card {
   position: absolute;
-  bottom: 30px;
-  right: 30px;
-  padding: 10px;
-}
-
-#filter-form .form-check {
-  padding-left: inherit;
-}
-
-#balanced-slider {
-  position: absolute;
-  top: 180px;
-  left: 30px;
-  padding: 5px;
-}
-
-#totals-summary {
-  position: absolute;
-  top: 75px;
-  left: 30px;
-  padding: 5px;
+  top: 55px;
+  min-width: 25em;
 }
 
 </style>
