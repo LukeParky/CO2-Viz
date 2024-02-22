@@ -13,10 +13,22 @@
       id="control-card"
       class="card"
     >
+      <h2>Scenario Controller</h2>
       <p>
-        Total CO2:
-        <span class="value">{{ formattedTotals.CO2 }}</span>
+        Baseline CO2:
+        <span class="value">{{ formattedTotals.baselineCo2 }}</span>
       </p>
+      <p>
+        Scenario CO2:
+        <span class="value">{{ formattedTotals.CO2 }}</span>
+        <span
+          class="value"
+          :class="percentageChangeClass"
+        >
+          ( {{ formattedTotals.percentageChange }})&nbsp
+        </span>
+      </p>
+
       <p>
         Total Vehicle Km Travelled:
         <span class="value">{{ formattedTotals.VKT }}</span>
@@ -90,6 +102,7 @@ export default Vue.extend({
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
       vktUseRates: [] as { fuel_type: string, VKT: number, CO2: number, weight: number }[],
+      baselineCo2: 0,
       sliderDefaultValues: [] as { name: string, value: number }[],
     }
   },
@@ -97,6 +110,7 @@ export default Vue.extend({
   async created() {
     this.vktUseRates = await this.fetchVktSums();
     this.sliderDefaultValues = this.vktUseRates.map(obj => ({name: obj.fuel_type, value: obj.weight}))
+    this.baselineCo2 = this.vktUseRates.reduce((partialSum, entry) => partialSum + entry.CO2, 0);
   },
 
   async mounted() {
@@ -247,12 +261,32 @@ export default Vue.extend({
       return {VKT, CO2: co2Sum}
     },
 
-    formattedTotals(): { CO2: string, VKT: string } {
+    formattedTotals(): { CO2: string, VKT: string, baselineCo2: string, percentageChange: string } {
+      const percentageChangeValue = roundToFixed(Math.abs(this.totals.CO2 - this.baselineCo2) / 100, 2)
       const co2Rounded = parseInt(roundToFixed(this.totals.CO2));
       const vktRounded = parseInt(roundToFixed(this.totals.VKT * 1000));
+      const baselineCo2Rounded = parseInt(roundToFixed(this.baselineCo2))
+
       const CO2 = `${co2Rounded.toLocaleString()} Tonnes / Year`
       const VKT = `${vktRounded.toLocaleString()} km / Year`
-      return {CO2, VKT}
+      const baselineCo2 = `${baselineCo2Rounded.toLocaleString()} Tonnes / Year`
+
+      let percentageSign = ""
+      if (this.totals.CO2 < this.baselineCo2)
+        percentageSign = "- "
+      else if (this.totals.CO2 > this.baselineCo2)
+        percentageSign = "+ "
+      const percentageChange = `${percentageSign}${percentageChangeValue} %`
+
+      return {CO2, VKT, baselineCo2, percentageChange}
+    },
+
+    percentageChangeClass(): string {
+      if (this.totals.CO2 === this.baselineCo2)
+        return "";
+      if (this.totals.CO2 < this.baselineCo2)
+        return "good-color"
+      return "bad-color"
     }
   }
 });
@@ -270,6 +304,14 @@ export default Vue.extend({
   position: absolute;
   top: 55px;
   min-width: 25em;
+}
+
+.bad-color {
+  color: #b51a28;
+}
+
+.good-color {
+  color: #367f2e;
 }
 
 </style>

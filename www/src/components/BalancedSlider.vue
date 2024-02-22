@@ -31,7 +31,7 @@
       size="sm"
       :disabled="disabled"
     >
-      Reset to default
+      Reset to baseline
     </b-button>
   </div>
 </template>
