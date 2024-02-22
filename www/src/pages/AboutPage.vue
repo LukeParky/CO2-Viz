@@ -13,6 +13,25 @@
       reduction goals. It aims to enable developing and retrofitting more sustainable, healthy, accessible and resilient
       cities, towns and neighbourhoods across Aotearoa New Zealand.
     </p>
+    <div class="row container-fluid">
+      <div class="col-lg-12 col-md-12 col-xs-12 thumb">
+        <a href="https://www.branz.co.nz/investing-research/building-research-levy/">
+          <img class="img-fluid" src="branz-logo.png" alt="BRANZ inc. logo">
+        </a>
+      </div>
+      <div class="row container-fluid">
+        <div class="col-lg-6 col-md-6 col-xs-6 thumb">
+          <a href="https://canterbury.ac.nz">
+            <img class="img-fluid" src="UCRed_RGB.svg" alt="University of Canterbury logo">
+          </a>
+        </div>
+        <div class="col-lg-6 col-md-6 col-xs-6 thumb">
+          <a href="https://geospatial.ac.nz">
+            <img class="img-fluid" src="GRI_full_logo_transparent.png" alt="Geospatial Research Institute Logo">
+          </a>
+        </div>
+      </div>
+    </div>
     <h2>Working Papers</h2>
     <p>
       Campbell, Malcolm and Conrow, Lindsey and Logan, Tom and Kingham, Simon, <i>International Case Studies Report for in
@@ -46,7 +65,10 @@ export default Vue.extend({
 </script>
 
 <style>
-.text-root {
-  padding: 10px
+.img-fluid {
+  padding: 20px
+}
+h2 {
+  padding-top: 15px;
 }
 </style>
