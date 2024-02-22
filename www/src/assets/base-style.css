@@ -1,10 +1,11 @@
 /* The basic style sheet for the entire app */
-main { /* 100 Bytes of CSS to look great everywhere https://www.swyx.io/css-100-bytes */
-  max-width: 80ch;
-  padding: 3em 1em;
-  margin: auto;
-  line-height: 1.75;
-  font-size: 1.25em;
+main {
+    /* 100 Bytes of CSS to look great everywhere https://www.swyx.io/css-100-bytes */
+    max-width: 80ch;
+    padding: 3em 1em;
+    margin: auto;
+    line-height: 1.75;
+    font-size: 1.25em;
 }
 
 input[type="number"] {
@@ -35,32 +36,17 @@ label {
     margin-left: 0.5rem;
 }
 
-#controls {
-    /* Appearance */
-    background-color: white;
-    padding: 0 20px 20px 20px;
-    cursor: move;
-    /* Fade out while not hovering */
-    opacity: 0.4;
-    zoom: 0.9;
-    transition: opacity 300ms 500ms;
+span.value {
+    /* align values like a tab stop */
+    float: right;
 }
 
-#controls:hover {
-    /* Fade in while hovering */
-    opacity: 0.95;
-    transition-delay: 0s;
-}
-
-/* Position and style citation */
-#cite {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    font-size: 12px;
+.card {
+    margin: 30px;
+    padding: 15px;
 }
 
 /* Add greying out on disabled for tags that may require it */
 :is(label, h1, h2, h3, h4, h5, h6)[disabled] {
-  color: grey;
+    color: grey;
 }
