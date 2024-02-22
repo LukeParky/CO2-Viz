@@ -2,24 +2,14 @@
   <div id="balanced-slider">
     <div v-for="(initValue, i) in initValues" :key="i">
       <input
-        v-if="i === 0"
         :id="`slider-${i}`"
         class="slider"
         type="range"
         min="0"
         max="100"
-        v-model.number="value"
+        v-model.number="sliderValues[i]"
+        @input="onChange(i)"
         :disabled="disabled"
-      >
-      <input
-        v-else
-        :id="`slider-${i}`"
-        class="slider"
-        type="range"
-        min="0"
-        max="100"
-        v-model="reactiveValues[i]"
-        disabled
       >
       <label
         :for="`slider-${i}`"
@@ -29,7 +19,7 @@
       </label>
     </div>
     <b-button
-      @click="$emit('submit', reactiveValues)"
+      @click="$emit('submit', sliderValues)"
       size="sm"
       :disabled="disabled"
     >
@@ -45,26 +35,33 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from "vue";
+
 import {roundToFixed} from "@/utils";
 
-export default {
+interface SliderItem {
+  name: string,
+  value: number
+}
+
+export default Vue.extend({
   name: "BalancedSlider",
 
   props: {
     initValues: {
-      type: Array,
+      type: Array as () => Array<SliderItem>,
       required: true,
-      validator: function (arr) {
-        if (arr.length === 0) {
+      validator: function (initValues: Array<SliderItem>) {
+        if (initValues.length === 0) {
           console.error("initValues must have values")
           return false; // Array must have values
         }
-        if (!arr.every(elem => elem.value >= 0 && elem.value <= 100)){
+        if (!initValues.every(elem => elem.value >= 0 && elem.value <= 100)) {
           console.error("All initValues must be between 0 and 100")
           return false; // All element values must be between 0 and 100
         }
-        const sum = arr.reduce((partialSum, elem) => partialSum + elem.value, 0)
+        const sum = initValues.reduce((partialSum, elem) => partialSum + elem.value, 0)
         const sum2dp = Math.round(sum * 100) / 100
         if (sum2dp !== 100) {
           console.error(`initValues must sum to 100, instead got ${sum}`)
@@ -84,44 +81,39 @@ export default {
 
   data() {
     return {
-      value: null,
-      reactiveValues: []
-    }
-  },
-
-  created() {
-    this.value = this.initValues[0].value;
-  },
-
-  watch: {
-    value(newValue) {
-      const reactedValues = [];
-      for (const [i, initValue] of this.initValues.entries()) {
-        if (i === 0) {
-          reactedValues.push(newValue)
-        } else {
-          const weight = initValue.value / (100 - this.initValues[0].value)
-          const updatedSubValue = weight * (100 - newValue)
-          reactedValues.push(updatedSubValue)
-        }
-      }
-      this.$emit('input', newValue)
-      this.$emit('change-sliders', reactedValues)
-      this.reactiveValues = reactedValues
+      sliderValues: this.initValues.map(initValue => initValue.value)
     }
   },
 
   methods: {
     onResetDefaultClicked() {
-      this.value = this.initValues[0].value
-      this.$emit('submit', this.reactiveValues)
+      this.sliderValues = this.initValues.map(initValue => initValue.value)
+      this.$emit('submit', this.sliderValues)
     },
 
-    formattedSliderValue(i) {
-      return `${roundToFixed(this.reactiveValues[i], 2)}%`
-    }
+    formattedSliderValue(i: number): string {
+      return `${roundToFixed(this.sliderValues[i], 2)}%`
+    },
+
+    onChange(sliderIndex: number) {
+      const changedSliderValue = this.sliderValues[sliderIndex]
+      const reactedValues = [];
+      for (const [i, initValue] of this.initValues.entries()) {
+        if (i === sliderIndex) {
+          reactedValues.push(changedSliderValue)
+        } else {
+          const weight = initValue.value / (100 - this.initValues[sliderIndex].value)
+          const updatedSubValue = weight * (100 - changedSliderValue)
+          reactedValues.push(updatedSubValue)
+        }
+      }
+      this.$emit('input', reactedValues)
+      this.$emit('change-sliders', reactedValues)
+      this.sliderValues = reactedValues
+
+    },
   }
-}
+});
 </script>
 
 <style scoped>
