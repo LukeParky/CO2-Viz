@@ -262,7 +262,9 @@ export default Vue.extend({
     },
 
     formattedTotals(): { CO2: string, VKT: string, baselineCo2: string, percentageChange: string } {
-      const percentageChangeValue = roundToFixed(Math.abs(this.totals.CO2 - this.baselineCo2) / 100, 2)
+      const percentageChangeValue = roundToFixed(
+        Math.abs(this.totals.CO2 - this.baselineCo2) / this.baselineCo2 * 100,
+        2)
       const co2Rounded = parseInt(roundToFixed(this.totals.CO2));
       const vktRounded = parseInt(roundToFixed(this.totals.VKT * 1000));
       const baselineCo2Rounded = parseInt(roundToFixed(this.baselineCo2))
