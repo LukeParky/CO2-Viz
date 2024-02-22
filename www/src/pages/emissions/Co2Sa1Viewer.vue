@@ -25,7 +25,6 @@
         v-if="sliderDefaultValues.length > 0"
         :init-values="sliderDefaultValues"
         @submit="changeUseRates($event)"
-        :disabled="selectedFuelType !== 'all'"
       />
     </div>
   </div>
@@ -92,12 +91,10 @@ export default Vue.extend({
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
       vktUseRates: [] as { fuel_type: string, VKT: number, CO2: number, weight: number }[],
       sliderDefaultValues: [] as { name: string, value: number }[],
-      selectedFuelType: "",
     }
   },
 
   async created() {
-    this.selectedFuelType = this.fuelTypeOptions[0].key
     this.vktUseRates = await this.fetchVktSums();
     this.sliderDefaultValues = this.vktUseRates.map(obj => ({name: obj.fuel_type, value: obj.weight}))
   },
@@ -107,13 +104,6 @@ export default Vue.extend({
     this.dataSources.geoJsonDataSources = [geojson]
 
     await this.styleSa1s();
-
-  },
-
-  watch: {
-    selectedFuelType() {
-      this.styleSa1s()
-    },
 
   },
 
@@ -189,9 +179,6 @@ export default Vue.extend({
         return
       }
       const sa1s = geoJsons[0]
-
-      const sqlView = this.selectedFuelType === "all" ? "all_cars" : "fuel_type";
-      const co2Properties = this.selectedFuelType === "all" ? this.co2PrefixedFuelTypes : "CO2";
       const propertyRequestUrl = axios.getUri({
         url: `${this.geoserverHost}/geoserver/sa1_emissions/ows`,
         params: {
@@ -199,9 +186,8 @@ export default Vue.extend({
           version: "1.0.0",
           request: "GetFeature",
           outputFormat: "application/json",
-          typeName: `sa1_emissions:sa1_emissions_${sqlView}`,
-          viewparams: `FUEL_TYPE:${this.selectedFuelType}`,
-          propertyname: `(SA12018_V1_00,VKT,AREA_SQ_KM,${co2Properties})`,
+          typeName: "sa1_emissions:sa1_emissions_all_cars",
+          propertyname: `(SA12018_V1_00,VKT,AREA_SQ_KM,${this.co2PrefixedFuelTypes})`,
           cql_filter: `UR2023_V1_00_NAME ILIKE '${this.urbanAreaName}'`
         }
       });
@@ -246,16 +232,6 @@ export default Vue.extend({
         return `CO2_${fuelTypeNoSpaces}`;
       });
       return fuelTypesPrefixed.join(",")
-    },
-
-    fuelTypeOptions(): { display: string, key: string }[] {
-      const fuelTypeOptions = [{display: "All Fuel Types", key: "all"}];
-      const fuelTypesAsDisplayKey = this.fuelTypes.map(fuelType => ({
-        display: fuelType,
-        key: fuelType.toLowerCase().split(" ")[0]
-      }))
-      fuelTypeOptions.push(...fuelTypesAsDisplayKey)
-      return fuelTypeOptions
     },
 
     totals(): { CO2: number, VKT: number } {
