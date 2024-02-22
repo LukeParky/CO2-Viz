@@ -99,7 +99,7 @@ const routes: RouteConfig[] = [
   {
     path: '*',
     name: RouterLocations.Root.Root,
-    redirect: {name: RouterLocations.Emissions.Christchurch}
+    redirect: {name: RouterLocations.Root.About}
   }
 ];
 export default routes;
