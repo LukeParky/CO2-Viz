@@ -34,7 +34,7 @@
     </div>
     <h2>Working Papers</h2>
     <p>
-      Campbell, Malcolm and Conrow, Lindsey and Logan, Tom and Kingham, Simon, <i>International Case Studies Report for in
+      Campbell M, Conrow L, Logan T, Kingham S <i>International Case Studies Report for in
       Greenhouse Gas Emissions Reductions: A Selected Portfolio of International Examples of Greenhouse Gas Emission
       Reduction Exemplars.</i> (October 31, 2022). Available at SSRN:
       <a href="https://ssrn.com/abstract=4410167">https://ssrn.com/abstract=4410167</a>
@@ -43,10 +43,10 @@
     </p>
     <p>And</p>
     <p>
-      Campbell, Malcolm and Conrow, Lindsey and Kingham, Simon and Logan, Tom, <i>Working paper: Lessons learned on how to
-      design Aotearoa New Zealand’s urban centres to better enable low(er) carbon living.</i> (March 1, 2023). Available at
-      SSRN: <a href="https://ssrn.com/abstract=4486347">https://ssrn.com/abstract=4486347</a> or <a
-      href="https://dx.doi.org/10.2139/ssrn.4486347">https://dx.doi.org/10.2139/ssrn.4486347</a>.
+      Campbell M, Conrow L, Logan T, Kingham S <i>Working paper: Lessons learned on how to
+      design Aotearoa New Zealand’s urban centres to better enable low(er) carbon living.</i> (March 1, 2023).
+      Available at SSRN: <a href="https://ssrn.com/abstract=4486347">https://ssrn.com/abstract=4486347</a> or
+      <a href="https://dx.doi.org/10.2139/ssrn.4486347">https://dx.doi.org/10.2139/ssrn.4486347</a>.
     </p>
   </main>
 </template>
