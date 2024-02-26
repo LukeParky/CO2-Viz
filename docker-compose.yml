@@ -1,5 +1,8 @@
 version: '3.8'
 
+include:
+  - ../nginx-proxy-docker/docker-compose.yml
+
 volumes:
   postgis_vol:
   geoserver_vol:
@@ -30,8 +33,9 @@ services:
     depends_on:
       - postgis
     environment:
-      - SKIP_DEMO_DATA=true
-      - CORS_ENABLED=true
+      VIRTUAL_HOST: ${GEOSERVER_VIRTUAL_HOST}
+      SKIP_DEMO_DATA: true
+      CORS_ENABLED: true
     ports:
       - "${GEOSERVER_PORT}:8080"
     restart: always
@@ -48,11 +52,10 @@ services:
       context: ./www
     container_name: www_digital_twin
     environment:
-      - VUE_APP_CESIUM_ACCESS_TOKEN=$CESIUM_ACCESS_TOKEN
-      - VUE_APP_GEOSERVER_HOST=$GEOSERVER_HOST
-      - VUE_APP_GEOSERVER_PORT=$GEOSERVER_PORT
-    ports:
-      - "${WWW_PORT}:80"
+      VIRTUAL_HOST: ${WWW_VIRTUAL_HOST}
+      VUE_APP_CESIUM_ACCESS_TOKEN: ${CESIUM_ACCESS_TOKEN}
+      VUE_APP_GEOSERVER_HOST: ${GEOSERVER_HOST}
+      VUE_APP_GEOSERVER_PORT: ${GEOSERVER_PORT}
     restart: always
 
   initialise_db:
