@@ -28,10 +28,10 @@ def find_flows(engine: sqlalchemy.engine.Engine, urban_area_name: str) -> pd.Dat
     all_flows_query = """
             SELECT "SA2_code_usual_residence_address"                                        AS origin,
                    "SA2_code_workplace_address"                                              AS dest,
-                   ("Walk_or_jog" + "Bicycle")                                               AS "Active_Transport",
-                   ("Public_bus" + "Train" + "Ferry")                                        AS "Public_Transport",
+                   ("Walk_or_jog" + "Bicycle")                                               AS "Active Transport",
+                   ("Public_bus" + "Train" + "Ferry")                                        AS "Public Transport",
                    ("Drive_a_private_car_truck_or_van" + "Drive_a_company_car_truck_or_van") AS "Drive",
-                   "Passenger_in_a_car_truck_van_or_company_bus"                             AS "Passenger_Car_Truck_Van_Co_Bus",
+                   "Passenger_in_a_car_truck_van_or_company_bus"                             AS "Passenger",
                    "Other",
                    "Total"
             
