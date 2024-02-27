@@ -1,8 +1,5 @@
 version: '3.8'
 
-include:
-  - ../nginx-proxy-docker/docker-compose.yml
-
 volumes:
   postgis_vol:
   geoserver_vol:
@@ -71,3 +68,8 @@ services:
         condition: service_healthy
       geoserver:
         condition: service_healthy
+
+networks:
+  default:
+    name: webproxy
+    external: true
