@@ -39,6 +39,12 @@
         @submit="changeUseRates($event)"
       />
     </div>
+    <ColorLegend
+      id="legend"
+      class="card"
+      :legend-steps="legendSteps"
+      axis-label="'000 Vehicle km / year"
+    />
   </div>
 </template>
 
@@ -51,6 +57,7 @@ import {MapViewerDataSourceOptions} from "geo-visualisation-components/src/types
 import Vue from "vue";
 
 import BalancedSlider from "@/components/BalancedSlider.vue";
+import ColorLegend, {HexColor, LegendStep} from "@/components/ColorLegend.vue";
 import {roundToFixed} from "@/utils";
 
 interface Sa1Emissions {
@@ -67,6 +74,7 @@ export default Vue.extend({
   name: "Co2Sa1Viewer",
   components: {
     BalancedSlider,
+    ColorLegend,
     MapViewer,
   },
 
@@ -104,6 +112,9 @@ export default Vue.extend({
       vktUseRates: [] as { fuel_type: string, VKT: number, CO2: number, weight: number }[],
       baselineCo2: 0,
       sliderDefaultValues: [] as { name: string, value: number }[],
+      colorScale: chroma.scale(chroma.brewer.Reds),
+      vktColorScalingFactor: 50000,
+      co2HeightScalingFactor: 5,
     }
   },
 
@@ -186,6 +197,14 @@ export default Vue.extend({
       return {area_sq_km: sa1.AREA_SQ_KM, vkt: sa1.VKT, co2}
     },
 
+    getColorFromVkt(vkt: number): chroma.Color {
+      return this.colorScale(vkt / this.vktColorScalingFactor);
+    },
+
+    getExtrudedHeightFromCo2(co2: number): number {
+      return co2 / this.co2HeightScalingFactor;
+    },
+
     async styleSa1s(): Promise<void> {
       console.log("Loading started")
       const geoJsons = this.dataSources.geoJsonDataSources;
@@ -207,7 +226,6 @@ export default Vue.extend({
       });
       const propertyJson = await axios.get(propertyRequestUrl);
       const emissionsData = propertyJson.data.features as { properties: Sa1Emissions }[]
-      const colorScale = chroma.scale(chroma.brewer.Reds);
       const sa1Entities = sa1s.entities.values;
       const sa1IdColumnName = "SA12018_V1_00";
       for (const entity of sa1Entities) {
@@ -219,10 +237,11 @@ export default Vue.extend({
           polyGraphics = new Cesium.PolygonGraphics({show: false})
         } else {
           const {vkt, co2} = this.getStyleInputVariables(entityData.properties)
-          const color = colorScale(vkt / 50000)
+          const color = this.getColorFromVkt(vkt);
+          const extrudedHeight = this.getExtrudedHeightFromCo2(co2);
           polyGraphics = new Cesium.PolygonGraphics({
+            extrudedHeight,
             show: true,
-            extrudedHeight: co2 / 5,
             material: new Cesium.Color(...color.gl()),
             outlineColor: new Cesium.Color(...color.darken().gl()),
           });
@@ -289,6 +308,22 @@ export default Vue.extend({
       if (this.totals.CO2 < this.baselineCo2)
         return "good-color"
       return "bad-color"
+    },
+
+    legendSteps(): LegendStep[] {
+      const numberOfSteps = 5;
+      const steps = [] as LegendStep[]
+      for (let i = 0; i < numberOfSteps; i ++) {
+        const scaleProportion = (i / numberOfSteps)
+        const vktValue = scaleProportion * this.vktColorScalingFactor
+        const vktRounded = parseInt(roundToFixed(vktValue)).toLocaleString()
+        const vktColor = this.colorScale(scaleProportion).hex() as HexColor
+        steps.push({
+          label: vktRounded,
+          color: vktColor
+        });
+      }
+      return steps;
     }
   }
 });
