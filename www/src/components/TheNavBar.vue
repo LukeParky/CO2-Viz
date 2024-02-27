@@ -2,7 +2,6 @@
   <!-- Navigation Bar to allow switching between different pages in the app -->
   <div>
     <b-navbar type="light" variant="light">
-      <b-navbar-toggle target="nav-text-collapse" />
       <b-navbar-brand :to="{name: routerLocations.Root.Root}">
         Carbon Neutral Neighbourhoods
       </b-navbar-brand>
@@ -27,6 +26,11 @@
           </b-nav-item>
         </b-navbar-nav>
       </b-collapse>
+      <b-navbar-brand href="https://geospatial.ac.nz">
+        <img
+          src="GRI_no_subtitle_transparent.png"
+          alt="Geospatial Research Institute Logo">
+      </b-navbar-brand>
     </b-navbar>
   </div>
 </template>
@@ -47,5 +51,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-
+nav img {
+  max-height: 30px;
+}
 </style>
