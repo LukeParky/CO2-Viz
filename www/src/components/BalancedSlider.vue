@@ -9,8 +9,12 @@
         max="100"
         v-model.number="sliderValues[i]"
         @input="onChange(i)"
-        :disabled="disabled"
+        :disabled="sliderLocks[i] || disabled"
       >
+      <LockCheckbox
+        :id="`slider-lock-${i}`"
+        v-model="sliderLocks[i]"
+      />
       <label
         :for="`slider-${i}`"
         :disabled="disabled"
@@ -40,6 +44,7 @@
 import Vue from "vue";
 
 import {roundToFixed} from "@/utils";
+import LockCheckbox from "@/components/LockCheckbox.vue";
 
 interface SliderItem {
   name: string,
@@ -48,7 +53,7 @@ interface SliderItem {
 
 export default Vue.extend({
   name: "BalancedSlider",
-
+  components: {LockCheckbox},
   props: {
     initValues: {
       type: Array as () => Array<SliderItem>,
@@ -82,12 +87,15 @@ export default Vue.extend({
 
   data() {
     return {
-      sliderValues: this.initValues.map(initValue => initValue.value)
+      sliderValues: this.initValues.map(initValue => initValue.value),
+      sliderLocks: new Array(this.initValues.length).fill(false) as boolean[]
     }
   },
 
+
   methods: {
     onResetDefaultClicked() {
+      this.sliderLocks = this.sliderLocks.fill(false)
       this.sliderValues = this.initValues.map(initValue => initValue.value)
       this.$emit('submit', this.sliderValues)
     },
@@ -97,14 +105,17 @@ export default Vue.extend({
     },
 
     onChange(sliderIndex: number) {
-      const changedSliderValue = this.sliderValues[sliderIndex]
+      const maxChangedSliderValue = 100 - this.lockedSum
+      const changedSliderValue = Math.min(this.sliderValues[sliderIndex], maxChangedSliderValue)
       const reactedValues = [];
       for (const [i, initValue] of this.initValues.entries()) {
         if (i === sliderIndex) {
           reactedValues.push(changedSliderValue)
+        } else if (this.sliderLocks[i]) {
+          reactedValues.push(this.sliderValues[i])
         } else {
-          const weight = initValue.value / (100 - this.initValues[sliderIndex].value)
-          const updatedSubValue = weight * (100 - changedSliderValue)
+          const weight = initValue.value / (100 - this.initValues[sliderIndex].value - this.lockedSum)
+          const updatedSubValue = weight * (100 - changedSliderValue - this.lockedSum)
           reactedValues.push(updatedSubValue)
         }
       }
@@ -113,6 +124,18 @@ export default Vue.extend({
       this.sliderValues = reactedValues
 
     },
+  },
+
+  computed: {
+    lockedSum(): number {
+      let lockedSum = 0;
+      for (const [i, isLocked] of this.sliderLocks.entries()) {
+        if (isLocked) {
+          lockedSum += this.sliderValues[i];
+        }
+      }
+      return lockedSum;
+    }
   }
 });
 </script>
@@ -130,6 +153,7 @@ export default Vue.extend({
 
 .slider {
   min-width: 12em;
+  vertical-align: middle;
 }
 
 label {
