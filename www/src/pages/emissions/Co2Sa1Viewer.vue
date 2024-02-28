@@ -249,7 +249,7 @@ export default Vue.extend({
               <tr><th>SA12018_V1_00</th><td>${sa1Emissions.SA12018_V1_00}</td></tr>
               <tr><th>Area (km&sup2)</th><td>${roundToFixed(sa1Emissions.AREA_SQ_KM, 4)}</td></tr>
               <tr><th>CO2 (T/Y)</th><td>${roundToFixed(co2)}</td></tr>
-              <tr><th>VKT ('000 km/Y)</th><td>${roundToFixed(vkt)}</td></tr>
+              <tr><th>VKT (km/Y)</th><td>${roundToFixed(vkt * 1000)}</td></tr>
             </tbody>
           </table>
         </div>
