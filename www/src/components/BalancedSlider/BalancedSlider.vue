@@ -1,28 +1,18 @@
 <template>
-  <div id="balanced-slider">
-    <div v-for="(initValue, i) in initValues" :key="i">
-      <input
-        :id="`slider-${i}`"
-        class="slider"
-        type="range"
-        min="0"
-        max="100"
-        v-model.number="sliderValues[i]"
-        @input="onChange(i)"
-        :disabled="sliderLocks[i] || disabled"
-      >
-      <LockCheckbox
-        :id="`slider-lock-${i}`"
-        v-model="sliderLocks[i]"
-      />
-      <label
-        :for="`slider-${i}`"
-        :disabled="disabled"
-      >
-        {{ initValue.name }}:
-        <span class="value">{{ formattedSliderValue(i) }}</span>
-      </label>
-    </div>
+  <div
+    id="balanced-slider"
+    :key="componentKey"
+  >
+    <BalancedSliderRow
+      v-for="(initValue, i) in initValues"
+      :ref="`slider-row-${i}`"
+      :key="i"
+      :name="initValue.name"
+      v-model.number="sliderValues[i]"
+      :locked="sliderLocks[i]"
+      @input="onChange(i, $event)"
+      @lock-change="onLockChange(i, $event)"
+    />
     <b-button
       @click="$emit('submit', sliderValues)"
       size="sm"
@@ -45,15 +35,22 @@ import Vue from "vue";
 
 import {roundToFixed} from "@/utils";
 import LockCheckbox from "@/components/LockCheckbox.vue";
+import BalancedSliderRow from "@/components/BalancedSlider/BalancedSliderRow.vue";
 
 interface SliderItem {
   name: string,
   value: number
 }
 
+type VModel = Vue & { value: number }
+
+
 export default Vue.extend({
   name: "BalancedSlider",
-  components: {LockCheckbox},
+  components: {
+    BalancedSliderRow,
+    LockCheckbox
+  },
   props: {
     initValues: {
       type: Array as () => Array<SliderItem>,
@@ -88,7 +85,8 @@ export default Vue.extend({
   data() {
     return {
       sliderValues: this.initValues.map(initValue => initValue.value),
-      sliderLocks: new Array(this.initValues.length).fill(false) as boolean[]
+      sliderLocks: new Array(this.initValues.length).fill(false) as boolean[],
+      componentKey: 0,
     }
   },
 
@@ -104,9 +102,10 @@ export default Vue.extend({
       return `${roundToFixed(this.sliderValues[i], 2)}%`
     },
 
-    onChange(sliderIndex: number) {
-      const maxChangedSliderValue = 100 - this.lockedSum
-      const changedSliderValue = Math.min(this.sliderValues[sliderIndex], maxChangedSliderValue)
+    async onChange(sliderIndex: number, sliderValue: number) {
+      const lockedSum = this.getLockedSum();
+      const maxChangedSliderValue = 100 - lockedSum
+      const changedSliderValue = Math.min(sliderValue, maxChangedSliderValue)
       const reactedValues = [];
       for (const [i, initValue] of this.initValues.entries()) {
         if (i === sliderIndex) {
@@ -114,8 +113,8 @@ export default Vue.extend({
         } else if (this.sliderLocks[i]) {
           reactedValues.push(this.sliderValues[i])
         } else {
-          let weight = initValue.value / (100 - this.initValues[sliderIndex].value - this.lockedInitSum)
-          const updatedSubValue = weight * (100 - changedSliderValue - this.lockedSum)
+          let weight = initValue.value / (100 - this.initValues[sliderIndex].value - this.getLockedInitSum())
+          const updatedSubValue = weight * (100 - changedSliderValue - lockedSum)
           reactedValues.push(updatedSubValue)
         }
       }
@@ -123,11 +122,25 @@ export default Vue.extend({
       this.$emit('change-sliders', reactedValues)
       this.sliderValues = reactedValues
 
+      const rowComponent = this.$refs[`slider-row-${sliderIndex}`] as VModel[];
+      const sliderComponent = rowComponent[0].$refs.slider as VModel;
+      const spinnerComponent = rowComponent[0].$refs.spinner as VModel;
+      await this.$nextTick()
+      if (rowComponent[0].value != sliderComponent.value || rowComponent[0].value != spinnerComponent.value) {
+        this.forceRerender()
+      }
     },
-  },
 
-  computed: {
-    lockedSum(): number {
+    onLockChange(lockRowIndex: number, newIsLocked: boolean) {
+      const numberLocked = this.sliderLocks
+        .map(isLocked => +isLocked)
+        .reduce((partialSum, current) => partialSum + current, 0)
+      if (!newIsLocked || numberLocked < this.sliderLocks.length - 2) {
+        this.$set(this.sliderLocks, lockRowIndex, newIsLocked);
+      }
+    },
+
+    getLockedSum(): number {
       let lockedSum = 0;
       for (const [i, isLocked] of this.sliderLocks.entries()) {
         if (isLocked) {
@@ -137,7 +150,7 @@ export default Vue.extend({
       return lockedSum;
     },
 
-    lockedInitSum(): number {
+    getLockedInitSum(): number {
       let lockedInitSum = 0;
       for (const [i, isLocked] of this.sliderLocks.entries()) {
         if (isLocked) {
@@ -146,7 +159,22 @@ export default Vue.extend({
       }
       return lockedInitSum;
     },
-  }
+
+    forceRerender() {
+      this.componentKey++;
+    }
+  },
+
+  computed: {
+    sliderValuesDisplay: {
+      get(): number[] {
+        return this.sliderValues.map(sliderValue => parseFloat(roundToFixed(sliderValue, 2)))
+      },
+      set(newValues: number[]) {
+        this.sliderValues = newValues;
+      }
+    },
+  },
 });
 </script>
 
@@ -159,15 +187,5 @@ export default Vue.extend({
 .btn {
   float: right;
   margin: 15px 5px 5px 5px
-}
-
-.slider {
-  min-width: 12em;
-  vertical-align: middle;
-}
-
-label {
-  display: inline;
-  min-width: 10em;
 }
 </style>
