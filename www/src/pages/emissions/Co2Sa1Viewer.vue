@@ -417,9 +417,8 @@ export default Vue.extend({
 <style>
 #legend {
   position: absolute;
-  bottom: 40px;
+  bottom: 0;
   right: 30px;
-  height: 175px;
 }
 
 #control-card {

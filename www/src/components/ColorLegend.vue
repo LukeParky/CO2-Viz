@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h1>Legend</h1>
-    <div class="legend-container"
-    >
+    <h2>Legend</h2>
+    <p>'000 Vehicle km travelled</p>
+    <div class="legend-container">
       <div class="legend-labels">
         <div
           v-for="step in legendSteps"
@@ -13,9 +13,8 @@
       </div>
       <div class="legend-colors">
         <div
-          v-for="step in legendSteps"
           class="color-box"
-          :style="`background-color: ${step.color};`" />
+          :style="`height: ${legendSteps.length * 1.5}em; background-image: linear-gradient(${firstColour}, ${lastColour}`" />
       </div>
     </div>
   </div>
@@ -57,6 +56,16 @@ export default Vue.extend({
       }
     }
   },
+
+  computed: {
+    firstColour(): string {
+      return this.legendSteps[0].color
+    },
+
+    lastColour(): string {
+      return this.legendSteps[this.legendSteps.length - 1].color
+    },
+  }
 });
 </script>
 
