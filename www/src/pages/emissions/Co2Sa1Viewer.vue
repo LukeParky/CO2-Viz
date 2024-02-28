@@ -56,7 +56,7 @@ import {MapViewer} from 'geo-visualisation-components/src/components';
 import {MapViewerDataSourceOptions} from "geo-visualisation-components/src/types";
 import Vue from "vue";
 
-import BalancedSlider from "@/components/BalancedSlider.vue";
+import BalancedSlider from "@/components/BalancedSlider";
 import ColorLegend, {HexColor, LegendStep} from "@/components/ColorLegend.vue";
 import {roundToFixed} from "@/utils";
 
