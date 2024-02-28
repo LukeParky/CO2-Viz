@@ -52,7 +52,8 @@ def get_workbook_config_page(urban_area_name: str, columns: List[str]) -> pd.Dat
         ["title", f"{urban_area_name} Mode Shares"],
         ["description", f"Means of travel to work for the {urban_area_name} area"],
         ["source.name", "2018 Census Main means of travel to work by Statistical Area 2"],
-        ["source.url", "https://datafinder.stats.govt.nz/table/104720-2018-census-main-means-of-travel-to-work-by-statistical-area-2/"],
+        ["source.url",
+         "https://datafinder.stats.govt.nz/table/104720-2018-census-main-means-of-travel-to-work-by-statistical-area-2/"],
         ["createdBy.name", "Geospatial Research Institute | Toi Hangarau"],
         ["createdBy.url", "http://geospatial.ac.nz"],
         ["mapbox.mapStyle", ""],
@@ -60,7 +61,13 @@ def get_workbook_config_page(urban_area_name: str, columns: List[str]) -> pd.Dat
         ["colors.darkMode", "no"],
         ["animate.flows", "no"],
         ["clustering", "no"],
-        ["flows.sheets", ','.join(columns)]
+        ["flows.sheets", ','.join(columns)],
+        ["msg.locationTooltip.incoming", "Inbound commuters"],
+        ["msg.locationTooltip.outgoing", "Outbound commuters"],
+        ["msg.locationTooltip.internal", "Internal commuters"],
+        ["msg.flowTooltip.numOfTrips", "Number of commuters"],
+        ["msg.totalCount.allTrips", "{0} commuters"],
+        ["msg.totalCount.countOfTrips", "{0} of {1} commuters"],
     ])
 
 
