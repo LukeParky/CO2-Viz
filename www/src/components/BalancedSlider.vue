@@ -114,7 +114,7 @@ export default Vue.extend({
         } else if (this.sliderLocks[i]) {
           reactedValues.push(this.sliderValues[i])
         } else {
-          const weight = initValue.value / (100 - this.initValues[sliderIndex].value - this.lockedSum)
+          let weight = initValue.value / (100 - this.initValues[sliderIndex].value - this.lockedInitSum)
           const updatedSubValue = weight * (100 - changedSliderValue - this.lockedSum)
           reactedValues.push(updatedSubValue)
         }
@@ -135,7 +135,17 @@ export default Vue.extend({
         }
       }
       return lockedSum;
-    }
+    },
+
+    lockedInitSum(): number {
+      let lockedInitSum = 0;
+      for (const [i, isLocked] of this.sliderLocks.entries()) {
+        if (isLocked) {
+          lockedInitSum += this.initValues[i].value;
+        }
+      }
+      return lockedInitSum;
+    },
   }
 });
 </script>
