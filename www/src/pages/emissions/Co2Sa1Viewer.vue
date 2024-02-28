@@ -105,7 +105,7 @@ export default Vue.extend({
 
   data() {
     return {
-      baseLayer: new Cesium.ImageryLayer(new Cesium.OpenStreetMapImageryProvider({}), {}),
+      baseLayer: new Cesium.ImageryLayer(new Cesium.OpenStreetMapImageryProvider({}), {saturation: 0}),
       geoserverHost: `${process.env.VUE_APP_GEOSERVER_HOST}:${process.env.VUE_APP_GEOSERVER_PORT}`,
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
