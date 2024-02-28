@@ -28,7 +28,7 @@
       </b-collapse>
       <b-navbar-brand href="https://geospatial.ac.nz">
         <img
-          src="GRI_no_subtitle_transparent.png"
+          src="/GRI_no_subtitle_transparent.png"
           alt="Geospatial Research Institute Logo">
       </b-navbar-brand>
     </b-navbar>
