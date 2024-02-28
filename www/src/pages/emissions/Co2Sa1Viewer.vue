@@ -241,6 +241,22 @@ export default Vue.extend({
       this.styleSa1s()
     },
 
+    getInfoBoxTable(sa1Emissions: Sa1Emissions, co2: number, vkt: number): Cesium.Property | undefined {
+      const infoBox = `
+        <div class="cesium-infoBox-description">
+          <table class="cesium-infoBox-defaultTable">
+            <tbody>
+              <tr><th>SA12018_V1_00</th><td>${sa1Emissions.SA12018_V1_00}</td></tr>
+              <tr><th>Area (km&sup2)</th><td>${roundToFixed(sa1Emissions.AREA_SQ_KM, 4)}</td></tr>
+              <tr><th>CO2 (T/Y)</th><td>${roundToFixed(co2)}</td></tr>
+              <tr><th>VKT ('000 km/Y)</th><td>${roundToFixed(vkt)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      `
+      return infoBox as unknown as Cesium.Property
+    },
+
     getStyleInputVariables(sa1: Sa1Emissions): { area_sq_km: number, vkt: number, co2: number } {
       let co2 = sa1.CO2;
       if (co2 === undefined) {
@@ -298,6 +314,8 @@ export default Vue.extend({
           polyGraphics = new Cesium.PolygonGraphics({show: false})
         } else {
           const {vkt, co2} = this.getStyleInputVariables(entityData.properties)
+          entity.description = this.getInfoBoxTable(entityData.properties, co2, vkt)
+
           const color = this.getColorFromVkt(vkt);
           const extrudedHeight = this.getExtrudedHeightFromCo2(co2);
           polyGraphics = new Cesium.PolygonGraphics({
