@@ -13,20 +13,6 @@
       @input="onChange(i, $event)"
       @lock-change="onLockChange(i, $event)"
     />
-    <b-button
-      @click="$emit('submit', sliderValues)"
-      size="sm"
-      :disabled="disabled"
-    >
-      Update
-    </b-button>
-    <b-button
-      @click="onResetDefaultClicked"
-      size="sm"
-      :disabled="disabled"
-    >
-      Reset to baseline
-    </b-button>
   </div>
 </template>
 
@@ -92,6 +78,10 @@ export default Vue.extend({
 
 
   methods: {
+    onUpdateClicked() {
+      this.$emit('submit', this.sliderValues);
+    },
+
     onResetDefaultClicked() {
       this.sliderLocks = this.sliderLocks.fill(false)
       this.sliderValues = this.initValues.map(initValue => initValue.value)
@@ -182,10 +172,5 @@ export default Vue.extend({
 #balanced-slider {
   min-width: inherit;
   padding: 5px;
-}
-
-.btn {
-  float: right;
-  margin: 15px 5px 5px 5px
 }
 </style>

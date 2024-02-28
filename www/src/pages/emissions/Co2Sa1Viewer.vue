@@ -28,15 +28,16 @@
           ( {{ percentageChanges.CO2 }})&nbsp
         </span>
       </p>
-      <p>
-        Baseline Vehicle Km Travelled:
-        <span class="value">{{ formattedTotals.baselineVKT }}</span>
-      </p>
       <BalancedSlider
+        ref="balanced-slider"
         v-if="sliderDefaultValues.length > 0"
         :init-values="sliderDefaultValues"
         @submit="changeUseRates($event)"
       />
+      <p>
+        Baseline Vehicle Km Travelled:
+        <span class="value">{{ formattedTotals.baselineVKT }}</span>
+      </p>
       <p>
         Scenario Vehicle Km Travelled:
         <span class="value">{{ formattedTotals.VKT }}</span>
@@ -62,6 +63,18 @@
           <label for="vkt-spinner">%</label>
         </span>
       </div>
+      <b-button
+        @click="onUpdateClicked"
+        size="sm"
+      >
+        Update
+      </b-button>
+      <b-button
+        @click="onResetDefaultClicked"
+        size="sm"
+      >
+        Reset to baseline
+      </b-button>
     </div>
     <ColorLegend
       id="legend"
@@ -202,6 +215,19 @@ export default Vue.extend({
       const fuel_to_vkts = features.map(feature => feature.properties)
       const total_vkt = fuel_to_vkts.reduce((partialSum, entry) => partialSum + entry.VKT, 0)
       return fuel_to_vkts.map(entry => ({...entry, weight: entry.VKT / total_vkt * 100}))
+    },
+
+    onUpdateClicked() {
+      const balancedSlider = this.$refs['balanced-slider'] as Vue & {onUpdateClicked: () => void}
+      this.VKT = this.VKTSlider as number / 100 * this.baselineVKT;
+      balancedSlider.onUpdateClicked();
+    },
+
+    onResetDefaultClicked() {
+      const balancedSlider = this.$refs['balanced-slider'] as Vue & {onResetDefaultClicked: () => void}
+      this.VKTSlider = 100;
+      this.VKT = this.baselineVKT;
+      balancedSlider.onResetDefaultClicked();
     },
 
     changeUseRates(changeEvent: number[]) {
@@ -422,6 +448,11 @@ export default Vue.extend({
 .vkt-adjuster input[type=range] {
   min-width: 10em;
   margin-left: 1em;
+}
+
+.btn {
+  float: right;
+  margin: 15px 5px 5px 5px
 }
 
 </style>
