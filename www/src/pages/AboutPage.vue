@@ -16,18 +16,18 @@
     <div class="row container-fluid">
       <div class="col-lg-12 col-md-12 col-xs-12 thumb">
         <a href="https://www.branz.co.nz/investing-research/building-research-levy/">
-          <img class="img-fluid" src="branz-logo.png" alt="BRANZ inc. logo">
+          <img class="img-fluid" src="/branz-logo.png" alt="BRANZ inc. logo">
         </a>
       </div>
       <div class="row container-fluid">
         <div class="col-lg-6 col-md-6 col-xs-6 thumb">
           <a href="https://canterbury.ac.nz">
-            <img class="img-fluid" src="UCRed_RGB.svg" alt="University of Canterbury logo">
+            <img class="img-fluid" src="/UCRed_RGB.svg" alt="University of Canterbury logo">
           </a>
         </div>
         <div class="col-lg-6 col-md-6 col-xs-6 thumb">
           <a href="https://geospatial.ac.nz">
-            <img class="img-fluid" src="GRI_full_logo_transparent.png" alt="Geospatial Research Institute Logo">
+            <img class="img-fluid" src="/GRI_full_logo_transparent.png" alt="Geospatial Research Institute Logo">
           </a>
         </div>
       </div>
