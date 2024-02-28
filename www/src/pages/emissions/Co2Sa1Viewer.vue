@@ -40,22 +40,28 @@
       <p>
         Scenario Vehicle Km Travelled:
         <span class="value">{{ formattedTotals.VKT }}</span>
-        <span
-          class="value"
-          :class="percentageChangeClass.VKT"
-        >
-          ( {{ percentageChanges.VKT }})&nbsp
-        </span>
       </p>
-      <input
-        id="vkt-slider"
-        type="range"
-        min="0"
-        max="1"
-        step="0.01"
-        :value="VKT / baselineVKT"
-        @input="VKT = baselineVKT * $event.target.value"
-      >
+      <div class="vkt-adjuster">
+        <label for="vkt-slider">Adjust Scenario VKT</label>
+        <input
+          id="vkt-slider"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          v-model="VKTSlider"
+        >
+        <span class="value">
+          <input
+            id="vkt-spinner"
+            type="number"
+            v-model="VKTSpinnerDisplay"
+            min="0"
+            max="100"
+          >
+          <label for="vkt-spinner">%</label>
+        </span>
+      </div>
     </div>
     <ColorLegend
       id="legend"
@@ -131,6 +137,7 @@ export default Vue.extend({
       baselineCo2: 0,
       baselineVKT: 0,
       VKT: 0,
+      VKTSlider: 100 as string | number,
       sliderDefaultValues: [] as { name: string, value: number }[],
       colorScale: chroma.scale(chroma.brewer.Reds),
       vktColorScalingFactor: 50000,
@@ -372,7 +379,16 @@ export default Vue.extend({
         });
       }
       return steps;
-    }
+    },
+
+    VKTSpinnerDisplay: {
+      get(): string {
+        return roundToFixed(this.VKTSlider as number, 2)
+      },
+      set(newValue: string) {
+        this.VKTSlider = roundToFixed(parseFloat(newValue), 2)
+      }
+    },
   }
 });
 </script>
@@ -397,6 +413,15 @@ export default Vue.extend({
 
 .good-color {
   color: #367f2e;
+}
+
+.vkt-adjuster {
+  padding-right: 10px;
+}
+
+.vkt-adjuster input[type=range] {
+  min-width: 10em;
+  margin-left: 1em;
 }
 
 </style>
