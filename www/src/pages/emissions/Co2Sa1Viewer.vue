@@ -23,21 +23,39 @@
         <span class="value">{{ formattedTotals.CO2 }}</span>
         <span
           class="value"
-          :class="percentageChangeClass"
+          :class="percentageChangeClass.CO2"
         >
-          ( {{ formattedTotals.percentageChange }})&nbsp
+          ( {{ percentageChanges.CO2 }})&nbsp
         </span>
       </p>
-
       <p>
-        Total Vehicle Km Travelled:
-        <span class="value">{{ formattedTotals.VKT }}</span>
+        Baseline Vehicle Km Travelled:
+        <span class="value">{{ formattedTotals.baselineVKT }}</span>
       </p>
       <BalancedSlider
         v-if="sliderDefaultValues.length > 0"
         :init-values="sliderDefaultValues"
         @submit="changeUseRates($event)"
       />
+      <p>
+        Scenario Vehicle Km Travelled:
+        <span class="value">{{ formattedTotals.VKT }}</span>
+        <span
+          class="value"
+          :class="percentageChangeClass.VKT"
+        >
+          ( {{ percentageChanges.VKT }})&nbsp
+        </span>
+      </p>
+      <input
+        id="vkt-slider"
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        :value="VKT / baselineVKT"
+        @input="VKT = baselineVKT * $event.target.value"
+      >
     </div>
     <ColorLegend
       id="legend"
@@ -111,6 +129,8 @@ export default Vue.extend({
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
       vktUseRates: [] as { fuel_type: string, VKT: number, CO2: number, weight: number }[],
       baselineCo2: 0,
+      baselineVKT: 0,
+      VKT: 0,
       sliderDefaultValues: [] as { name: string, value: number }[],
       colorScale: chroma.scale(chroma.brewer.Reds),
       vktColorScalingFactor: 50000,
@@ -122,6 +142,8 @@ export default Vue.extend({
     this.vktUseRates = await this.fetchVktSums();
     this.sliderDefaultValues = this.vktUseRates.map(obj => ({name: obj.fuel_type, value: obj.weight}))
     this.baselineCo2 = this.vktUseRates.reduce((partialSum, entry) => partialSum + entry.CO2, 0);
+    this.baselineVKT = this.vktUseRates.reduce((partialSum, entry) => partialSum + entry.VKT, 0);
+    this.VKT = this.baselineVKT;
   },
 
   async mounted() {
@@ -194,7 +216,9 @@ export default Vue.extend({
           }
         }
       }
-      return {area_sq_km: sa1.AREA_SQ_KM, vkt: sa1.VKT, co2}
+      co2 = co2 * this.VKT / this.baselineVKT;
+      const vkt = sa1.VKT * this.VKT / this.baselineVKT;
+      return {area_sq_km: sa1.AREA_SQ_KM, vkt, co2}
     },
 
     getColorFromVkt(vkt: number): chroma.Color {
@@ -275,45 +299,69 @@ export default Vue.extend({
           co2Sum += (weight / defaultWeight) * CO2
         }
       }
-
-      const VKT = this.vktUseRates.reduce((partialSum, entry) => partialSum + entry.VKT, 0)
-      return {VKT, CO2: co2Sum}
+      co2Sum = co2Sum * this.VKT / this.baselineVKT;
+      return {VKT: this.VKT, CO2: co2Sum};
     },
 
-    formattedTotals(): { CO2: string, VKT: string, baselineCo2: string, percentageChange: string } {
-      const percentageChangeValue = roundToFixed(
-        Math.abs(this.totals.CO2 - this.baselineCo2) / this.baselineCo2 * 100,
-        2)
+    formattedTotals(): { CO2: string, VKT: string, baselineCo2: string, baselineVKT: string } {
       const co2Rounded = parseInt(roundToFixed(this.totals.CO2));
       const vktRounded = parseInt(roundToFixed(this.totals.VKT * 1000));
       const baselineCo2Rounded = parseInt(roundToFixed(this.baselineCo2))
+      const baselineVKTRounded = parseInt(roundToFixed(this.baselineVKT))
 
       const CO2 = `${co2Rounded.toLocaleString()} Tonnes / Year`
       const VKT = `${vktRounded.toLocaleString()} km / Year`
       const baselineCo2 = `${baselineCo2Rounded.toLocaleString()} Tonnes / Year`
+      const baselineVKT = `${baselineVKTRounded.toLocaleString()} km / Year`
 
-      let percentageSign = ""
-      if (this.totals.CO2 < this.baselineCo2)
-        percentageSign = "- "
-      else if (this.totals.CO2 > this.baselineCo2)
-        percentageSign = "+ "
-      const percentageChange = `${percentageSign}${percentageChangeValue} %`
 
-      return {CO2, VKT, baselineCo2, percentageChange}
+      return {CO2, VKT, baselineCo2, baselineVKT}
     },
 
-    percentageChangeClass(): string {
-      if (this.totals.CO2 === this.baselineCo2)
-        return "";
+    percentageChanges(): { CO2: string, VKT: string } {
+      let percentSignCO2 = ""
       if (this.totals.CO2 < this.baselineCo2)
-        return "good-color"
-      return "bad-color"
+        percentSignCO2 = "- "
+      else if (this.totals.CO2 > this.baselineCo2)
+        percentSignCO2 = "+ "
+      const percentageChangeCO2 = roundToFixed(
+        Math.abs(this.totals.CO2 - this.baselineCo2) / this.baselineCo2 * 100,
+        2)
+      const CO2 = `${percentSignCO2}${percentageChangeCO2} %`
+
+      let percentSignVKT = ""
+      if (this.totals.VKT < this.baselineVKT)
+        percentSignVKT = "- "
+      else if (this.totals.VKT > this.baselineVKT)
+        percentSignVKT = "+ "
+      const percentageChangeVKT = roundToFixed(
+        Math.abs(this.totals.VKT - this.baselineVKT) / this.baselineVKT * 100,
+        2)
+      const VKT = `${percentSignVKT}${percentageChangeVKT} %`
+
+
+      return {CO2, VKT}
+    },
+
+    percentageChangeClass(): { CO2: string, VKT: string } {
+      let co2Class = "";
+      if (this.totals.CO2 < this.baselineCo2)
+        co2Class = "good-color"
+      else if (this.totals.CO2 > this.baselineCo2)
+        co2Class = "bad-color"
+
+      let vktClass = "";
+      if (this.totals.VKT < this.baselineVKT)
+        vktClass = "good-color"
+      else if (this.totals.VKT > this.baselineVKT)
+        vktClass = "bad-color"
+      return {CO2: co2Class, VKT: vktClass}
     },
 
     legendSteps(): LegendStep[] {
       const numberOfSteps = 5;
       const steps = [] as LegendStep[]
-      for (let i = 0; i < numberOfSteps; i ++) {
+      for (let i = 0; i < numberOfSteps; i++) {
         const scaleProportion = (i / numberOfSteps)
         const vktValue = scaleProportion * this.vktColorScalingFactor
         const vktRounded = parseInt(roundToFixed(vktValue)).toLocaleString()
