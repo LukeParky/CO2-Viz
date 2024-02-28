@@ -17,39 +17,58 @@
       The ‘emissions’ tab allows us to visualise how emissions change the overall flows of vehicles for each of the
       areas listed above. We can do this using the ‘Scenario Controller’. The baseline data is automatically loaded into
       the visualisation in the background map. Select any category to determine how shifts in the fuel type of vehicles
-      will shift the CO2 footprint of the area of interest. We have kept the total vehicle kilometres travelled (VKT)
-      constant for this scenario builder. In the example below we shift Hybrid to make up ¾ of the vehicle fleet and
-      show that there would be a 44.91% reduction in total carbon emissions even with the same VKT.
+      will shift the CO2 footprint of the area of interest. In the example below we shift Hybrid to make up ¾ of the
+      vehicle fleet and show that there would be a 44.91% reduction in total carbon emissions even with the same VKT.
+      You can see the scenario emissions of each SA1 neighbourhood by clicking on a neighbourhood and looking at the
+      info box.
     </p>
     <div>
-      <!-- todo -->
+      <div class="row container-fluid">
+        <div class="col-lg-6 col-md-6 col-xs-6 thumb">
+          <img class="img-fluid" src="/scenario_controller_base.png" alt="Screenshot of scenario controller panel">
+        </div>
+        <div class="col-lg-6 col-md-6 col-xs-6 thumb">
+          <img class="img-fluid" src="/scenario_controller_hybrid.png" alt="Screenshot of scenario with 75% hybrid fleet">
+        </div>
+      </div>
     </div>
     <p>
       The visualisation can be controlled using the instructions in the screenshot below. Click on the ‘question mark’
       icon, see the icon here
       <span>
-<!--        todo -->
+        <img class="img-thumbnail" src="/help_button.png" alt="help button">
       </span>
       to bring up the navigation instructions, which are shown below.
     </p>
     <div>
-      <!--      todo -->
+      <div class="row container-fluid">
+        <div class="col-lg-12 col-md-12 col-xs-12 thumb">
+          <img class="img-fluid centre-block" src="/help_full.png" alt="Screenshot of scenario controller panel">
+        </div>
+      </div>
     </div>
     <h2>About the Mode Share Visualiser</h2>
     <p>
-      <!--      todo trips to commutes -->
       The mode share tab visualises the transport patterns from the 2018 census for each of the cities and localities
       listed above. There are active transport (e.g. Walking and Cycling), public transport (e.g. bus), Drive, Passenger
       and other categories to select to help you understand the most recent travel trends in the region of interest. The
       data is focused on travel to work. There is a box in the top right-hand corner of the window to allow users to
       query the origin and destination data of where residents have come from and to work. Once an area is selected
-      (e.g. Christchurch Central), it is possible to query Incoming, Outgoing or internal trips for that area. Selecting
+      (e.g. Christchurch Central), it is possible to query Incoming, Outgoing or internal commuters for that area. Selecting
       a particular area, by clicking on any of the circles, will display the trip data. For example, 6,825 incoming
-      trips, 9 outgoing and 18 internal trips for Christchurch Central.
+      commuters, 9 outgoing and 18 internal commuters for Christchurch Central.
     </p>
     <p>
       Note: it is this data that has formed the basis of the ‘mode shift’ scenarios developed as part of the project.
     </p>
+          <div class="row container-fluid">
+        <div class="col-lg-8 col-md-8 col-xs-8 thumb">
+          <img class="img-fluid" src="/mode_share_chch.png" alt="Commutes around Christchurch">
+        </div>
+        <div class="col-lg-4 col-md-4 col-xs-4 thumb">
+          <img class="img-fluid" src="/mode_share_chch_detail.png" alt="Commutes into and out of Christchurch Central">
+        </div>
+      </div>
     <h2>About the Carbon Neutral Neighbourhood team</h2>
     <p>
       The Carbon Neutral Neighbourhood project is led by an interdisciplinary team at
@@ -116,6 +135,11 @@ export default Vue.extend({
 <style>
 .img-fluid {
   padding: 20px
+}
+
+.centre-block {
+  display: block;
+  margin: auto;
 }
 
 h2 {
