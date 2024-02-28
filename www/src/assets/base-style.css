@@ -66,3 +66,7 @@ label {
   display: inline;
   min-width: 10em;
 }
+
+figcaption {
+    color: slategrey;
+}
