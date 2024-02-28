@@ -26,7 +26,7 @@
         :id="`spinner-${uuid}`"
         ref="spinner"
         type="number"
-        :value="value"
+        :value="sliderValueDisplay"
         min="0"
         max="100"
         :disabled="locked || disabled"
@@ -45,6 +45,7 @@
 <script lang="ts">
 import Vue from "vue";
 import LockCheckbox from "@/components/LockCheckbox.vue";
+import {roundToFixed} from "@/utils";
 
 let componentUuid = 0;
 
@@ -53,12 +54,8 @@ export default Vue.extend({
   components: {LockCheckbox},
 
   props: {
-    name: {
-      type: String
-    },
-    value: {
-      type: Number
-    },
+    name: String,
+    value: [Number, String],
     locked: {
       type: Boolean,
       default: false,
@@ -87,16 +84,9 @@ export default Vue.extend({
   },
 
   computed: {
-    // sliderValueDisplay: {
-    //   get(): number {
-    //     return parseFloat(roundToFixed(this.value, 2))
-    //   },
-    //   set(newValues: number[]) {
-    //     console.log('set')
-    //     console.log(newValues)
-    //     this.value = newValue;
-    //   }
-    // },
+    sliderValueDisplay(): string {
+      return roundToFixed(this.value as number, 2)
+    },
   }
 });
 </script>
@@ -108,7 +98,8 @@ input[type=range] {
 }
 
 input[type=number] {
-  max-width: 4em;
+  width: 4.5em;
+  padding-left: 0;
 }
 
 label {
