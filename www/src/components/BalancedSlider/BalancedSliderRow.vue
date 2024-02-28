@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="slider-row">
     <input
       :id="`slider-${uuid}`"
       ref="slider"
@@ -26,7 +26,7 @@
         :id="`spinner-${uuid}`"
         ref="spinner"
         type="number"
-        :value="sliderValueDisplay"
+        :value="spinnerValueDisplay"
         min="0"
         max="100"
         :disabled="locked || disabled"
@@ -84,7 +84,7 @@ export default Vue.extend({
   },
 
   computed: {
-    sliderValueDisplay(): string {
+    spinnerValueDisplay(): string {
       return roundToFixed(this.value as number, 2)
     },
   }
@@ -92,18 +92,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-input[type=range] {
-  min-width: 12em;
-  vertical-align: middle;
-}
-
-input[type=number] {
-  width: 4.5em;
-  padding-left: 0;
-}
-
-label {
-  display: inline;
-  min-width: 10em;
+.slider-row {
+  padding: 5px;
 }
 </style>

@@ -50,3 +50,19 @@ span.value {
 :is(label, h1, h2, h3, h4, h5, h6)[disabled] {
     color: grey;
 }
+
+input[type=range] {
+  min-width: 12em;
+  vertical-align: middle;
+}
+
+input[type=number] {
+  width: 4.5em;
+  padding-left: 0;
+  margin-left: 1em;
+}
+
+label {
+  display: inline;
+  min-width: 10em;
+}
