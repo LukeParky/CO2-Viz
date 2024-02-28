@@ -22,16 +22,13 @@
       {{ name }}:
     </label>
     <span class="value">
-      <input
+      <RoundedSpinner
         :id="`spinner-${uuid}`"
         ref="spinner"
         type="number"
-        :value="spinnerValueDisplay"
-        min="0"
-        max="100"
-        :disabled="locked || disabled"
+        :value="value"
         @input="onInput($event.target.value)"
-      >
+      />
       <label
         :for="`spinner-${uuid}`"
         :disabled="disabled"
@@ -45,13 +42,13 @@
 <script lang="ts">
 import Vue from "vue";
 import LockCheckbox from "@/components/LockCheckbox.vue";
-import {roundToFixed} from "@/utils";
+import RoundedSpinner from "@/components/RoundedSpinner.vue";
 
 let componentUuid = 0;
 
 export default Vue.extend({
   name: "BalancedSliderRow",
-  components: {LockCheckbox},
+  components: {RoundedSpinner, LockCheckbox},
 
   props: {
     name: String,
@@ -69,7 +66,7 @@ export default Vue.extend({
   data() {
     return {
       uuid: componentUuid,
-      internalLocked: this.locked
+      internalLocked: this.locked,
     }
   },
 
@@ -83,11 +80,6 @@ export default Vue.extend({
     }
   },
 
-  computed: {
-    spinnerValueDisplay(): string {
-      return roundToFixed(this.value as number, 2)
-    },
-  }
 });
 </script>
 

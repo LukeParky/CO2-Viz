@@ -56,7 +56,7 @@
           <input
             id="vkt-spinner"
             type="number"
-            v-model="VKTSpinnerDisplay"
+            v-model="VKTSlider"
             min="0"
             max="100"
           >
@@ -218,13 +218,13 @@ export default Vue.extend({
     },
 
     onUpdateClicked() {
-      const balancedSlider = this.$refs['balanced-slider'] as Vue & {onUpdateClicked: () => void}
+      const balancedSlider = this.$refs['balanced-slider'] as Vue & { onUpdateClicked: () => void }
       this.VKT = this.VKTSlider as number / 100 * this.baselineVKT;
       balancedSlider.onUpdateClicked();
     },
 
     onResetDefaultClicked() {
-      const balancedSlider = this.$refs['balanced-slider'] as Vue & {onResetDefaultClicked: () => void}
+      const balancedSlider = this.$refs['balanced-slider'] as Vue & { onResetDefaultClicked: () => void }
       this.VKTSlider = 100;
       this.VKT = this.baselineVKT;
       balancedSlider.onResetDefaultClicked();
@@ -340,7 +340,7 @@ export default Vue.extend({
       const co2Rounded = parseInt(roundToFixed(this.totals.CO2));
       const vktRounded = parseInt(roundToFixed(this.totals.VKT * 1000));
       const baselineCo2Rounded = parseInt(roundToFixed(this.baselineCo2))
-      const baselineVKTRounded = parseInt(roundToFixed(this.baselineVKT))
+      const baselineVKTRounded = parseInt(roundToFixed(this.baselineVKT * 1000));
 
       const CO2 = `${co2Rounded.toLocaleString()} Tonnes / Year`
       const VKT = `${vktRounded.toLocaleString()} km / Year`
@@ -405,16 +405,7 @@ export default Vue.extend({
         });
       }
       return steps;
-    },
-
-    VKTSpinnerDisplay: {
-      get(): string {
-        return roundToFixed(this.VKTSlider as number, 2)
-      },
-      set(newValue: string) {
-        this.VKTSlider = roundToFixed(parseFloat(newValue), 2)
-      }
-    },
+    }
   }
 });
 </script>
