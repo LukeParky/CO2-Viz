@@ -63,18 +63,20 @@
           <label for="vkt-spinner">%</label>
         </span>
       </div>
-      <b-button
-        @click="onUpdateClicked"
-        size="sm"
-      >
-        Update
-      </b-button>
-      <b-button
-        @click="onResetDefaultClicked"
-        size="sm"
-      >
-        Reset to baseline
-      </b-button>
+      <div>
+        <b-button
+          @click="onUpdateClicked"
+          size="sm"
+        >
+          Update
+        </b-button>
+        <b-button
+          @click="onResetDefaultClicked"
+          size="sm"
+        >
+          Reset to baseline
+        </b-button>
+      </div>
     </div>
     <ColorLegend
       id="legend"
@@ -96,6 +98,7 @@ import Vue from "vue";
 import BalancedSlider from "@/components/BalancedSlider";
 import ColorLegend, {HexColor, LegendStep} from "@/components/ColorLegend.vue";
 import {roundToFixed} from "@/utils";
+import RoundedSpinner from "@/components/RoundedSpinner.vue";
 
 interface Sa1Emissions {
   SA12018_V1_00: number,
@@ -110,6 +113,7 @@ interface Sa1Emissions {
 export default Vue.extend({
   name: "Co2Sa1Viewer",
   components: {
+    RoundedSpinner,
     BalancedSlider,
     ColorLegend,
     MapViewer,
@@ -424,6 +428,12 @@ export default Vue.extend({
   min-width: 25em;
 }
 
+#control-card button {
+  float: right;
+  margin: 15px 5px 5px 5px
+}
+
+
 .bad-color {
   color: #b51a28;
 }
@@ -439,11 +449,6 @@ export default Vue.extend({
 .vkt-adjuster input[type=range] {
   min-width: 10em;
   margin-left: 1em;
-}
-
-.btn {
-  float: right;
-  margin: 15px 5px 5px 5px
 }
 
 </style>
