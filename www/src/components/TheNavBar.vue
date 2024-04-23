@@ -8,21 +8,21 @@
       <b-collapse id="nav-text-collapse" is-nav>
         <b-navbar-nav>
           <template v-for="region of regions">
-            <b-nav-item-dropdown :text="region">
+            <b-nav-item-dropdown :text="region.display">
               <b-dropdown-item>
-                <b-nav-item :to="{name: routerLocations.Emissions[region]}">
+                <b-nav-item :to="{name: routerLocations.Emissions[region.key]}">
                   Emissions
                 </b-nav-item>
               </b-dropdown-item>
               <b-dropdown-item>
-                <b-nav-item :to=" {name: routerLocations.ModeShare[region]}">
+                <b-nav-item :to=" {name: routerLocations.ModeShare[region.key]}">
                   Mode Share
                 </b-nav-item>
               </b-dropdown-item>
             </b-nav-item-dropdown>
           </template>
           <b-nav-item :to="{name: routerLocations.Root.About}">
-            About
+            Find out more | Kimihia te roanga atu
           </b-nav-item>
         </b-navbar-nav>
       </b-collapse>
@@ -44,7 +44,12 @@ export default Vue.extend({
   data() {
     return {
       routerLocations: RouterLocations,
-      regions: ["Auckland", "Wellington", "Christchurch", "Oamaru"]
+      regions: [
+        {display: "Auckland | Tāmaki Makaurau", key: "Auckland"},
+        {display: "Wellington | Te Whanganui-a-Tara", key: "Wellington"},
+        {display: "Christchurch | Ōtautahi", key: "Christchurch"},
+        {display: "Oamaru | Oāmaru", key: "Oamaru"},
+      ]
     }
   }
 })

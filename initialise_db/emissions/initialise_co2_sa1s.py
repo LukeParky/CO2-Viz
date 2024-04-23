@@ -23,7 +23,7 @@ def find_sa1s_in_area(area_of_interest: stats_nz_geographies.AreaOfInterest) -> 
     sa1s.set_index("SA12018_V1_00", verify_integrity=True, inplace=True)
     sa1s.index = sa1s.index.astype('int64')
     sa1s_in_urban_area = stats_nz_geographies.filter_gdf_by_urban_rural_area(sa1s,
-                                                                             area_of_interest.name,
+                                                                             area_of_interest.ua_name,
                                                                              vector_fetcher)
     # Filter to remove SA1s that represent inlets and other non-mainland features.
     return sa1s_in_urban_area.loc[sa1s_in_urban_area["LANDWATER_NAME"] == "Mainland"]

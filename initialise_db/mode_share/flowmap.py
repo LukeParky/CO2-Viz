@@ -5,7 +5,8 @@ from typing import List, Union
 import gspread
 import pandas as pd
 import sqlalchemy
-from config import EnvVariable, get_db_engine
+import stats_nz_geographies
+from config import EnvVariable
 from tqdm import tqdm
 
 log = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ log = logging.getLogger(__name__)
 def find_sa2_locations(engine: sqlalchemy.engine.Engine, urban_area_name: str) -> pd.DataFrame:
     all_sa2s_query = """
         SELECT DISTINCT "SA22018_V1_00"               AS id,
-                        "SA22018_V1_NAME"             as name,
+                        "SA22018_V1_NAME"             as ua_name,
                         ST_Y(ST_CENTROID("geometry")) as lat,
                         ST_X(ST_CENTROID("geometry")) as lon
         
@@ -133,15 +134,14 @@ def save_flow_map_sheets(engine: sqlalchemy.engine.Engine) -> None:
     log.info(f"Initialising table {flow_sheets_table_name}.")
 
     gspread_client = gspread.service_account_from_dict(EnvVariable.GOOGLE_CREDENTIALS)
-    urban_areas = pd.read_sql('SELECT DISTINCT "UR2023_V1_00_NAME" FROM sa2s',
-                              engine).to_numpy().flatten()
     flow_sheet_url_data = []
-    for urban_area in urban_areas:
+    for aoi in stats_nz_geographies.AREAS_OF_INTEREST:
+        urban_area = aoi.ua_name
         sa2_locations = find_sa2_locations(engine, urban_area)
         flows = find_flows(engine, urban_area)
         spreadsheet_name = f"flows_{urban_area}"
         flow_columns = [col for col in flows.columns if col not in {'origin', 'dest'}]
-        workbook_config_sheet = get_workbook_config_page(urban_area, flow_columns)
+        workbook_config_sheet = get_workbook_config_page(aoi.display_name, flow_columns)
         num_attempts = 3
         for attempt in range(num_attempts):
             try:
