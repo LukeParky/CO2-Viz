@@ -4,15 +4,19 @@ import * as pages from "@/pages";
 
 enum EmissionsLocations {
   Auckland = "EMISSIONS_AUCKLAND",
+  Hamilton = "EMISSIONS_HAMILTON",
   Christchurch = "EMISSIONS_CHRISTCHURCH",
   Oamaru = "EMISSIONS_OAMARU",
+  Queenstown = "EMISSIONS_QUEENSTOWN",
   Wellington = "EMISSIONS_WELLINGTON"
 }
 
 enum ModeShareLocations {
   Auckland = "MODE_SHARE_AUCKLAND",
+  Hamilton = "MODE_SHARE_HAMILTON",
   Christchurch = "MODE_SHARE_CHRISTCHURCH",
   Oamaru = "MODE_SHARE_OAMARU",
+  Queenstown = "MODE_SHARE_QUEENSTOWN",
   Wellington = "MODE_SHARE_WELLINGTON"
 }
 
@@ -41,6 +45,11 @@ const routes: RouteConfig[] = [
         component: pages.emissions.Auckland
       },
       {
+        path: "hamilton",
+        name: RouterLocations.Emissions.Hamilton,
+        component: pages.emissions.Hamilton
+      },
+      {
         path: "christchurch",
         name: RouterLocations.Emissions.Christchurch,
         component: pages.emissions.Christchurch
@@ -49,6 +58,11 @@ const routes: RouteConfig[] = [
         path: "oamaru",
         name: RouterLocations.Emissions.Oamaru,
         component: pages.emissions.Oamaru
+      },
+      {
+        path: "queenstown",
+        name: RouterLocations.Emissions.Queenstown,
+        component: pages.emissions.Queenstown
       },
       {
         path: "wellington",
@@ -71,6 +85,11 @@ const routes: RouteConfig[] = [
         component: pages.modeShare.Auckland
       },
       {
+        path: "hamilton",
+        name: RouterLocations.ModeShare.Hamilton,
+        component: pages.modeShare.Hamilton
+      },
+      {
         path: "christchurch",
         name: RouterLocations.ModeShare.Christchurch,
         component: pages.modeShare.Christchurch
@@ -84,6 +103,11 @@ const routes: RouteConfig[] = [
         path: "oamaru",
         name: RouterLocations.ModeShare.Oamaru,
         component: pages.modeShare.Oamaru
+      },
+      {
+        path: "queenstown",
+        name: RouterLocations.ModeShare.Queenstown,
+        component: pages.modeShare.Queenstown
       },
       {
         path: "*",

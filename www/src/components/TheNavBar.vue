@@ -46,9 +46,11 @@ export default Vue.extend({
       routerLocations: RouterLocations,
       regions: [
         {display: "Auckland | Tāmaki Makaurau", key: "Auckland"},
+        {display: "Hamilton | Kirikiriroa", key: "Hamilton"},
         {display: "Wellington | Te Whanganui-a-Tara", key: "Wellington"},
         {display: "Christchurch | Ōtautahi", key: "Christchurch"},
         {display: "Oamaru | Oāmaru", key: "Oamaru"},
+        {display: "Queenstown | Tāhuna", key: "Queenstown"},
       ]
     }
   }

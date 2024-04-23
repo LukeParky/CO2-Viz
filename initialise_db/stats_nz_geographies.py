@@ -33,9 +33,11 @@ class AreaOfInterest(NamedTuple):
 
 AREAS_OF_INTEREST = [
     AreaOfInterest("Auckland", "Auckland | Tāmaki Makaurau", Bbox(-37.11973, 174.56626, -36.66668, 175.00701)),
+    AreaOfInterest("Hamilton", "Hamilton | Kirikiriroa", Bbox(-37.84833, 175.18301, -37.69678, 175.34657)),
     AreaOfInterest("Wellington", "Wellington | Te Whanganui-a-Tara", Bbox(-41.36836, 174.69794, -41.13047, 174.90839)),
     AreaOfInterest("Christchurch", "Christchurch | Ōtautahi", Bbox(-43.62712, 172.36059, -43.41766, 172.81524)),
     AreaOfInterest("Oamaru", "Oamaru | Oāmaru", Bbox(-45.11886, 170.912129, -45.04020, 171.02564)),
+    AreaOfInterest("Queenstown", "Tāhuna", Bbox(-45.39727, 168.07669, -43.90287, 169.72412)),
 ]
 
 
