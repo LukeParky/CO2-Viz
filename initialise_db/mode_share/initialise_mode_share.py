@@ -18,7 +18,7 @@ def find_sa2s_in_area(area_of_interest: stats_nz_geographies.AreaOfInterest) -> 
     sa2s = vector_fetcher.run(92212)
     sa2s.set_index("SA22018_V1_00", verify_integrity=True, inplace=True)
     sa2s.index = sa2s.index.astype('int64')
-    sa2s_in_urban_area = stats_nz_geographies.filter_gdf_by_urban_rural_area(sa2s, area_of_interest.name,
+    sa2s_in_urban_area = stats_nz_geographies.filter_gdf_by_urban_rural_area(sa2s, area_of_interest.ua_name,
                                                                              vector_fetcher)
     # Filter to remove SA1s that represent inlets and other non-mainland features.
     return sa2s_in_urban_area.loc[
