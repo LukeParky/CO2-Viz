@@ -1,49 +1,84 @@
 <template>
   <!-- Navigation Bar to allow switching between different pages in the app -->
-  <div>
-    <b-navbar type="light" variant="light">
-      <b-navbar-brand :to="{name: routerLocations.Root.Root}">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <router-link class="navbar-brand" :to="{name: routerLocations.Root.Root}">
         Carbon Neutral Neighbourhoods
-      </b-navbar-brand>
-      <b-collapse id="nav-text-collapse" is-nav>
-        <b-navbar-nav>
-          <template v-for="region of regions">
-            <b-nav-item-dropdown :text="region.display">
-              <b-dropdown-item>
-                <b-nav-item :to="{name: routerLocations.Emissions[region.key]}">
+      </router-link>
+
+      <button class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarText"
+              aria-controls="navbarText"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li v-for="region of regions"
+              :key="region.key"
+              class="nav-item dropdown"
+          >
+            <a class="nav-link"
+               href="#"
+               :id="`navbarDropdown${region.key}`"
+               role="button"
+               data-bs-toggle="dropdown"
+               aria-expanded="false"
+            >
+              {{ region.display }}
+            </a>
+            <ul class="dropdown-menu" :aria-labelledby="`navbarDropdown${region.key}`">
+              <li class="dropdown-item">
+                <router-link :to="{name: routerLocations.Emissions[region.key]}">
                   Emissions
-                </b-nav-item>
-              </b-dropdown-item>
-              <b-dropdown-item>
-                <b-nav-item :to=" {name: routerLocations.ModeShare[region.key]}">
+                </router-link>
+              </li>
+              <li class="dropdown-item">
+                <router-link :to="{name: routerLocations.ModeShare[region.key]}">
                   Mode Share
-                </b-nav-item>
-              </b-dropdown-item>
-            </b-nav-item-dropdown>
-          </template>
-          <b-nav-item :to="{name: routerLocations.Root.About}">
-            Find out more | Kimihia te roanga atu
-          </b-nav-item>
-        </b-navbar-nav>
-      </b-collapse>
-      <b-navbar-brand href="https://geospatial.ac.nz">
+                </router-link>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <router-link :to="{name: routerLocations.Root.About}">
+              Find out more | Kimihia te roanga atu
+            </router-link>
+          </li>
+        </ul>
+      </div>
+      <a class="navbar-brand" href="https://geospatial.ac.nz">
         <img
           src="/GRI_no_subtitle_transparent.png"
           alt="Geospatial Research Institute Logo">
-      </b-navbar-brand>
-    </b-navbar>
-  </div>
+      </a>
+    </div>
+  </nav>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import {defineComponent} from "vue";
 import {RouterLocations} from "@/routes";
 
-export default Vue.extend({
+export default defineComponent({
   name: "TheNavBar",
   data() {
     return {
-      routerLocations: RouterLocations,
+      routerLocations: RouterLocations as {
+        Emissions: {
+          [location: string]: string
+        },
+        ModeShare: {
+          [location: string]: string
+        },
+        Root: {
+          [location: string]: string
+        },
+      },
       regions: [
         {display: "Auckland | Tāmaki Makaurau", key: "Auckland"},
         {display: "Hamilton | Kirikiriroa", key: "Hamilton"},

@@ -64,18 +64,18 @@
         </span>
       </div>
       <div>
-        <b-button
+        <button
           @click="onUpdateClicked"
-          size="sm"
+          class="btn btn-secondary btn-sm"
         >
           Update
-        </b-button>
-        <b-button
+        </button>
+        <button
           @click="onResetDefaultClicked"
-          size="sm"
+          class="btn btn-secondary btn-sm"
         >
           Reset to baseline
-        </b-button>
+        </button>
       </div>
     </div>
     <ColorLegend
@@ -91,14 +91,15 @@
 import axios from "axios";
 import * as Cesium from "cesium";
 import chroma from "chroma-js";
-import {MapViewer} from 'geo-visualisation-components/src/components';
-import {MapViewerDataSourceOptions} from "geo-visualisation-components/src/types";
-import Vue from "vue";
+import {MapViewer} from 'geo-visualisation-components';
+import type {MapViewerDataSourceOptions} from "geo-visualisation-components";
+import {type Component, defineComponent} from "vue";
 
 import BalancedSlider from "@/components/BalancedSlider";
-import ColorLegend, {HexColor, LegendStep} from "@/components/ColorLegend.vue";
+import ColorLegend from "@/components/ColorLegend.vue";
+import type {HexColor, LegendStep} from "@/components/ColorLegend.vue";
+
 import {roundToFixed} from "@/utils";
-import RoundedSpinner from "@/components/RoundedSpinner.vue";
 
 interface Sa1Emissions {
   SA12018_V1_00: number,
@@ -110,10 +111,9 @@ interface Sa1Emissions {
 }
 
 
-export default Vue.extend({
+export default defineComponent({
   name: "Co2Sa1Viewer",
   components: {
-    RoundedSpinner,
     BalancedSlider,
     ColorLegend,
     MapViewer,
@@ -146,10 +146,10 @@ export default Vue.extend({
 
   data() {
     return {
-      baseLayer: new Cesium.ImageryLayer(new Cesium.OpenStreetMapImageryProvider({}), {saturation: 0}),
-      geoserverHost: `${process.env.VUE_APP_GEOSERVER_HOST}:${process.env.VUE_APP_GEOSERVER_PORT}`,
+      baseLayer: undefined,
+      geoserverHost: `${import.meta.env.VITE_GEOSERVER_HOST}:${import.meta.env.VITE_GEOSERVER_PORT}`,
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
-      cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
+      cesiumApiToken: import.meta.env.VITE_CESIUM_ACCESS_TOKEN,
       vktUseRates: [] as { fuel_type: string, VKT: number, CO2: number, weight: number }[],
       baselineCo2: 0,
       baselineVKT: 0,
@@ -222,13 +222,13 @@ export default Vue.extend({
     },
 
     onUpdateClicked() {
-      const balancedSlider = this.$refs['balanced-slider'] as Vue & { onUpdateClicked: () => void }
+      const balancedSlider = this.$refs['balanced-slider'] as Component & { onUpdateClicked: () => void }
       this.VKT = this.VKTSlider as number / 100 * this.baselineVKT;
       balancedSlider.onUpdateClicked();
     },
 
     onResetDefaultClicked() {
-      const balancedSlider = this.$refs['balanced-slider'] as Vue & { onResetDefaultClicked: () => void }
+      const balancedSlider = this.$refs['balanced-slider'] as Component & { onResetDefaultClicked: () => void }
       this.VKTSlider = 100;
       this.VKT = this.baselineVKT;
       balancedSlider.onResetDefaultClicked();
@@ -308,7 +308,9 @@ export default Vue.extend({
       for (const entity of sa1Entities) {
         if (entity.polygon == undefined || entity.properties == undefined)
           continue;
-        const entityData = emissionsData.find((emissionReading: { properties: Sa1Emissions }) => emissionReading.properties[sa1IdColumnName] == entity.properties?.[sa1IdColumnName]?.getValue())
+        const entityData = emissionsData.find((emissionReading: {
+          properties: Sa1Emissions
+        }) => emissionReading.properties[sa1IdColumnName] == entity.properties?.[sa1IdColumnName]?.getValue())
         let polyGraphics: Cesium.PolygonGraphics
         if (entityData == undefined) {
           polyGraphics = new Cesium.PolygonGraphics({show: false})

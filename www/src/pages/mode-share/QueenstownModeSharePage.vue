@@ -11,15 +11,12 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import titleMixin from "@/mixins/title";
+import {defineComponent} from "vue";
 import ModeShareViewer from "./ModeShareViewer.vue"
 
-export default Vue.extend({
+export default defineComponent({
   name: "QueenstownCo2Sa1Page",
   components: {ModeShareViewer},
-  title: "Queenstown Mode Shares",
-  mixins: [titleMixin],
 
   data() {
     return {
@@ -36,7 +33,7 @@ export default Vue.extend({
     document.body.style.overflow = "hidden"
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     // Reset scrolling for other pages
     document.body.style.overflow = ""
   },

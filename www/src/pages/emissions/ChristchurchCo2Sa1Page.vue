@@ -11,15 +11,13 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+
+import {defineComponent} from "vue";
 
 import Co2Sa1Viewer from "./Co2Sa1Viewer.vue";
-import titleMixin from "@/mixins/title";
 
-export default Vue.extend({
+export default defineComponent({
   name: "ChristchurchCo2Sa1Page",
-  title: "Christchurch Map",
-  mixins: [titleMixin],
   components: {
     Co2Sa1Viewer,
   },
@@ -39,7 +37,7 @@ export default Vue.extend({
     document.body.style.overflow = "hidden"
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     // Reset scrolling for other pages
     document.body.style.overflow = ""
   },

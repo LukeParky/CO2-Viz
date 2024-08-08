@@ -8,7 +8,7 @@
       max="100"
       :value="value"
       :disabled="locked || disabled"
-      @input="onInput($event.target.value)"
+      @input="onInput(parseFloat(($event.target as HTMLInputElement).value))"
     >
     <LockCheckbox
       :id="`slider-lock-${uuid}`"
@@ -40,19 +40,19 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import {defineComponent} from "vue";
 import LockCheckbox from "@/components/LockCheckbox.vue";
 import RoundedSpinner from "@/components/RoundedSpinner.vue";
 
 let componentUuid = 0;
 
-export default Vue.extend({
+export default defineComponent({
   name: "BalancedSliderRow",
   components: {RoundedSpinner, LockCheckbox},
 
   props: {
     name: String,
-    value: [Number, String],
+    value: Number,
     locked: {
       type: Boolean,
       default: false,

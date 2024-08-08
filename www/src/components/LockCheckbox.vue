@@ -4,7 +4,7 @@
       :id="id"
       type="checkbox"
       :checked="checked"
-      @change="$emit('change', $event.target.checked)"
+      @change="$emit('change', ($event.target as HTMLInputElement).checked)"
     >
     <label :for="id">
       <img
@@ -16,9 +16,9 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import {defineComponent} from "vue";
 
-export default Vue.extend({
+export default defineComponent({
   name: "LockCheckbox",
 
   model : {

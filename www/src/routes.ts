@@ -1,4 +1,4 @@
-import {RouteConfig} from "vue-router";
+import type {RouteRecordRaw} from "vue-router";
 import * as pages from "@/pages";
 
 
@@ -34,7 +34,7 @@ const RouterLocations = {
 /**
  * Sets router url endpoints to specific pages
  */
-const routes: RouteConfig[] = [
+const routes: RouteRecordRaw[] = [
   {
     path: "/emissions",
     component: pages.emissions.EmissionsBase,
@@ -70,7 +70,7 @@ const routes: RouteConfig[] = [
         component: pages.emissions.Wellington
       },
       {
-        path: "*",
+        path: "/:pathMatch(.*)*",
         redirect: {name: RouterLocations.Emissions.Christchurch}
       }
     ]
@@ -110,7 +110,7 @@ const routes: RouteConfig[] = [
         component: pages.modeShare.Queenstown
       },
       {
-        path: "*",
+        path: "/:pathMatch(.*)*",
         redirect: {name: RouterLocations.ModeShare.Christchurch}
       }
     ]
@@ -121,7 +121,7 @@ const routes: RouteConfig[] = [
     component: pages.AboutPage
   },
   {
-    path: '*',
+    path: "/:pathMatch(.*)*",
     name: RouterLocations.Root.Root,
     redirect: {name: RouterLocations.Root.About}
   }

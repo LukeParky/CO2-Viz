@@ -17,10 +17,9 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import {type Component, defineComponent} from "vue";
 
 import {roundToFixed} from "@/utils";
-import LockCheckbox from "@/components/LockCheckbox.vue";
 import BalancedSliderRow from "@/components/BalancedSlider/BalancedSliderRow.vue";
 
 interface SliderItem {
@@ -28,14 +27,13 @@ interface SliderItem {
   value: number
 }
 
-type VModel = Vue & { value: number }
+type VModel = Component & { value: number, $refs: Component[] }
 
 
-export default Vue.extend({
+export default defineComponent({
   name: "BalancedSlider",
   components: {
     BalancedSliderRow,
-    LockCheckbox
   },
   props: {
     initValues: {
@@ -111,8 +109,7 @@ export default Vue.extend({
       this.$emit('input', reactedValues)
       this.$emit('change-sliders', reactedValues)
       this.sliderValues = reactedValues
-
-      const rowComponent = this.$refs[`slider-row-${sliderIndex}`] as VModel[];
+      const rowComponent = this.$refs[`slider-row-${sliderIndex}`] as InstanceType<typeof BalancedSliderRow>[];
       const sliderComponent = rowComponent[0].$refs.slider as VModel;
       const spinnerComponent = rowComponent[0].$refs.spinner as VModel;
       await this.$nextTick()
@@ -126,7 +123,7 @@ export default Vue.extend({
         .map(isLocked => +isLocked)
         .reduce((partialSum, current) => partialSum + current, 0)
       if (!newIsLocked || numberLocked < this.sliderLocks.length - 2) {
-        this.$set(this.sliderLocks, lockRowIndex, newIsLocked);
+        this.sliderLocks[lockRowIndex] = newIsLocked;
       }
     },
 

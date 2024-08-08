@@ -11,14 +11,17 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import {defineComponent} from "vue";
 import {roundToFixed} from "@/utils";
 
-export default Vue.extend({
+export default defineComponent({
   name: "RoundedSpinner",
 
   props: {
-    value: Number,
+    value: {
+      type: Number,
+      default: 0,
+    },
     min: {
       type: Number,
       default: 0,

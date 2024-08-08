@@ -146,14 +146,11 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import {defineComponent} from "vue";
 
-import titleMixin from "@/mixins/title";
 
-export default Vue.extend({
+export default defineComponent({
   name: "AboutPage",
-  title: "About",
-  mixins: [titleMixin],
 
 });
 </script>

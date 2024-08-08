@@ -2,7 +2,7 @@
   <!-- The component that renders a CO2/VKT map for a given area of SA1s -->
   <div class="full-screen">
     <iframe
-      :title="`Mode share flow map ${this.urbanAreaName}`"
+      :title="`Mode share flow map ${urbanAreaName}`"
       :src=flowMapSrcUrl
       width="100%"
       height="1080px"
@@ -13,24 +13,10 @@
 
 <script lang="ts">
 import axios from "axios";
-import {MapViewer} from 'geo-visualisation-components/src/components';
-import Vue from "vue";
+import {defineComponent} from "vue";
 
-interface Sa1Emissions {
-  SA12018_V1_00: number,
-  AREA_SQ_KM: number,
-  CO2?: number,
-  VKT: number,
-
-  [k: `CO2_${string}`]: number | undefined,
-}
-
-
-export default Vue.extend({
+export default defineComponent({
   name: "Co2Sa1Viewer",
-  components: {
-    MapViewer,
-  },
 
   props: {
     /** Initial latitude for map view */
@@ -59,7 +45,7 @@ export default Vue.extend({
 
   data() {
     return {
-      geoserverHost: `${process.env.VUE_APP_GEOSERVER_HOST}:${process.env.VUE_APP_GEOSERVER_PORT}`,
+      geoserverHost: `${import.meta.env.VITE_GEOSERVER_HOST}:${import.meta.env.VITE_GEOSERVER_PORT}`,
       sheetId: undefined as string | undefined
     }
   },
