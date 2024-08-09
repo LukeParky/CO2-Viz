@@ -148,7 +148,7 @@ export default defineComponent({
     return {
       baseLayer: undefined,
       geoserverHost: `${import.meta.env.VITE_GEOSERVER_HOST}:${import.meta.env.VITE_GEOSERVER_PORT}`,
-      dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
+      dataSources: {} as MapViewerDataSourceOptions,
       cesiumApiToken: import.meta.env.VITE_CESIUM_ACCESS_TOKEN,
       vktUseRates: [] as { fuel_type: string, VKT: number, CO2: number, weight: number }[],
       baselineCo2: 0,
@@ -172,7 +172,7 @@ export default defineComponent({
 
   async mounted() {
     const geojson = await this.loadSa1s()
-    this.dataSources.geoJsonDataSources = [geojson]
+    this.dataSources = {geoJsonDataSources: [geojson]}
 
     await this.styleSa1s();
 
