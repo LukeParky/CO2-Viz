@@ -4,7 +4,7 @@
       :id="id"
       type="checkbox"
       :checked="checked"
-      @change="$emit('change', ($event.target as HTMLInputElement).checked)"
+      @change.stop="$emit('change', ($event.target as HTMLInputElement).checked)"
     >
     <label :for="id">
       <img

@@ -10,7 +10,7 @@
       :name="initValue.name"
       v-model.number="sliderValues[i]"
       :locked="sliderLocks[i]"
-      @input="onChange(i, $event)"
+      @update:modelValue="onChange(i, $event)"
       @lock-change="onLockChange(i, $event)"
     />
   </div>

@@ -6,7 +6,7 @@
       type="range"
       min="0"
       max="100"
-      :value="value"
+      :value="modelValue"
       :disabled="locked || disabled"
       @input="onInput(parseFloat(($event.target as HTMLInputElement).value))"
     >
@@ -26,7 +26,7 @@
         :id="`spinner-${uuid}`"
         ref="spinner"
         type="number"
-        :value="value"
+        :value="modelValue"
         @input="onInput($event.target.value)"
       />
       <label
@@ -52,7 +52,7 @@ export default defineComponent({
 
   props: {
     name: String,
-    value: Number,
+    modelValue: Number,
     locked: {
       type: Boolean,
       default: false,
@@ -76,7 +76,7 @@ export default defineComponent({
 
   methods: {
     onInput(newValue: number) {
-      this.$emit('input', newValue)
+      this.$emit('update:modelValue', newValue)
     }
   },
 
