@@ -15,14 +15,14 @@ def find_sa2s_in_area(area_of_interest: stats_nz_geographies.AreaOfInterest) -> 
     # All SA2s in bbox
     vector_fetcher = geoapis.vector.StatsNz(key=Env.STATS_API_KEY,
                                             bounding_polygon=area_of_interest.bbox.as_gdf())
-    sa2s = vector_fetcher.run(92212)
-    sa2s.set_index("SA22018_V1_00", verify_integrity=True, inplace=True)
+    sa2s = vector_fetcher.run(111227)
+    sa2s.set_index("SA22023_V1_00", verify_integrity=True, inplace=True)
     sa2s.index = sa2s.index.astype('int64')
     sa2s_in_urban_area = stats_nz_geographies.filter_gdf_by_urban_rural_area(sa2s, area_of_interest.ua_name,
                                                                              vector_fetcher)
     # Filter to remove SA1s that represent inlets and other non-mainland features.
     return sa2s_in_urban_area.loc[
-        ~sa2s_in_urban_area["SA22018_V1_NAME"].str.startswith(("Inlet", "Inland water", "Oceanic"))
+        ~sa2s_in_urban_area["SA22023_V1_00_NAME"].str.startswith(("Inlet", "Inland water", "Oceanic"))
     ]
 
 
@@ -68,7 +68,7 @@ def convert_mode_share_df_to_gdf(mode_shares: pd.DataFrame) -> gpd.GeoDataFrame:
 
 def initialise_mode_share(engine: sqlalchemy.engine.Engine) -> None:
     sa2s_table_name = "sa2s"
-    index_col = "SA22018_V1_00"
+    index_col = "SA22023_V1_00"
     if sqlalchemy.inspect(engine).has_table(sa2s_table_name):
         log.info(f"Table {sa2s_table_name} exists, reading")
         sa2_ids = pd.read_sql(f'SELECT "{index_col}" FROM {sa2s_table_name}', engine, index_col=index_col)
