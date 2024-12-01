@@ -7,7 +7,7 @@ volumes:
 services:
   postgis:
     # Database to store all geospatial data
-    image: postgis/postgis
+    image: postgis/postgis:17-3.5
     container_name: postgis_carbon_neutral
     restart: always
     ports:
