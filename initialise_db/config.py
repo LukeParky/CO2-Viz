@@ -14,23 +14,26 @@ load_dotenv()
 log = logging.getLogger(__name__)
 
 
-def get_env_variable(var_name: str, default: str = None, allow_empty: bool = False) -> str:
+def _get_env_variable(var_name: str, default: Optional[str] = None, allow_empty: bool = False) -> str:
     """
-    Reads a string environment variable, with settings to allow defaults, empty values.
-    To read a boolean user get_bool_env_variable
+    Read a string environment variable, with settings to allow defaults, empty values.
+    To read a boolean use _get_bool_env_variable.
+
+    For public use please use EnvVariable.
 
     Parameters
     ----------
     var_name : str
         The name of the environment variable to retrieve.
-    default : T = None
-        Default return value if the environment variable does not exist.
+    default : Optional[str] = None
+        Default return value if the environment variable is empty or does not exist.
     allow_empty : bool
-        If False then a ValueError will be raised if the environment variable is empty.
+        If False then a KeyError will be raised if the environment variable is empty.
 
     Returns
     -------
-    The environment variable, or default if it does not exist, as type T.
+    str
+        The environment variable, or default if it is empty or does not exist.
 
     Raises
     ------
@@ -46,10 +49,13 @@ def get_env_variable(var_name: str, default: str = None, allow_empty: bool = Fal
     return env_var
 
 
-def get_bool_env_variable(var_name: str, default: Optional[bool] = None, allow_empty: bool = False) -> bool:
+def _get_bool_env_variable(var_name: str, default: Optional[bool] = None) -> bool:
     """
-    Reads an environment variable and attempts to cast to bool, with settings to allow defaults, empty values.
-    For bool we have the problem where bool("False") == True but we want this function to return False
+    Read an environment variable and attempts to cast to bool, with settings to allow defaults.
+    For bool casting we have the problem where bool("False") == True
+    but this function fixes that so get_bool_env_variable("False") == False
+
+    For public use please use EnvVariable.
 
     Parameters
     ----------
@@ -57,8 +63,6 @@ def get_bool_env_variable(var_name: str, default: Optional[bool] = None, allow_e
         The name of the environment variable to retrieve.
     default : Optional[bool] = None
         Default return value if the environment variable does not exist.
-    allow_empty : bool
-        If False then a KeyError will be raised if the environment variable is empty.
 
     Returns
     -------
@@ -70,7 +74,7 @@ def get_bool_env_variable(var_name: str, default: Optional[bool] = None, allow_e
     ValueError
         If allow_empty is False and the environment variable is empty string or None
     """
-    env_variable = get_env_variable(var_name, default, allow_empty)
+    env_variable = _get_env_variable(var_name, str(default))
     truth_values = {"true", "t", "1"}
     false_values = {"false", "f", "0"}
     if env_variable.lower() in truth_values:
@@ -82,23 +86,23 @@ def get_bool_env_variable(var_name: str, default: Optional[bool] = None, allow_e
 
 
 class EnvVariable:
-    ADMIN_EMAIL = get_env_variable("ADMIN_EMAIL", default="luke.parkinson@canterbury.ac.nz")
-    EMISSIONS_DATA = pathlib.Path(get_env_variable("EMISSIONS_DATA"))
-    MEANS_OF_TRAVEL_DATA = pathlib.Path(get_env_variable("MEANS_OF_TRAVEL_DATA"))
+    ADMIN_EMAIL = _get_env_variable("ADMIN_EMAIL", default="luke.parkinson@canterbury.ac.nz")
+    EMISSIONS_DATA = pathlib.Path(_get_env_variable("EMISSIONS_DATA"))
+    MEANS_OF_TRAVEL_DATA = pathlib.Path(_get_env_variable("MEANS_OF_TRAVEL_DATA"))
 
-    POSTGRES_HOST = get_env_variable("POSTGRES_HOST")
-    POSTGRES_PORT = get_env_variable("POSTGRES_PORT")
-    POSTGRES_DB = get_env_variable("POSTGRES_DB")
-    POSTGRES_USER = get_env_variable("POSTGRES_USER")
-    POSTGRES_PASSWORD = get_env_variable("POSTGRES_PASSWORD")
+    POSTGRES_HOST = _get_env_variable("POSTGRES_HOST")
+    POSTGRES_PORT = _get_env_variable("POSTGRES_PORT")
+    POSTGRES_DB = _get_env_variable("POSTGRES_DB")
+    POSTGRES_USER = _get_env_variable("POSTGRES_USER")
+    POSTGRES_PASSWORD = _get_env_variable("POSTGRES_PASSWORD")
 
-    GEOSERVER_HOST = get_env_variable("GEOSERVER_HOST")
-    GEOSERVER_PORT = get_env_variable("GEOSERVER_PORT")
-    GEOSERVER_ADMIN_NAME = get_env_variable("GEOSERVER_ADMIN_NAME")
-    GEOSERVER_ADMIN_PASSWORD: str = get_env_variable("GEOSERVER_ADMIN_PASSWORD")
+    GEOSERVER_HOST = _get_env_variable("GEOSERVER_HOST")
+    GEOSERVER_PORT = _get_env_variable("GEOSERVER_PORT")
+    GEOSERVER_ADMIN_NAME = _get_env_variable("GEOSERVER_ADMIN_NAME")
+    GEOSERVER_ADMIN_PASSWORD: str = _get_env_variable("GEOSERVER_ADMIN_PASSWORD")
 
-    STATS_API_KEY: str = get_env_variable("STATS_API_KEY")
-    GOOGLE_CREDENTIALS: dict = json.loads(base64.b64decode(get_env_variable("GOOGLE_CREDENTIALS_BASE64")))
+    STATS_API_KEY: str = _get_env_variable("STATS_API_KEY")
+    GOOGLE_CREDENTIALS: dict = json.loads(base64.b64decode(_get_env_variable("GOOGLE_CREDENTIALS_BASE64")))
 
 
 def get_db_engine() -> Engine:
