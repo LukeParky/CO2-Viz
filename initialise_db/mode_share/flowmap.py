@@ -127,6 +127,8 @@ def save_flow_map_to_gsheet(gspread_client: gspread.Client,
 
 
 def save_flow_map_sheets(engine: sqlalchemy.engine.Engine) -> None:
+    if not EnvVariable.IS_FLOWMAP_ENABLED:
+        return
     flow_sheets_table_name = "flow_sheets"
     if sqlalchemy.inspect(engine).has_table(flow_sheets_table_name):
         log.info(f"Table {flow_sheets_table_name} exists, skipping.")
