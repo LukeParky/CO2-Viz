@@ -50,7 +50,8 @@ def create_mode_share_view(workspace_name: str, data_store_name: str):
 
 
 def create_flow_sheets_view(workspace_name: str, data_store_name: str) -> None:
-    create_datastore_layer(workspace_name, data_store_name, layer_name="flow_sheets")
+    if EnvVariable.IS_FLOWMAP_ENABLED:
+        create_datastore_layer(workspace_name, data_store_name, layer_name="flow_sheets")
 
 
 def initialise_geoserver_mode_share():

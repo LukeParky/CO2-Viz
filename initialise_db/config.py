@@ -101,6 +101,8 @@ class EnvVariable:
     GEOSERVER_ADMIN_NAME = _get_env_variable("GEOSERVER_ADMIN_NAME")
     GEOSERVER_ADMIN_PASSWORD: str = _get_env_variable("GEOSERVER_ADMIN_PASSWORD")
 
+    IS_FLOWMAP_ENABLED = _get_bool_env_variable("IS_FLOWMAP_ENABLED", default=True)
+
     STATS_API_KEY: str = _get_env_variable("STATS_API_KEY")
     GOOGLE_CREDENTIALS: dict = json.loads(base64.b64decode(_get_env_variable("GOOGLE_CREDENTIALS_BASE64")))
 
