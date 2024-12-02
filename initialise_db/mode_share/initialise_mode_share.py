@@ -8,6 +8,7 @@ import pandas as pd
 import sqlalchemy
 
 from config import EnvVariable as Env, get_db_engine
+from setup_logging import setup_logging
 import stats_nz_geographies
 
 log = logging.getLogger(__name__)
@@ -35,6 +36,11 @@ class ModeShareInitialiser(abc.ABC):
     def sa2_table_name(self) -> str:
         raise NotImplementedError("sa2_table_name must be instantiated in the child class")
 
+    @staticmethod
+    @abc.abstractmethod
+    def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> pd.DataFrame:
+        raise NotImplementedError("find_mode_shares_in_areas_of_interest must be instantiated in the child class")
+
     def find_sa2s_in_area(self, area_of_interest: stats_nz_geographies.AreaOfInterest) -> gpd.GeoDataFrame:
         # All SA2s in bbox
         vector_fetcher = geoapis.vector.StatsNz(key=Env.STATS_API_KEY,
@@ -48,24 +54,6 @@ class ModeShareInitialiser(abc.ABC):
         return sa2s_in_urban_area.loc[
             ~sa2s_in_urban_area[self.sa2.name_code].str.startswith(("Inlet", "Inland water", "Oceanic"))
         ]
-
-    @staticmethod
-    def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> pd.DataFrame:
-        mode_shares = pd.read_csv(Env.MEANS_OF_TRAVEL_DATA)
-        # Drop info that is duplicated in SA2 table to keep data normalised
-        mode_shares = mode_shares.drop(columns=[
-            "SA2_name_usual_residence_address",
-            "SA2_usual_residence_easting",
-            "SA2_usual_residence_northing",
-            "SA2_name_workplace_address",
-            "SA2_workplace_easting",
-            "SA2_workplace_northing",
-        ])
-        mode_shares = mode_shares.loc[
-            mode_shares["SA2_code_usual_residence_address"].isin(sa2_ids.index)
-            & mode_shares["SA2_code_workplace_address"].isin(sa2_ids.index)]
-        return mode_shares.set_index(["SA2_code_usual_residence_address", "SA2_code_workplace_address"],
-                                     verify_integrity=True)
 
     @staticmethod
     def set_suppressed_values_as_zero(mode_shares: pd.DataFrame) -> pd.DataFrame:
@@ -120,14 +108,37 @@ class ModeShareFlowInitialiser(ModeShareInitialiser):
     mode_share_table_name = "mode_share"
     sa2_table_name = "sa2"
 
+    @staticmethod
+    def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> pd.DataFrame:
+        mode_shares = pd.read_csv(Env.MEANS_OF_TRAVEL_DATA)
+        # Drop info that is duplicated in SA2 table to keep data normalised
+        mode_shares = mode_shares.drop(columns=[
+            "SA2_name_usual_residence_address",
+            "SA2_usual_residence_easting",
+            "SA2_usual_residence_northing",
+            "SA2_name_workplace_address",
+            "SA2_workplace_easting",
+            "SA2_workplace_northing",
+        ])
+        mode_shares = mode_shares.loc[
+            mode_shares["SA2_code_usual_residence_address"].isin(sa2_ids.index)
+            & mode_shares["SA2_code_workplace_address"].isin(sa2_ids.index)]
+        return mode_shares.set_index(["SA2_code_usual_residence_address", "SA2_code_workplace_address"],
+                                     verify_integrity=True)
+
 
 class ModeShare2023Initialiser(ModeShareInitialiser):
     sa2 = SA2(111227, "SA22023_V1_00", "SA22023_V1_00_NAME")
     mode_share_table_name = "mode_share_2023"
     sa2_table_name = "sa2_2023"
 
+    @staticmethod
+    def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> pd.DataFrame:
+        raise NotImplementedError("Not yet implemented")
+
 
 if __name__ == '__main__':
+    setup_logging()
     engine = get_db_engine()
     ModeShareFlowInitialiser().initialise_mode_share(engine)
     ModeShare2023Initialiser().initialise_mode_share(engine)
