@@ -27,6 +27,11 @@ interface SliderItem {
   value: number
 }
 
+export type ClickToUpdateComponent = Component & {
+  onUpdateClicked: () => void,
+  onResetDefaultClicked: () => void
+}
+
 type VModel = Component & { value: number, $refs: Component[] }
 
 
