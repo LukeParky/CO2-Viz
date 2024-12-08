@@ -5,7 +5,7 @@
       :init-lat="initLat"
       :init-long="initLong"
       :init-height="initHeight"
-      :init-base-layer="baseLayer"
+      :init-base-layer="baseLayerProvider"
       :cesium-access-token="cesiumApiToken"
       :data-sources="dataSources"
     />
@@ -93,7 +93,7 @@ import * as Cesium from "cesium";
 import chroma from "chroma-js";
 import {MapViewer} from 'geo-visualisation-components';
 import type {MapViewerDataSourceOptions} from "geo-visualisation-components";
-import {computed, defineProps, onMounted, ref, useTemplateRef} from "vue";
+import {computed, onMounted, ref, useTemplateRef} from "vue";
 
 import BalancedSlider from "@/components/BalancedSlider";
 import type {ClickToUpdateComponent} from "@/components/BalancedSlider";
@@ -138,7 +138,7 @@ const props = defineProps({
 )
 
 
-const baseLayer = undefined;
+const baseLayerProvider = new Cesium.OpenStreetMapImageryProvider({});
 const geoserverHost = `${import.meta.env.VITE_GEOSERVER_HOST}:${import.meta.env.VITE_GEOSERVER_PORT}`;
 const cesiumApiToken = import.meta.env.VITE_CESIUM_ACCESS_TOKEN;
 const colorScale = chroma.scale(chroma.brewer.Reds);
