@@ -27,7 +27,7 @@ enum RootLocations {
 
 const RouterLocations = {
   Emissions: EmissionsLocations,
-  ModeShare: ModeShareLocations,
+  ModeShareFlow: ModeShareLocations,
   Root: RootLocations,
 }
 
@@ -76,42 +76,42 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: "/mode-share",
+    path: "/mode-share-flow",
     component: pages.modeShare.ModeShareBase,
     children: [
       {
         path: "auckland",
-        name: RouterLocations.ModeShare.Auckland,
+        name: RouterLocations.ModeShareFlow.Auckland,
         component: pages.modeShare.Auckland
       },
       {
         path: "hamilton",
-        name: RouterLocations.ModeShare.Hamilton,
+        name: RouterLocations.ModeShareFlow.Hamilton,
         component: pages.modeShare.Hamilton
       },
       {
         path: "christchurch",
-        name: RouterLocations.ModeShare.Christchurch,
+        name: RouterLocations.ModeShareFlow.Christchurch,
         component: pages.modeShare.Christchurch
       },
       {
         path: "wellington",
-        name: RouterLocations.ModeShare.Wellington,
+        name: RouterLocations.ModeShareFlow.Wellington,
         component: pages.modeShare.Wellington
       },
       {
         path: "oamaru",
-        name: RouterLocations.ModeShare.Oamaru,
+        name: RouterLocations.ModeShareFlow.Oamaru,
         component: pages.modeShare.Oamaru
       },
       {
         path: "queenstown",
-        name: RouterLocations.ModeShare.Queenstown,
+        name: RouterLocations.ModeShareFlow.Queenstown,
         component: pages.modeShare.Queenstown
       },
       {
         path: "/:pathMatch(.*)*",
-        redirect: {name: RouterLocations.ModeShare.Christchurch}
+        redirect: {name: RouterLocations.ModeShareFlow.Christchurch}
       }
     ]
   },
