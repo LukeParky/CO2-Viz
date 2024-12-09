@@ -27,7 +27,7 @@
         ref="spinner"
         type="number"
         :value="modelValue"
-        @input="onInput($event.target.value)"
+        @submit="onInput($event.target.value)"
       />
       <label
         :for="`spinner-${uuid}`"

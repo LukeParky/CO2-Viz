@@ -5,8 +5,9 @@
     :value="spinnerDisplayValue"
     :min="min"
     :max="max"
-    @focusout="$emit('input', $event)"
-    @keyup.enter="$emit('input', $event)"
+    @input.stop.prevent="handleInputs($event)"
+    @focusout="handleInputs($event)"
+    @keyup.enter="handleInputs($event)"
   >
 </template>
 
@@ -39,6 +40,17 @@ export default defineComponent({
   computed: {
     spinnerDisplayValue(): string {
       return roundToFixed(this.value, this.decimalPlaces)
+    }
+  },
+
+  methods: {
+    handleInputs(event: Event & InputEvent): void {
+      if (event?.inputType === "insertText") {
+        event.stopImmediatePropagation();
+      } else {
+        console.log(event)
+        this.$emit("submit", event);
+      }
     }
   }
 });

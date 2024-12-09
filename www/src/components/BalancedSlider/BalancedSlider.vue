@@ -118,9 +118,6 @@ export default defineComponent({
       const sliderComponent = rowComponent[0].$refs.slider as VModel;
       const spinnerComponent = rowComponent[0].$refs.spinner as VModel;
       await this.$nextTick()
-      if (rowComponent[0].value != sliderComponent.value || rowComponent[0].value != spinnerComponent.value) {
-        this.forceRerender()
-      }
     },
 
     onLockChange(lockRowIndex: number, newIsLocked: boolean) {
