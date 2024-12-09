@@ -15,8 +15,13 @@
                 </b-nav-item>
               </b-dropdown-item>
               <b-dropdown-item>
-                <b-nav-item :to=" {name: routerLocations.ModeShare[region.key]}">
-                  Mode Share
+                <b-nav-item :to=" {name: routerLocations.ModeShareFlow[region.key]}">
+                  Mode Share Flow
+                </b-nav-item>
+              </b-dropdown-item>
+              <b-dropdown-item>
+                <b-nav-item :to=" {name: routerLocations.ModeShare2023[region.key]}">
+                  Mode Share 2023
                 </b-nav-item>
               </b-dropdown-item>
             </b-nav-item-dropdown>
