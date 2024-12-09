@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 def create_sa2_view(workspace_name: str, data_store_name: str):
-    create_datastore_layer(workspace_name, data_store_name, layer_name="sa2s")
+    create_datastore_layer(workspace_name, data_store_name, layer_name="sa2")
 
 
 def create_mode_share_view(workspace_name: str, data_store_name: str):
