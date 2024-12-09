@@ -21,7 +21,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY --chmod=500 ./entrypoint.sh /entrypoint.sh
 RUN chmod +x entrypoint.sh
 
-COPY --from=build-stage /app/dist /app
+COPY --from=build-stage --chmod=555 /app/dist /app
 
 # Expose nginx web-server on http port (80)
 EXPOSE 80
