@@ -8,7 +8,6 @@ VITE_ENV_VARS=$(printenv | grep -o "VITE_\w*")
 
 echo "Replacing env constants in JavaScript and HTML"
 echo -e "Env constants: \n${VITE_ENV_VARS}"
-for FILE in "$ROOT_DIR"/js/app.*.js* "$ROOT_DIR"/index.html;
 
 for FILE in "$ROOT_DIR"/assets/index-*.js* "$ROOT_DIR"/index.html "$ROOT_DIR"/precache-manifest*.js;
 do
