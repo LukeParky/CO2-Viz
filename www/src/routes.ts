@@ -11,13 +11,22 @@ enum EmissionsLocations {
   Wellington = "EMISSIONS_WELLINGTON"
 }
 
-enum ModeShareLocations {
-  Auckland = "MODE_SHARE_AUCKLAND",
-  Hamilton = "MODE_SHARE_HAMILTON",
-  Christchurch = "MODE_SHARE_CHRISTCHURCH",
-  Oamaru = "MODE_SHARE_OAMARU",
-  Queenstown = "MODE_SHARE_QUEENSTOWN",
-  Wellington = "MODE_SHARE_WELLINGTON"
+enum ModeShareFlowLocations {
+  Auckland = "MODE_SHARE_FLOW_AUCKLAND",
+  Hamilton = "MODE_SHARE_FLOW_HAMILTON",
+  Christchurch = "MODE_SHARE_FLOW_CHRISTCHURCH",
+  Oamaru = "MODE_SHARE_FLOW_OAMARU",
+  Queenstown = "MODE_SHARE_FLOW_QUEENSTOWN",
+  Wellington = "MODE_SHARE_FLOW_WELLINGTON"
+}
+
+enum ModeShare2023Locations {
+  Auckland = "MODE_SHARE_2023_AUCKLAND",
+  Hamilton = "MODE_SHARE_2023_HAMILTON",
+  Christchurch = "MODE_SHARE_2023_CHRISTCHURCH",
+  Oamaru = "MODE_SHARE_2023_OAMARU",
+  Queenstown = "MODE_SHARE_2023_QUEENSTOWN",
+  Wellington = "MODE_SHARE_2023_WELLINGTON"
 }
 
 enum RootLocations {
@@ -27,7 +36,8 @@ enum RootLocations {
 
 const RouterLocations = {
   Emissions: EmissionsLocations,
-  ModeShareFlow: ModeShareLocations,
+  ModeShareFlow: ModeShareFlowLocations,
+  ModeShare2023: ModeShare2023Locations,
   Root: RootLocations,
 }
 
@@ -77,41 +87,81 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/mode-share-flow",
-    component: pages.modeShare.ModeShareBase,
+    component: pages.modeShareFlow.ModeShareBase,
     children: [
       {
         path: "auckland",
         name: RouterLocations.ModeShareFlow.Auckland,
-        component: pages.modeShare.Auckland
+        component: pages.modeShareFlow.Auckland
       },
       {
         path: "hamilton",
         name: RouterLocations.ModeShareFlow.Hamilton,
-        component: pages.modeShare.Hamilton
+        component: pages.modeShareFlow.Hamilton
       },
       {
         path: "christchurch",
         name: RouterLocations.ModeShareFlow.Christchurch,
-        component: pages.modeShare.Christchurch
+        component: pages.modeShareFlow.Christchurch
       },
       {
         path: "wellington",
         name: RouterLocations.ModeShareFlow.Wellington,
-        component: pages.modeShare.Wellington
+        component: pages.modeShareFlow.Wellington
       },
       {
         path: "oamaru",
         name: RouterLocations.ModeShareFlow.Oamaru,
-        component: pages.modeShare.Oamaru
+        component: pages.modeShareFlow.Oamaru
       },
       {
         path: "queenstown",
         name: RouterLocations.ModeShareFlow.Queenstown,
-        component: pages.modeShare.Queenstown
+        component: pages.modeShareFlow.Queenstown
       },
       {
         path: "/:pathMatch(.*)*",
         redirect: {name: RouterLocations.ModeShareFlow.Christchurch}
+      }
+    ]
+  },
+  {
+    path: "/mode-share-2023",
+    component: pages.modeShare2023.ModeShareBase,
+    children: [
+      {
+        path: "auckland",
+        name: RouterLocations.ModeShare2023.Auckland,
+        component: pages.modeShare2023.Auckland
+      },
+      {
+        path: "hamilton",
+        name: RouterLocations.ModeShare2023.Hamilton,
+        component: pages.modeShare2023.Hamilton
+      },
+      {
+        path: "christchurch",
+        name: RouterLocations.ModeShare2023.Christchurch,
+        component: pages.modeShare2023.Christchurch
+      },
+      {
+        path: "wellington",
+        name: RouterLocations.ModeShare2023.Wellington,
+        component: pages.modeShare2023.Wellington
+      },
+      {
+        path: "oamaru",
+        name: RouterLocations.ModeShare2023.Oamaru,
+        component: pages.modeShare2023.Oamaru
+      },
+      {
+        path: "queenstown",
+        name: RouterLocations.ModeShare2023.Queenstown,
+        component: pages.modeShare2023.Queenstown
+      },
+      {
+        path: "/:pathMatch(.*)*",
+        redirect: {name: RouterLocations.ModeShare2023.Christchurch}
       }
     ]
   },

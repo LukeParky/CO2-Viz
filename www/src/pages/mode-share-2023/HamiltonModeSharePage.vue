@@ -1,0 +1,44 @@
+<template>
+  <!-- The page that shows the map for the Hamilton area, comparing CO2 and VKT for each SA1 area -->
+  <div class="full-height">
+    <ModeShareViewer
+      :init-lat="hamilton.latitude"
+      :init-long="hamilton.longitude"
+      :urban-area-name="hamilton.urbanAreaName"
+      :init-height="initHeight"
+    />
+  </div>
+</template>
+
+<script lang="ts">
+import {defineComponent} from "vue";
+import ModeShareViewer from "./ModeShareViewer.vue"
+
+export default defineComponent({
+  name: "HamiltonCo2Sa1Page",
+  components: {ModeShareViewer},
+
+  data() {
+    return {
+      hamilton: {
+        latitude: -37.786394,
+        longitude: 175.277849,
+        urbanAreaName: "Hamilton"
+      },
+      initHeight: 20000
+    }
+  },
+  async mounted() {
+    // Limit scrolling on this page
+    document.body.style.overflow = "hidden"
+  },
+
+  beforeUnmount() {
+    // Reset scrolling for other pages
+    document.body.style.overflow = ""
+  },
+});
+</script>
+
+<style>
+</style>

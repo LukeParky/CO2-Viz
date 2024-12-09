@@ -38,8 +38,13 @@
                 </router-link>
               </li>
               <li class="dropdown-item">
-                <router-link :to="{name: routerLocations.ModeShare[region.key]}">
-                  Mode Share
+                <router-link :to="{name: routerLocations.ModeShareFlow[region.key]}">
+                  Mode Share Flow
+                </router-link>
+              </li>
+              <li class="dropdown-item">
+                <router-link :to="{name: routerLocations.ModeShare2023[region.key]}">
+                  Mode Share 2023
                 </router-link>
               </li>
             </ul>
@@ -72,9 +77,12 @@ export default defineComponent({
         Emissions: {
           [location: string]: string
         },
-        ModeShare: {
+        ModeShareFlow: {
           [location: string]: string
         },
+        ModeShare2023: {
+          [location: string]: string
+        }
         Root: {
           [location: string]: string
         },
