@@ -1,9 +1,11 @@
 import abc
 import logging
+import pathlib
 from typing import NamedTuple
 
 import geoapis.vector
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import sqlalchemy
 
@@ -36,10 +38,13 @@ class ModeShareInitialiser(abc.ABC):
     def sa2_table_name(self) -> str:
         raise NotImplementedError("sa2_table_name must be instantiated in the child class")
 
-    @staticmethod
     @abc.abstractmethod
-    def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> pd.DataFrame:
+    def find_mode_shares_in_areas_of_interest(self, sa2_ids: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError("find_mode_shares_in_areas_of_interest must be instantiated in the child class")
+
+    @staticmethod
+    def set_suppressed_values_as_zero(mode_shares: pd.DataFrame) -> pd.DataFrame:
+        return mode_shares.replace(-999, 0)
 
     def find_sa2s_in_area(self, area_of_interest: stats_nz_geographies.AreaOfInterest) -> gpd.GeoDataFrame:
         # All SA2s in bbox
@@ -54,10 +59,6 @@ class ModeShareInitialiser(abc.ABC):
         return sa2s_in_urban_area.loc[
             ~sa2s_in_urban_area[self.sa2.name_code].str.startswith(("Inlet", "Inland water", "Oceanic"))
         ]
-
-    @staticmethod
-    def set_suppressed_values_as_zero(mode_shares: pd.DataFrame) -> pd.DataFrame:
-        return mode_shares.replace(-999, 0)
 
     @staticmethod
     def convert_mode_share_df_to_gdf(mode_shares: pd.DataFrame) -> gpd.GeoDataFrame:
@@ -93,12 +94,10 @@ class ModeShareInitialiser(abc.ABC):
         else:
             log.info(f"Table {self.mode_share_table_name} does not exist, initialising...")
             mode_shares = self.find_mode_shares_in_areas_of_interest(sa2_ids)
-            mode_shares = self.set_suppressed_values_as_zero(mode_shares)
             mode_shares.to_sql(self.mode_share_table_name,
                                engine,
                                if_exists="replace",
-                               index=True,
-                               index_label=["SA2_code_usual_residence_address", "SA2_code_workplace_address"])
+                               index=True)
 
             log.info(f"Table {self.mode_share_table_name} initialised.")
 
@@ -108,8 +107,7 @@ class ModeShareFlowInitialiser(ModeShareInitialiser):
     mode_share_table_name = "mode_share"
     sa2_table_name = "sa2"
 
-    @staticmethod
-    def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> pd.DataFrame:
+    def find_mode_shares_in_areas_of_interest(self, sa2_ids: pd.DataFrame) -> pd.DataFrame:
         mode_shares = pd.read_csv(Env.MEANS_OF_TRAVEL_DATA)
         # Drop info that is duplicated in SA2 table to keep data normalised
         mode_shares = mode_shares.drop(columns=[
@@ -123,8 +121,9 @@ class ModeShareFlowInitialiser(ModeShareInitialiser):
         mode_shares = mode_shares.loc[
             mode_shares["SA2_code_usual_residence_address"].isin(sa2_ids.index)
             & mode_shares["SA2_code_workplace_address"].isin(sa2_ids.index)]
-        return mode_shares.set_index(["SA2_code_usual_residence_address", "SA2_code_workplace_address"],
-                                     verify_integrity=True)
+        mode_shares = mode_shares.set_index(["SA2_code_usual_residence_address", "SA2_code_workplace_address"],
+                                            verify_integrity=True)
+        return self.set_suppressed_values_as_zero(mode_shares)
 
 
 class ModeShare2023Initialiser(ModeShareInitialiser):
@@ -132,9 +131,48 @@ class ModeShare2023Initialiser(ModeShareInitialiser):
     mode_share_table_name = "mode_share_2023"
     sa2_table_name = "sa2_2023"
 
+    def _read_means_of_travel_dataset(self, dataset_path: pathlib.Path, sa2_ids: pd.DataFrame) -> pd.DataFrame:
+        relevant_cols = ["Variable codes", "CEN23_TBT_GEO_006", "OBS_VALUE", "Observation Status"]
+
+        means_of_travel = pd.read_csv(dataset_path, usecols=relevant_cols)
+        means_of_travel = means_of_travel[means_of_travel["CEN23_TBT_GEO_006"] != "SA2Total"]
+        means_of_travel = means_of_travel.rename(columns={
+            "Variable codes": "means_of_travel",
+            "CEN23_TBT_GEO_006": "SA2_code",
+            "OBS_VALUE": "count"
+        }).astype({"means_of_travel": str, "SA2_code": int, "count": float})
+        return means_of_travel.set_index(["SA2_code", "means_of_travel"])
+
+    def find_mode_shares_in_areas_of_interest(self, sa2_ids: pd.DataFrame) -> pd.DataFrame:
+        usual_residence = self._read_means_of_travel_dataset(Env.MEANS_OF_TRAVEL_USUAL_RES_2023_DATA, sa2_ids)
+        workplace = self._read_means_of_travel_dataset(Env.MEANS_OF_TRAVEL_WORKPLACE_2023_DATA, sa2_ids)
+        mode_shares = (usual_residence.join(workplace, lsuffix="_res", rsuffix="_work")
+                       .reset_index()
+                       .set_index("SA2_code"))
+        mode_shares = mode_shares.loc[mode_shares.index.isin(sa2_ids.index)]
+
+        mode_shares = self.set_suppressed_values_as_zero(mode_shares)
+
+        return self.convert_mode_share_to_wide_format(mode_shares)
+
     @staticmethod
-    def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> pd.DataFrame:
-        pass
+    def convert_mode_share_to_wide_format(mode_shares: pd.DataFrame) -> pd.DataFrame:
+        mode_shares = mode_shares.drop(columns=["Observation Status_res", "Observation Status_work"])
+        groups = mode_shares.groupby(["SA2_code", "means_of_travel"])
+        flows = groups.sum()
+        flows["net_out"] = flows["count_res"] - flows["count_work"]
+        flows = flows.drop(columns=["count_work", "count_res"])
+        unstacked = flows.unstack(fill_value=0).reset_index()
+        flattened_columns = [multicol[-1] if multicol[-1] else multicol[0] for multicol in unstacked.columns]
+        underscored_columns = [col.replace(" ", "_") for col in flattened_columns]
+        unstacked.columns = underscored_columns
+
+        return unstacked
+
+    @staticmethod
+    def set_suppressed_values_as_zero(mode_shares: pd.DataFrame) -> pd.DataFrame:
+        mode_shares[["count_res", "count_work"]] = mode_shares[["count_res", "count_work"]].fillna(0)
+        return mode_shares
 
 
 if __name__ == '__main__':
