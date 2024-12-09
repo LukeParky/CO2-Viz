@@ -134,7 +134,7 @@ class ModeShare2023Initialiser(ModeShareInitialiser):
 
     @staticmethod
     def find_mode_shares_in_areas_of_interest(sa2_ids: pd.DataFrame) -> pd.DataFrame:
-        raise NotImplementedError("Not yet implemented")
+        pass
 
 
 if __name__ == '__main__':
