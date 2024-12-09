@@ -44,11 +44,10 @@ export default defineComponent({
   },
 
   methods: {
-    handleInputs(event: Event & InputEvent): void {
-      if (event?.inputType === "insertText") {
+    handleInputs(event: Event): void {
+      if ((event as InputEvent)?.inputType === "insertText") {
         event.stopImmediatePropagation();
       } else {
-        console.log(event)
         this.$emit("submit", event);
       }
     }
