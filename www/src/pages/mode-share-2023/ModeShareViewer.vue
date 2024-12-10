@@ -80,7 +80,7 @@ async function loadSa2s(): Promise<Cesium.GeoJsonDataSource> {
       version: "1.0.0",
       request: "GetFeature",
       outputFormat: "application/json",
-      typeName: "sa2_mode_share:sa2_2023",
+      typeName: "sa2_mode_share:mode_share_2023",
       cql_filter: `UR2023_V1_00_NAME ILIKE '${props.urbanAreaName}'`
     }
   })
@@ -104,10 +104,9 @@ async function styleSa2s(): Promise<void> {
     if (entity.polygon == undefined || entity.properties == undefined)
       continue;
     let polyGraphics: Cesium.PolygonGraphics
-
-    const random = Math.random()
-    const color = colorScale(random)
-    const extrudedHeight = random * 400
+    console.log(entity.properties)
+    const color = colorScale(entity.properties.Net_outflow / 2000)
+    const extrudedHeight = 4
     polyGraphics = new Cesium.PolygonGraphics({
       extrudedHeight,
       show: true,

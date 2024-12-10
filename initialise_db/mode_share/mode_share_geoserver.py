@@ -66,8 +66,10 @@ def create_mode_share_2023_view(workspace_name: str, data_store_name: str):
             ("Walk_or_jog" + "Bicycle") AS "Active_transport",
             "Work_at_home" AS "Work_at_home",
             "Did_not_go_to_work_today" AS "Did_not_go_to_work_today",
+            "Net_flow" AS "Net_outflow",
             "Other" AS "Other",
             "Total_stated_-_main_means_of_travel_to_work_by_usual_residence_" AS "Total_residents",
+            "UR2023_V1_00_NAME" AS "UR2023_V1_00_NAME",
             "geometry"
         FROM {mode_share_layer_name}
         INNER JOIN sa2_2023
