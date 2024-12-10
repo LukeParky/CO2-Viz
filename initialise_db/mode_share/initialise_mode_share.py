@@ -153,7 +153,11 @@ class ModeShare2023Initialiser(ModeShareInitialiser):
 
         mode_shares = self.set_suppressed_values_as_zero(mode_shares)
 
-        return self.convert_mode_share_to_wide_format(mode_shares)
+        wide_mode_shares = self.convert_mode_share_to_wide_format(mode_shares)
+
+        non_flow_contributing_columns = ["Did_not_go_to_work_today", "Work_at_home", "Total_stated_-_main_means_of_travel_to_work_by_usual_residence_address", "Main_means_of_travel_to_work_by_usual_residence_address_-_total_employed_census_usually_resident_population_count_aged_15_years_and_over"]
+        wide_mode_shares["Net_flow"] = wide_mode_shares.drop(columns=non_flow_contributing_columns).sum(axis=1)
+        return wide_mode_shares
 
     @staticmethod
     def convert_mode_share_to_wide_format(mode_shares: pd.DataFrame) -> pd.DataFrame:
@@ -167,7 +171,7 @@ class ModeShare2023Initialiser(ModeShareInitialiser):
         underscored_columns = [col.replace(" ", "_").replace(",", "") for col in flattened_columns]
         unstacked.columns = underscored_columns
 
-        return unstacked
+        return unstacked.set_index("SA2_code")
 
     @staticmethod
     def set_suppressed_values_as_zero(mode_shares: pd.DataFrame) -> pd.DataFrame:
