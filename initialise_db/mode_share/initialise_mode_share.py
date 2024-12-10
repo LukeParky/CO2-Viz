@@ -164,7 +164,7 @@ class ModeShare2023Initialiser(ModeShareInitialiser):
         flows = flows.drop(columns=["count_work", "count_res"])
         unstacked = flows.unstack(fill_value=0).reset_index()
         flattened_columns = [multicol[-1] if multicol[-1] else multicol[0] for multicol in unstacked.columns]
-        underscored_columns = [col.replace(" ", "_") for col in flattened_columns]
+        underscored_columns = [col.replace(" ", "_").replace(",", "") for col in flattened_columns]
         unstacked.columns = underscored_columns
 
         return unstacked

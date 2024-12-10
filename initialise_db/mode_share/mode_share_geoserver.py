@@ -59,17 +59,19 @@ def create_mode_share_2023_view(workspace_name: str, data_store_name: str):
     # Construct query linking medusa_table_class to its geometry table
     mode_share_sql_query = f"""
         SELECT
-            "SA2_code",
-            "Work_at_home",
-            "Did_not_go_to_work_today",
-            "Passenger_in_a_car_truck_van_or_company_bus",
-            ("Drive_a_private_car_truck_or_van", "Drive_a_company_car_truck_or_van") AS "Drive",
+            "SA2_code" AS "SA2_code",
+            "Passenger_in_a_car_truck_van_or_company_bus" AS "Passenger_in_a_car_truck_van_or_company_bus",
+            ("Drive_a_private_car_truck_or_van" + "Drive_a_company_car_truck_or_van") AS "Drive",
             ("Public_bus" + "Train" + "Ferry") AS "Public_transport",
             ("Walk_or_jog" + "Bicycle") AS "Active_transport",
-            "Did_not_go_to_work_today",
-            "Other",
-            "Total_stated_-_main_means_of_travel_to_work,_by_usual_residence", as "Total_residents"
+            "Work_at_home" AS "Work_at_home",
+            "Did_not_go_to_work_today" AS "Did_not_go_to_work_today",
+            "Other" AS "Other",
+            "Total_stated_-_main_means_of_travel_to_work_by_usual_residence_" AS "Total_residents",
+            "geometry"
         FROM {mode_share_layer_name}
+        INNER JOIN sa2_2023
+        ON "SA2_code"="SA22023_V1_00"
     """
     # Escape characters in SQL query so that it is valid Geoserver XML
     xml_escaped_sql = saxutils.escape(mode_share_sql_query, entities={r"'": "&apos;", "\n": "&#xd;"})
