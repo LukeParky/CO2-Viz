@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>Legend</h2>
-    <p>'000 Vehicle km travelled</p>
+    <p>{{ axisLabel }}</p>
     <div class="legend-container">
       <div class="legend-labels">
         <div
@@ -54,6 +54,10 @@ export default Vue.extend({
           {value: 10, color: '#FFFFFF'}
         ]
       }
+    },
+    axisLabel: {
+      type: String,
+      required: true
     }
   },
 

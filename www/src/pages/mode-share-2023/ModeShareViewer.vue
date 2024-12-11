@@ -13,7 +13,7 @@
       id="legend"
       class="card"
       :legend-steps="legendSteps"
-      axis-label="'000 Vehicle km / year"
+      axis-label="Net total incoming commuters"
     />
   </div>
 </template>
@@ -102,7 +102,7 @@ export default Vue.extend({
       for (const entity of sa2s.entities.values) {
         if (entity.polygon == undefined || entity.properties == undefined)
           continue;
-        const netOutflowScale = (entity.properties.Net_outflow + this.modeShareColorScalingFactor) / (2 * this.modeShareColorScalingFactor)
+        const netOutflowScale = (-entity.properties.Net_outflow + this.modeShareColorScalingFactor) / (2 * this.modeShareColorScalingFactor)
         const color = this.colorScale(netOutflowScale)
         const polyGraphics = new Cesium.PolygonGraphics({
           show: true,
@@ -121,17 +121,20 @@ export default Vue.extend({
   },
   computed: {
     legendSteps(): LegendStep[] {
-      const numberOfSteps = 5;
+      const numberOfStepsFrom0 = 2;
       const steps = [] as LegendStep[]
-      for (let i = 0; i < numberOfSteps; i++) {
-        const scaleProportion = (i / numberOfSteps)
-        const vktValue = scaleProportion * this.modeShareColorScalingFactor
-        const vktRounded = parseInt(roundToFixed(vktValue)).toLocaleString()
-        const vktColor = this.colorScale(scaleProportion).hex() as HexColor
+      let i = -numberOfStepsFrom0
+      while (i <= numberOfStepsFrom0) {
+        const scaleProportion = i / numberOfStepsFrom0
+        const commuteValue = scaleProportion * this.modeShareColorScalingFactor
+        const commuteRounded = parseInt(roundToFixed(commuteValue)).toLocaleString()
+        const colorScaled = (commuteValue + this.modeShareColorScalingFactor) / (2 * this.modeShareColorScalingFactor)
+        const commuteColor = this.colorScale(colorScaled).hex() as HexColor
         steps.push({
-          label: vktRounded,
-          color: vktColor
-        });
+          label: commuteRounded,
+          color: commuteColor
+        })
+        i++;
       }
       return steps;
     }
