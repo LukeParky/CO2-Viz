@@ -144,12 +144,8 @@ class ModeShare2023Initialiser(ModeShareInitialiser):
         return means_of_travel.set_index(["SA2_code", "means_of_travel"])
 
     def find_mode_shares_in_areas_of_interest(self, sa2_ids: pd.DataFrame) -> pd.DataFrame:
-        usual_residence = self._read_means_of_travel_dataset(Env.MEANS_OF_TRAVEL_USUAL_RES_2023_DATA, sa2_ids)
-        workplace = self._read_means_of_travel_dataset(Env.MEANS_OF_TRAVEL_WORKPLACE_2023_DATA, sa2_ids)
-        mode_shares = (usual_residence.join(workplace, lsuffix="_res", rsuffix="_work")
-                       .reset_index()
-                       .set_index("SA2_code"))
-        mode_shares = mode_shares.loc[mode_shares.index.isin(sa2_ids.index)]
+        mode_shares = self._read_means_of_travel_dataset(Env.MEANS_OF_TRAVEL_USUAL_RES_2023_DATA, sa2_ids)
+        mode_shares = mode_shares.loc[mode_shares.index.get_level_values("SA2_code").isin(sa2_ids.index)]
 
         mode_shares = self.set_suppressed_values_as_zero(mode_shares)
 
@@ -161,11 +157,9 @@ class ModeShare2023Initialiser(ModeShareInitialiser):
 
     @staticmethod
     def convert_mode_share_to_wide_format(mode_shares: pd.DataFrame) -> pd.DataFrame:
-        mode_shares = mode_shares.drop(columns=["Observation Status_res", "Observation Status_work"])
+        mode_shares = mode_shares.drop(columns=["Observation Status"])
         groups = mode_shares.groupby(["SA2_code", "means_of_travel"])
         flows = groups.sum()
-        flows["net_out"] = flows["count_res"] - flows["count_work"]
-        flows = flows.drop(columns=["count_work", "count_res"])
         unstacked = flows.unstack(fill_value=0).reset_index()
         flattened_columns = [multicol[-1] if multicol[-1] else multicol[0] for multicol in unstacked.columns]
         underscored_columns = [col.replace(" ", "_").replace(",", "") for col in flattened_columns]
@@ -175,7 +169,7 @@ class ModeShare2023Initialiser(ModeShareInitialiser):
 
     @staticmethod
     def set_suppressed_values_as_zero(mode_shares: pd.DataFrame) -> pd.DataFrame:
-        mode_shares[["count_res", "count_work"]] = mode_shares[["count_res", "count_work"]].fillna(0)
+        mode_shares[["count"]] = mode_shares[["count"]].fillna(0)
         return mode_shares
 
 

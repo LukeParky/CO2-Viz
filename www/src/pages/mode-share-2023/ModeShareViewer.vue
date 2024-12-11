@@ -13,7 +13,7 @@
       id="legend"
       class="card"
       :legend-steps="legendSteps"
-      axis-label="Net total incoming commuters"
+      axis-label="Outgoing commuters"
     />
   </div>
 </template>
@@ -67,8 +67,8 @@ export default Vue.extend({
       geoserverHost: `${process.env.VUE_APP_GEOSERVER_HOST}:${process.env.VUE_APP_GEOSERVER_PORT}`,
       dataSources: {geoJsonDataSources: []} as MapViewerDataSourceOptions,
       cesiumApiToken: process.env.VUE_APP_CESIUM_ACCESS_TOKEN,
-      colorScale: chroma.scale(chroma.brewer.RdYlBu),
-      modeShareColorScalingFactor: 10000,
+      colorScale: chroma.scale(chroma.brewer.Blues),
+      modeShareColorScalingFactor: 2500,
     }
   },
 
@@ -102,7 +102,7 @@ export default Vue.extend({
       for (const entity of sa2s.entities.values) {
         if (entity.polygon == undefined || entity.properties == undefined)
           continue;
-        const netOutflowScale = (-entity.properties.Net_outflow + this.modeShareColorScalingFactor) / (2 * this.modeShareColorScalingFactor)
+        const netOutflowScale = entity.properties["Outgoing commuters"] / this.modeShareColorScalingFactor
         const color = this.colorScale(netOutflowScale)
         const polyGraphics = new Cesium.PolygonGraphics({
           show: true,
@@ -121,20 +121,17 @@ export default Vue.extend({
   },
   computed: {
     legendSteps(): LegendStep[] {
-      const numberOfStepsFrom0 = 2;
+      const numberOfSteps = 5;
       const steps = [] as LegendStep[]
-      let i = -numberOfStepsFrom0
-      while (i <= numberOfStepsFrom0) {
-        const scaleProportion = i / numberOfStepsFrom0
-        const commuteValue = scaleProportion * this.modeShareColorScalingFactor
-        const commuteRounded = parseInt(roundToFixed(commuteValue)).toLocaleString()
-        const colorScaled = (commuteValue + this.modeShareColorScalingFactor) / (2 * this.modeShareColorScalingFactor)
-        const commuteColor = this.colorScale(colorScaled).hex() as HexColor
+      for (let i = 0; i <= numberOfSteps; i++) {
+        const scaleProportion = (i / numberOfSteps)
+        const outflowValue = scaleProportion * this.modeShareColorScalingFactor
+        const outflowRounded = parseInt(roundToFixed(outflowValue)).toLocaleString()
+        const outflowColor = this.colorScale(scaleProportion).hex() as HexColor
         steps.push({
-          label: commuteRounded,
-          color: commuteColor
-        })
-        i++;
+          label: outflowRounded,
+          color: outflowColor
+        });
       }
       return steps;
     }
