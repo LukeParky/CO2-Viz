@@ -28,6 +28,7 @@ import Vue from "vue";
 import ColorLegend, {HexColor, LegendStep} from "@/components/ColorLegend.vue";
 import axios from "axios";
 import {roundToFixed} from "@/utils";
+import CesiumInfoBox from "@/pages/mode-share-2023/CesiumInfoBox.vue";
 
 export default Vue.extend({
   name: "Co2Sa1Viewer",
@@ -82,25 +83,17 @@ export default Vue.extend({
       let descriptionBody: string | undefined;
       return new Cesium.CallbackProperty(() => {
         if (descriptionBody === undefined) {
-          console.log(entityProperties.propertyNames)
-          const tableRows: string[] = [];
-          for (const prop of entityProperties.propertyNames) {
-            tableRows.push(`<tr>
-                <th>${prop}</th>
-                <td>${entityProperties[prop]}</td>
-              </tr>`)
-          }
-          descriptionBody = `
-        <table class="cesium-infoBox-defaultTable">
-          <tbody>
-          ${tableRows.join('\n')}
-          </tbody>
-        </table>
-        `
+          // Generate table rows dynamically
+          const InfoBoxConstructor = Vue.extend(CesiumInfoBox)
+          const instance = new InfoBoxConstructor({propsData: {entityProperties}})
+          // Mount the component to a temporary div, then extract the HTML string
+          instance.$mount();
+          descriptionBody = instance.$el.outerHTML;
         }
         return descriptionBody;
-      }, true)
+      }, true);
     },
+
     async loadSa2s(): Promise<Cesium.GeoJsonDataSource> {
       console.log("Loading started")
 
