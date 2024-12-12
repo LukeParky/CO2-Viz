@@ -9,12 +9,12 @@
       :cesium-access-token="cesiumApiToken"
       :data-sources="dataSources"
     />
-    <ColorLegend
-      id="legend"
-      class="card"
-      :legend-steps="legendSteps"
-      axis-label="Total commuters"
-    />
+<!--    <ColorLegend-->
+<!--      id="legend"-->
+<!--      class="card"-->
+<!--      :legend-steps="legendSteps"-->
+<!--      axis-label="Total commuters"-->
+<!--    />-->
   </div>
 </template>
 

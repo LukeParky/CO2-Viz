@@ -14,7 +14,8 @@
     "core-js": "^3.6.5",
     "geo-visualisation-components": "0.0.10-co2-alpha",
     "vue": "^2.6.11",
-    "vue-router": "^3.6.0"
+    "vue-router": "^3.6.0",
+    "vue-plotly": "^1.1.0"
   },
   "devDependencies": {
     "@types/chroma-js": "^2.4.4",
