@@ -66,9 +66,9 @@ def create_mode_share_2023_view(workspace_name: str, data_store_name: str):
             ("Public_bus" + "Train" + "Ferry") AS "Public transport",
             ("Walk_or_jog" + "Bicycle") AS "Active transport",
             "Work_at_home" AS "Work at home",
-            "Did_not_go_to_work_today" AS "Did not go to work today",
-            "Net_flow" AS "Outgoing commuters",
+            "Did_not_go_to_work_today" AS "Did not go to work on census day",
             "Other" AS "Other",
+            "Net_flow" AS "Total commuters",
             "Total_stated_-_main_means_of_travel_to_work_by_usual_residence_" AS "Total residents stated",
             "UR2023_V1_00_NAME" AS "UR2023_V1_00_NAME",
             "geometry"

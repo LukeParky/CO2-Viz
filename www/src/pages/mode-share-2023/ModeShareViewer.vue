@@ -13,7 +13,7 @@
       id="legend"
       class="card"
       :legend-steps="legendSteps"
-      axis-label="Outgoing commuters"
+      axis-label="Total commuters"
     />
   </div>
 </template>
@@ -102,7 +102,7 @@ export default Vue.extend({
       for (const entity of sa2s.entities.values) {
         if (entity.polygon == undefined || entity.properties == undefined)
           continue;
-        const netOutflowScale = entity.properties["Outgoing commuters"] / this.modeShareColorScalingFactor
+        const netOutflowScale = entity.properties["Total commuters"] / this.modeShareColorScalingFactor
         const color = this.colorScale(netOutflowScale)
         const polyGraphics = new Cesium.PolygonGraphics({
           show: true,
