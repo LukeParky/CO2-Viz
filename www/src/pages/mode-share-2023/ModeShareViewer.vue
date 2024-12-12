@@ -78,6 +78,29 @@ export default Vue.extend({
   },
 
   methods: {
+    createDescriptionCallbackProp(entityProperties: Cesium.PropertyBag): Cesium.CallbackProperty {
+      let descriptionBody: string | undefined;
+      return new Cesium.CallbackProperty(() => {
+        if (descriptionBody === undefined) {
+          console.log(entityProperties.propertyNames)
+          const tableRows: string[] = [];
+          for (const prop of entityProperties.propertyNames) {
+            tableRows.push(`<tr>
+                <th>${prop}</th>
+                <td>${entityProperties[prop]}</td>
+              </tr>`)
+          }
+          descriptionBody = `
+        <table class="cesium-infoBox-defaultTable">
+          <tbody>
+          ${tableRows.join('\n')}
+          </tbody>
+        </table>
+        `
+        }
+        return descriptionBody;
+      }, true)
+    },
     async loadSa2s(): Promise<Cesium.GeoJsonDataSource> {
       console.log("Loading started")
 
@@ -104,6 +127,11 @@ export default Vue.extend({
           continue;
         const netOutflowScale = entity.properties["Total commuters"] / this.modeShareColorScalingFactor
         const color = this.colorScale(netOutflowScale)
+        // console.log(entity.description)
+        // if (entity.description) {
+        //   console.log(entity.description.getValue(Cesium.JulianDate.now(), undefined))
+        // }
+        entity.description = this.createDescriptionCallbackProp(entity.properties)
         const polyGraphics = new Cesium.PolygonGraphics({
           show: true,
           material: new Cesium.Color(...color.gl()),
