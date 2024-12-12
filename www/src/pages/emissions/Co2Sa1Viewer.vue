@@ -432,7 +432,7 @@ export default Vue.extend({
 });
 </script>
 
-<style>
+<style scoped>
 #legend {
   position: absolute;
   bottom: 0;

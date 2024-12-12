@@ -9,12 +9,12 @@
       :cesium-access-token="cesiumApiToken"
       :data-sources="dataSources"
     />
-<!--    <ColorLegend-->
-<!--      id="legend"-->
-<!--      class="card"-->
-<!--      :legend-steps="legendSteps"-->
-<!--      axis-label="Total commuters"-->
-<!--    />-->
+    <ColorLegend
+      id="legend"
+      class="card"
+      :legend-steps="legendSteps"
+      axis-label="Total commuters"
+    />
   </div>
 </template>
 
@@ -160,10 +160,10 @@ export default Vue.extend({
 });
 </script>
 
-<style>
+<style scoped>
 #legend {
   position: absolute;
   bottom: 0;
-  right: 30px;
+  left: 30px;
 }
 </style>
