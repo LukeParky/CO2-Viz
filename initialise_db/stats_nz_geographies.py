@@ -32,12 +32,12 @@ class AreaOfInterest(NamedTuple):
 
 
 AREAS_OF_INTEREST = [
-    AreaOfInterest("Auckland", "Auckland | Tāmaki Makaurau", Bbox(-37.11973, 174.56626, -36.66668, 175.00701)),
-    AreaOfInterest("Hamilton", "Hamilton | Kirikiriroa", Bbox(-37.84833, 175.18301, -37.69678, 175.34657)),
-    AreaOfInterest("Wellington", "Wellington | Te Whanganui-a-Tara", Bbox(-41.36836, 174.69794, -41.13047, 174.90839)),
-    AreaOfInterest("Christchurch", "Christchurch | Ōtautahi", Bbox(-43.62712, 172.36059, -43.41766, 172.81524)),
-    AreaOfInterest("Oamaru", "Oamaru | Oāmaru", Bbox(-45.11886, 170.912129, -45.04020, 171.02564)),
-    AreaOfInterest("Queenstown", "Tāhuna", Bbox(-45.39727, 168.07669, -43.90287, 169.72412)),
+    AreaOfInterest("Auckland", "Auckland | Tāmaki Makaurau", Bbox(-36.4, 174.300, -37.4, 175.3)),
+    AreaOfInterest("Hamilton", "Hamilton | Kirikiriroa", Bbox(-38.01, 174.88, -37.54, 175.49)),
+    AreaOfInterest("Wellington", "Wellington | Te Whanganui-a-Tara", Bbox(-41.45, 175.6, -40.9, 174.56)),
+    AreaOfInterest("Christchurch", "Christchurch | Ōtautahi", Bbox(-43.83, 172.15, -43.0, 172.825)),
+    AreaOfInterest("Oamaru", "Oamaru | Oāmaru", Bbox(-44.98, 171.02, -45.211, 170.81)),
+    AreaOfInterest("Queenstown", "Tāhuna", Bbox(-45.0981, 168.4859, -44.8418, 169.1003)),
 ]
 
 
@@ -56,4 +56,23 @@ def filter_gdf_by_urban_rural_area(gdf_to_filter: gpd.GeoDataFrame,
     polygons_in_urban_area = gdf_to_filter.loc[gdf_to_filter.index.isin(gdf_join_urban_area.index)]
     # Add urban area name
     polygons_in_urban_area['UR2023_V1_00_NAME'] = gdf_join_urban_area["UR2023_V1_00_NAME"]
+    return polygons_in_urban_area
+
+
+def filter_gdf_by_functional_urban_area(gdf_to_filter: gpd.GeoDataFrame,
+                                        area_name: str,
+                                        vector_fetcher: geoapis.vector.StatsNz,
+                                        predicate: str = "intersects"
+                                        ):
+    # Urban/Rural area polygons
+    urban_rural = vector_fetcher.run(111270)
+    # Find gdf polygons that are within the urban area Polygon
+    urban_area = urban_rural.loc[urban_rural['FUA2023_V1_00_NAME'] == area_name]
+    gdf_join_urban_area = gdf_to_filter.sjoin(urban_area, how='inner', predicate=predicate)
+    gdf_join_urban_area = gdf_join_urban_area[~gdf_join_urban_area.index.duplicated(keep='first')]
+    # Filter gdf polygons for those values that exist in the spatial join above
+    # Keeps data more simple than using the spatial join
+    polygons_in_urban_area = gdf_to_filter.loc[gdf_to_filter.index.isin(gdf_join_urban_area.index)]
+    # Add urban area name
+    polygons_in_urban_area['UR2023_V1_00_NAME'] = gdf_join_urban_area["FUA2023_V1_00_NAME"]
     return polygons_in_urban_area

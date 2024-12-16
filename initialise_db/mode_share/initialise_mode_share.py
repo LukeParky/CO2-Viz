@@ -53,8 +53,8 @@ class ModeShareInitialiser(abc.ABC):
         sa2s = vector_fetcher.run(self.sa2.layer_id)
         sa2s.set_index(self.sa2.index_name, verify_integrity=True, inplace=True)
         sa2s.index = sa2s.index.astype('int64')
-        sa2s_in_urban_area = stats_nz_geographies.filter_gdf_by_urban_rural_area(sa2s, area_of_interest.ua_name,
-                                                                                 vector_fetcher)
+        sa2s_in_urban_area = stats_nz_geographies.filter_gdf_by_functional_urban_area(sa2s, area_of_interest.ua_name,
+                                                                                      vector_fetcher)
         # Filter to remove SA1s that represent inlets and other non-mainland features.
         return sa2s_in_urban_area.loc[
             ~sa2s_in_urban_area[self.sa2.name_code].str.startswith(("Inlet", "Inland water", "Oceanic"))
@@ -151,7 +151,9 @@ class ModeShare2023Initialiser(ModeShareInitialiser):
 
         wide_mode_shares = self.convert_mode_share_to_wide_format(mode_shares)
 
-        non_flow_contributing_columns = ["Did_not_go_to_work_today", "Work_at_home", "Total_stated_-_main_means_of_travel_to_work_by_usual_residence_address", "Main_means_of_travel_to_work_by_usual_residence_address_-_total_employed_census_usually_resident_population_count_aged_15_years_and_over"]
+        non_flow_contributing_columns = ["Did_not_go_to_work_today", "Work_at_home",
+                                         "Total_stated_-_main_means_of_travel_to_work_by_usual_residence_address",
+                                         "Main_means_of_travel_to_work_by_usual_residence_address_-_total_employed_census_usually_resident_population_count_aged_15_years_and_over"]
         wide_mode_shares["Net_flow"] = wide_mode_shares.drop(columns=non_flow_contributing_columns).sum(axis=1)
         return wide_mode_shares
 
