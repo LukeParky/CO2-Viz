@@ -24,9 +24,9 @@ export default Vue.extend({
   data() {
     return {
       oamaru: {
-        latitude: -43.514137213246535,
-        longitude: 172.62835098005368,
-        urbanAreaName: "Oamaru"
+        latitude: -45.09652014809901,
+        longitude: 170.9714064482898,
+        urbanAreaName: "oamaru"
       },
       initHeight: 20000
     }
