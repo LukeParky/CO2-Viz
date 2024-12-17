@@ -43,7 +43,7 @@ services:
 
   www:
     # Webserver to visualise and interact with the data
-    image: lparkinson/www-co2-sa1:2.0
+    image: lparkinson/www-co2-sa1:2.1
     build:
       context: ./www
     container_name: www_digital_twin
@@ -56,7 +56,7 @@ services:
     restart: always
 
   initialise_db:
-    image: lparkinson/initialise-db-co2-sa1:2.0
+    image: lparkinson/initialise-db-co2-sa1:2.1
     build:
       context: initialise_db
     container_name: initialise_db_carbon_neutral

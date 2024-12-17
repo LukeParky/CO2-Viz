@@ -1,7 +1,8 @@
 <template>
   <div>
-    <div class="plot-container" style="height: 500px;">
-      <Plotly
+    <div style="height: 610px;">
+      <PlotlyPlot
+        ref="plot"
         :data="plotData"
         :layout="plotLayout"
         :display-mode-bar="false"
@@ -20,10 +21,10 @@
 <script>
 
 import Vue from "vue";
-import {Plotly} from "vue-plotly";
+import {Plotly as PlotlyPlot} from "vue-plotly";
 
 export default Vue.extend({
-  components: {Plotly},
+  components: {PlotlyPlot},
   props: {
     entityProperties: {
       required: true
@@ -34,7 +35,7 @@ export default Vue.extend({
       plotLayout: {
         width: 450,
         title: {
-          text: "Mode shares of commuters",
+          text: "Number of commuters by mode share",
           yref: 0,
           font: {
             color: '#ffffff'
@@ -42,6 +43,15 @@ export default Vue.extend({
         }
       }
     }
+  },
+  mounted() {
+    const plot = this.$refs.plot;
+    const svgContainer = plot.$el.firstChild.firstChild
+    const svgMain = svgContainer.firstChild
+    svgMain.style.height = "550px";
+    svgMain.style.width = "510px";
+    const svgLast = svgContainer.lastChild
+    svgLast.style.height = 0;
   },
   computed: {
     propNames() {
@@ -65,11 +75,11 @@ export default Vue.extend({
 })
 </script>
 <style>
-.plot-container {
-  height: 700px;
-}
 .cesium-infoBox-defaultTable {
   margin-top: 20px;
+}
+.cesium-infoBox {
+  max-width: 510px;
 }
 </style>
 
