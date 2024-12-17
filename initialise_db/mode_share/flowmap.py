@@ -19,7 +19,7 @@ def find_sa2_locations(engine: sqlalchemy.engine.Engine, urban_area_name: str) -
                         ST_Y(ST_CENTROID("geometry")) as lat,
                         ST_X(ST_CENTROID("geometry")) as lon
         
-        FROM sa2s
+        FROM sa2
         WHERE "UR2023_V1_00_NAME" ILIKE %(urban_area_name)s
     """
     return pd.read_sql(all_sa2s_query, engine, index_col="id", params={"urban_area_name": urban_area_name})
@@ -37,8 +37,8 @@ def find_flows(engine: sqlalchemy.engine.Engine, urban_area_name: str) -> pd.Dat
                    "Total"
             
             FROM mode_share
-                JOIN sa2s AS workplace ON workplace."SA22018_V1_00"="SA2_code_workplace_address"
-                JOIN sa2s AS residence ON residence."SA22018_V1_00"="SA2_code_usual_residence_address"
+                JOIN sa2 AS workplace ON workplace."SA22018_V1_00"="SA2_code_workplace_address"
+                JOIN sa2 AS residence ON residence."SA22018_V1_00"="SA2_code_usual_residence_address"
             
             WHERE workplace."UR2023_V1_00_NAME"=%(urban_area_name)s 
             AND residence."UR2023_V1_00_NAME"=%(urban_area_name)s
